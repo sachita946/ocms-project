@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EduVerse | Signup</title>
+<link rel="stylesheet" href="css/style.css">
+<script defer src="js/script.js"></script>
+<script defer src="js/signup.js"></script>
+</head>
+<body>
+
+<section class="forms-section">
+
+  <div class="signup-container">
+    <h2>Create Account</h2>
+    <div class="role-switch">
+      <button id="studentBtn" class="active">Student</button>
+      <button id="instructorBtn">Instructor</button>
+    </div>
+
+    <!-- Student -->
+    <form id="studentForm" class="form zoom">
+      <input type="text" id="studentName" placeholder="Full Name" required>
+      <p class="error" id="studentNameError"></p>
+      <input type="email" id="studentEmail" placeholder="Email" required>
+      <p class="error" id="studentEmailError"></p>
+      <input type="password" id="studentPassword" placeholder="Password" required>
+      <p class="error" id="studentPasswordError"></p>
+      <input type="password" id="studentConfirmPassword" placeholder="Confirm Password" required>
+      <p class="error" id="studentConfirmError"></p>
+      <input type="text" id="studentPhone" placeholder="Phone">
+      <textarea id="studentBio" placeholder="Bio / Interests"></textarea>
+      <input type="text" id="studentResume" placeholder="Resume URL">
+      <p class="error" id="studentResumeError"></p>
+      <button type="submit" class="btn">Sign Up as Student</button>
+      <p class="form-msg"></p>
+      <button type="button" class="back-btn zoom" id="backToLogin1">Back to Login</button>
+    </form>
+
+    <!-- Instructor -->
+    <form id="instructorForm" class="form zoom" style="display:none;">
+      <input type="text" id="instructorName" placeholder="Full Name" required>
+      <p class="error" id="instructorNameError"></p>
+      <input type="email" id="instructorEmail" placeholder="Email" required>
+      <p class="error" id="instructorEmailError"></p>
+      <input type="password" id="instructorPassword" placeholder="Password" required>
+      <p class="error" id="instructorPasswordError"></p>
+      <input type="password" id="instructorConfirmPassword" placeholder="Confirm Password" required>
+      <p class="error" id="instructorConfirmError"></p>
+      <input type="text" id="instructorPhone" placeholder="Phone">
+      <input type="text" id="instructorWebsite" placeholder="Website / Portfolio">
+      <p class="error" id="instructorWebsiteError"></p>
+      <textarea id="instructorBio" placeholder="Short Bio / Experience"></textarea>
+      <input type="text" id="instructorResume" placeholder="Resume URL">
+      <p class="error" id="instructorResumeError"></p>
+      <button type="submit" class="btn">Sign Up as Instructor</button>
+      <p class="form-msg"></p>
+      <button type="button" class="back-btn zoom" id="backToLogin2">Back to Login</button>
+    </form>
+  </div>
+
+</section>
+
+</body>
+</html>
+
+
+
+

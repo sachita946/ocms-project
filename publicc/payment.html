@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Course Payment | EduVerse</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">EduVerse</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="courses.html">Courses</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+  </header>
+
+  <main class="payment-container">
+    <h1>Complete Your Payment</h1>
+
+    <div class="payment-card">
+      <h2>Course Information</h2>
+      <p><strong>Course Name:</strong> <span id="courseName">Introduction to AI</span></p>
+      <p><strong>Instructor:</strong> <span id="instructorName">Dr. Sharma</span></p>
+      <p><strong>Price:</strong> $<span id="coursePrice">49</span></p>
+    </div>
+
+    <form id="paymentForm" class="payment-form">
+      <h2>Payment Details</h2>
+      <div class="form-group">
+        <label for="cardName">Cardholder Name</label>
+        <input type="text" id="cardName" placeholder="John Doe" required />
+      </div>
+
+      <div class="form-group">
+        <label for="cardNumber">Card Number</label>
+        <input type="text" id="cardNumber" maxlength="16" placeholder="1234 5678 9012 3456" required />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="expiry">Expiry Date</label>
+          <input type="text" id="expiry" placeholder="MM/YY" required />
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input type="password" id="cvv" maxlength="3" placeholder="123" required />
+        </div>
+      </div>
+      <section class="payment-section">
+  <h2>Buy Course</h2>
+  
+  <div class="course-info">
+    <p>Course: <span id="courseName">Web Development</span></p>
+    <p>Price: <span id="coursePrice">1500</span> NPR</p>
+  </div>
+
+  <label for="paymentMethod">Payment Method:</label>
+  <select id="paymentMethod">
+    <option value="Khalti">Khalti</option>
+    <option value="Esewa">Esewa</option>
+    <option value="Bank">Bank Transfer</option>
+  </select>
+
+  <input type="text" id="transactionId" placeholder="Transaction ID" required>
+  <button id="payBtn">Pay Now</button>
+  <p id="paymentMsg"></p>
+
+  <button id="generateCertBtn" disabled>Generate Certificate</button>
+</section>
+
+
+      <button type="submit" class="pay-btn">Pay Now</button>
+    </form>
+
+    <div id="message" class="message"></div>
+  </main>
+
+  <script src="js/payment.js"></script>
+</body>
+</html>

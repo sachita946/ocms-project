@@ -1,0 +1,266 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ...existing code...
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+model User {
+  id              String  @id @default(uuid())
+  email           String  @unique
+  password        String
+  first_name      String
+  last_name       String
+  profile_picture String?
+  is_active       Boolean @default(true)
+
+  role       Role     @default(STUDENT)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  studentProfile    StudentProfile?
+  instructorProfile InstructorProfile?
+  courses_created   Course[]           @relation("CourseInstructor")
+}
+
+model StudentProfile {
+  id                      Int      @id @default(autoincrement())
+  user_id                 String   @unique
+  full_name               String
+  phone                   String?
+  profile_picture         String?
+  bio                     String?
+  current_education_level String?
+  interests               String[]
+  is_active               Boolean  @default(true)
+
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  enrollments   Enrollment[]  @relation("StudentEnrollments")
+  quiz_attempts QuizAttempt[]
+  certificates  Certificate[] @relation("StudentCertificates")
+  payments      Payment[]     @relation("StudentPayments")
+  reviews       Review[]      @relation("StudentReviews")
+}
+
+model InstructorProfile {
+  id              Int     @id @default(autoincrement())
+  user_id         String  @unique
+  full_name       String
+  phone           String?
+  profile_picture String?
+  bio             String?
+  expertise_area  String?
+  website         String?
+  is_verified     Boolean @default(false)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Course {
+  id                Int       @id @default(autoincrement())
+  title             String
+  description       String?
+  instructor_id     String
+  category          String?
+  level             Level     @default(BEGINNER)
+  language          String    @default("English")
+  duration_weeks    Int?
+  price             Float?
+  discount_price    Float?
+  thumbnail_url     String?
+  promo_video_url   String?
+  is_published      Boolean   @default(false)
+  last_edition      DateTime?
+  requirements      String[]
+  learning_outcomes String[]
+
+  instructor   User          @relation("CourseInstructor", fields: [instructor_id], references: [id], onDelete: Cascade)
+  lessons      Lesson[]
+  enrollments  Enrollment[]  @relation("CourseEnrollments")
+  certificates Certificate[] @relation("CourseCertificates")
+  payments     Payment[]     @relation("CoursePayments")
+  reviews      Review[]      @relation("CourseReviews")
+}
+
+model Lesson {
+  id           Int         @id @default(autoincrement())
+  course_id    Int
+  title        String
+  content_type ContentType
+  content_url  String?
+  duration     Int?
+  updated_at   DateTime    @updatedAt
+
+  course    Course     @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  resources Resource[]
+  quiz      Quiz?
+  progress  Progress[]
+}
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+  QUIZ
+  ASSIGNMENT
+  DOWNLOAD
+}
+
+model Resource {
+  id        Int    @id @default(autoincrement())
+  lesson_id Int
+  title     String
+  file_url  String
+  file_type String
+
+  lesson Lesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id                Int              @id @default(autoincrement())
+  student_id        Int
+  course_id         Int
+  enrolled_at       DateTime         @default(now())
+  completion_status CompletionStatus @default(ACTIVE)
+  last_accessed     DateTime?
+  updated_at        DateTime         @updatedAt
+  enrollment_code   String           @unique
+
+  student  StudentProfile @relation("StudentEnrollments", fields: [student_id], references: [id], onDelete: Cascade)
+  course   Course         @relation("CourseEnrollments", fields: [course_id], references: [id], onDelete: Cascade)
+  progress Progress[]
+}
+
+enum CompletionStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+model Progress {
+  id            Int       @id @default(autoincrement())
+  enrollment_id Int
+  lesson_id     Int
+  is_completed  Boolean   @default(false)
+  completed_at  DateTime?
+
+  enrollment Enrollment @relation(fields: [enrollment_id], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+
+  @@unique([enrollment_id, lesson_id])
+}
+
+model Review {
+  id         Int            @id @default(autoincrement())
+  student_id Int
+  course_id  Int
+  rating     Int            @default(0)
+  comment    String?
+  created_at DateTime       @default(now())
+  student    StudentProfile @relation("StudentReviews", fields: [student_id], references: [id], onDelete: Cascade)
+  course     Course         @relation("CourseReviews", fields: [course_id], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id            Int    @id @default(autoincrement())
+  lesson_id     Int    @unique
+  title         String
+  passing_score Int    @default(70)
+  duration      Int? // in minutes
+
+  lesson    Lesson        @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  questions Question[]
+  attempts  QuizAttempt[]
+}
+
+model Question {
+  id            Int          @id @default(autoincrement())
+  quiz_id       Int
+  question_text String
+  question_type QuestionType
+  points        Int          @default(1)
+
+  quiz    Quiz     @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+model Answer {
+  id          Int     @id @default(autoincrement())
+  question_id Int
+  answer_text String
+  is_correct  Boolean @default(false)
+
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id         Int     @id @default(autoincrement())
+  student_id Int
+  quiz_id    Int
+  score      Int
+  is_passed  Boolean
+
+  student StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  quiz    Quiz           @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id                Int      @id @default(autoincrement())
+  student_id        Int
+  course_id         Int
+  issued_at         DateTime @default(now())
+  certificate_url   String
+  verification_code String   @unique
+
+  student StudentProfile @relation("StudentCertificates", fields: [student_id], references: [id], onDelete: Cascade)
+  course  Course         @relation("CourseCertificates", fields: [course_id], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  student_id     Int
+  course_id      Int
+  amount         Float
+  payment_method String
+  transaction_id String
+  status         PaymentStatus
+  updated_at     DateTime      @updatedAt
+
+  paid_at DateTime @default(now())
+
+  student StudentProfile @relation("StudentPayments", fields: [student_id], references: [id], onDelete: Cascade)
+  course  Course         @relation("CoursePayments", fields: [course_id], references: [id], onDelete: Cascade)
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}

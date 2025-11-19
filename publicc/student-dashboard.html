@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<script defer src="student-dashboard.js"></script>
+</head>
+<body>
+<header><h1>Student Dashboard</h1></header>
+<main>
+  <section class="profile">
+    <img id="profile-picture" src="" alt="Profile Picture">
+    <h2 id="full-name"></h2>
+    <p id="email"></p>
+    <p id="bio"></p>
+  </section>
+
+  <section class="enrollments">
+    <h3>Enrollments</h3>
+    <ul id="enrollments-list"></ul>
+  </section>
+
+  <section class="progress-chart">
+    <h3>Course Progress</h3>
+    <canvas id="progress-chart" width="400" height="200"></canvas>
+  </section>
+
+    <button type="button" class="btn back-btn zoom" onclick="window.location.href='index.html'">Back to Home</button>
+</main>
+</body>
+</html>
