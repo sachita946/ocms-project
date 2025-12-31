@@ -1,15 +1,12 @@
-import { Router } from 'express';
-import { auth } from '../middleware/auth.js';
-import {
-  getCertificates,
-  getCertificate,
-  issueCertificate
-} from '../controllers/certificates.controller.js';
+import { Router } from "express";
+import  {auth}  from "../middleware/auth.js";
+import {issueCertificate, verifyCertificate, createCertificate, listCertificates, deleteCertificate } from "../controllers/certificates.controller.js";
 
 const router = Router();
-
-router.get('/', auth, getCertificates);
-router.get('/:id', auth, getCertificate);
-router.post('/', auth, issueCertificate);
+router.post('/issue', auth, issueCertificate);
+router.post('/verify', verifyCertificate);
+router.post('/', auth, createCertificate);
+router.get('/', auth, listCertificates);
+router.delete('/:id', auth, deleteCertificate);
 
 export default router;

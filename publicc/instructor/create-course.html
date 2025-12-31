@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Create Course | Instructor Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+			margin-left: 260px;
+		}
+		@media (max-width: 768px) { body { margin-left: 0; } }
+		.container {
+			max-width: 900px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.back-btn {
+			padding: 10px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.back-btn:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.form-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 28px;
+		}
+		.form-section {
+			margin-bottom: 24px;
+		}
+		.form-section h3 {
+			font-size: 14px;
+			text-transform: uppercase;
+			color: #06b6d4;
+			margin-bottom: 16px;
+			font-weight: 700;
+		}
+		.form-group {
+			margin-bottom: 16px;
+		}
+		.form-group label {
+			display: block;
+			margin-bottom: 8px;
+			color: #e9f2ff;
+			font-weight: 600;
+			font-size: 14px;
+		}
+		.form-group input,
+		.form-group textarea,
+		.form-group select {
+			width: 100%;
+			padding: 12px;
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.12);
+			border-radius: 8px;
+			color: #e9f2ff;
+			font-family: inherit;
+			transition: all 0.2s ease;
+		}
+		.form-group input:focus,
+		.form-group textarea:focus,
+		.form-group select:focus {
+			outline: none;
+			border-color: rgba(6, 182, 212, 0.4);
+			background: rgba(255,255,255,0.08);
+			box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+		}
+		.form-group textarea {
+			resize: vertical;
+			min-height: 120px;
+		}
+		.form-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+		.form-group input::placeholder,
+		.form-group textarea::placeholder {
+			color: #9bb0c9;
+		}
+		.thumbnail-preview {
+			width: 100%;
+			height: 200px;
+			background: rgba(255,255,255,0.03);
+			border: 2px dashed rgba(6, 182, 212, 0.3);
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-top: 12px;
+			color: #9bb0c9;
+		}
+		.thumbnail-preview img {
+			max-width: 100%;
+			max-height: 100%;
+			border-radius: 6px;
+		}
+		.form-actions {
+			display: flex;
+			gap: 12px;
+			margin-top: 28px;
+			padding-top: 28px;
+			border-top: 1px solid rgba(255,255,255,0.08);
+		}
+		.btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 600;
+			font-size: 14px;
+		}
+		.btn-primary {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #0b1226;
+			flex: 1;
+		}
+		.btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+		}
+		.btn-secondary {
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+		}
+		.btn-secondary:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.alert {
+			padding: 12px 16px;
+			border-radius: 8px;
+			margin-bottom: 16px;
+			display: none;
+		}
+		.alert-success {
+			background: rgba(34,197,94,0.2);
+			border: 1px solid rgba(34,197,94,0.3);
+			color: #22c55e;
+		}
+		.alert-error {
+			background: rgba(239,68,68,0.2);
+			border: 1px solid rgba(239,68,68,0.3);
+			color: #ef4444;
+		}
+		.form-group.two-col {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+		.form-group.two-col > div {
+			margin-bottom: 0;
+		}
+		@media (max-width: 768px) {
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+			.form-row { grid-template-columns: 1fr; }
+			.form-group.two-col { grid-template-columns: 1fr; }
+			.form-actions { flex-direction: column; }
+		}
+	</style>
+</head>
+
+<body>	<script src="nav.js"></script>	<div class="container">
+		<div class="header">
+			<div>
+				<h1>🎓 Create New Course</h1>
+				<p style="color: #9bb0c9; margin-top: 4px;">Build and share your expertise with students</p>
+			</div>
+			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+		</div>
+
+		<div class="form-card">
+			<div id="alertMessage" class="alert"></div>
+
+			<form id="createCourseForm">
+				<!-- Course Information -->
+				<div class="form-section">
+					<h3>📝 Course Information</h3>
+					
+					<div class="form-group">
+						<label>Course Title *</label>
+						<input type="text" id="title" placeholder="e.g., Advanced Web Development with React" required>
+					</div>
+
+					<div class="form-group">
+						<label>Description *</label>
+						<textarea id="description" placeholder="Describe what students will learn in this course..." required></textarea>
+					</div>
+
+					<div class="form-row">
+						<div class="form-group">
+							<label>Category *</label>
+							<select id="category" required>
+								<option value="">Select a category</option>
+								<option value="web-development">Web Development</option>
+								<option value="mobile-development">Mobile Development</option>
+								<option value="data-science">Data Science</option>
+								<option value="machine-learning">Machine Learning</option>
+								<option value="design">Design</option>
+								<option value="business">Business</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label>Level *</label>
+							<select id="level" required>
+								<option value="">Select a level</option>
+								<option value="BEGINNER">Beginner</option>
+								<option value="INTERMEDIATE">Intermediate</option>
+								<option value="ADVANCED">Advanced</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Course Media -->
+				<div class="form-section">
+					<h3>🖼️ Course Media</h3>
+					
+					<div class="form-group">
+						<label>Thumbnail URL</label>
+						<input type="url" id="thumbnail_url" placeholder="https://example.com/image.jpg">
+						<div class="thumbnail-preview" id="thumbnailPreview">
+							<span>No image selected</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Pricing & Details -->
+				<div class="form-section">
+					<h3>💰 Pricing & Details</h3>
+					
+					<div class="form-row">
+						<div class="form-group">
+							<label>Price (USD) *</label>
+							<input type="number" id="price" placeholder="49.99" step="0.01" min="0" required>
+						</div>
+
+						<div class="form-group">
+							<label>Estimated Duration (hours)</label>
+							<input type="number" id="duration" placeholder="12" min="0">
+						</div>
+					</div>
+
+					<div class="form-row">
+						<div class="form-group">
+							<label>Language</label>
+							<select id="language">
+								<option value="English">English</option>
+								<option value="Spanish">Spanish</option>
+								<option value="French">French</option>
+								<option value="German">German</option>
+								<option value="Other">Other</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label>Certificate Included</label>
+							<select id="hasCertificate">
+								<option value="true">Yes</option>
+								<option value="false">No</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Additional Options -->
+				<div class="form-section">
+					<h3>⚙️ Additional Options</h3>
+					
+					<div class="form-group">
+						<label>Tags (comma-separated)</label>
+						<input type="text" id="tags" placeholder="e.g., react, javascript, web development">
+					</div>
+
+					<div class="form-group">
+						<label>Requirements</label>
+						<textarea id="requirements" placeholder="e.g., Basic knowledge of HTML and CSS"></textarea>
+					</div>
+				</div>
+
+				<!-- Form Actions -->
+				<div class="form-actions">
+					<button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+					<button type="submit" class="btn btn-primary">✅ Create Course</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

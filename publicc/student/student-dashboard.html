@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | OCMS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(120deg, #0f172a 0%, #0b6b6b 100%);
+      color: #eaf4f2;
+      min-height: 100vh;
+      display: flex;
+    }
+    a { color: inherit; text-decoration: none; }
+    .layout { display: grid; grid-template-columns: 260px 1fr; width: 100%; }
+    .sidebar {
+      background: rgba(12, 18, 40, 0.9);
+      backdrop-filter: blur(6px);
+      padding: 24px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .user-card { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(145deg, #22c55e, #0ea5e9);
+      display: grid; place-items: center; font-weight: 700; color: #0f172a;
+    }
+    .user-meta small { color: #9fb5b9; }
+    .nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav button {
+      background: rgba(255,255,255,0.06);
+      color: #eaf4f2;
+      border: 1px solid transparent;
+      padding: 12px 14px;
+      border-radius: 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .nav button.active, .nav button:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.12); }
+    .logout { margin-top: 18px; background: transparent; border-color: rgba(255,255,255,0.24); color: #f8c4c4; }
+    main { padding: 28px; }
+    .hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .hero h1 { font-size: 24px; letter-spacing: 0.3px; }
+    .hero p { color: #9fb5b9; }
+    .badge { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); color: #7bd8ff; border: 1px solid rgba(255,255,255,0.14); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 14px; margin-bottom: 18px; }
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 90px;
+    }
+    .card strong { font-size: 22px; display: block; margin-top: 6px; color: #fff; }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); font-size: 12px; color: #9fb5b9; margin-right: 6px; margin-bottom: 6px; }
+    .panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px; display: none; }
+    .panel.active { display: block; }
+    .panel h3 { margin-bottom: 10px; }
+    .list { list-style: none; display: grid; gap: 10px; }
+    .list-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .muted { color: #9fb5b9; font-size: 14px; }
+    .progress-bar { width: 100%; height: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #0ea5e9); }
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); } .hero { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="avatar">S</div>
+        <div class="user-meta">
+          <div id="userName">Student</div>
+          <small id="userEmail">email@example.com</small>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="active" data-section="overview">Overview</button>
+        <button data-section="enrollments">Enrollments</button>
+        <button data-section="progress">Progress</button>
+        <button data-section="certificates">Certificates</button>
+        <button data-section="payments">Payments</button>
+        <button data-section="notifications">Notifications</button>
+      </div>
+      <button class="nav logout" id="logoutBtn">Logout</button>
+    </aside>
+
+    <main>
+      <div class="hero">
+        <div>
+          <p>Keep learning, your progress is saved.</p>
+          <h1>Welcome back, <span id="welcomeName">Student</span></h1>
+        </div>
+        <div class="badge" id="roleBadge">Student</div>
+      </div>
+
+      <section class="grid" id="statsGrid">
+        <div class="card"><div class="muted">Enrollments</div><strong id="stat-enrollments">0</strong></div>
+        <div class="card"><div class="muted">Active</div><strong id="stat-active">0</strong></div>
+        <div class="card"><div class="muted">Completed</div><strong id="stat-completed">0</strong></div>
+        <div class="card"><div class="muted">Certificates</div><strong id="stat-certificates">0</strong></div>
+        <div class="card"><div class="muted">Payments</div><strong id="stat-payments">0</strong></div>
+        <div class="card"><div class="muted">Quiz Attempts</div><strong id="stat-quizzes">0</strong></div>
+        <div class="card"><div class="muted">Notes</div><strong id="stat-notes">0</strong></div>
+      </section>
+
+      <section id="section-overview" class="panel active">
+        <h3>Quick Overview</h3>
+        <div class="list" id="overview-list"></div>
+      </section>
+
+      <section id="section-enrollments" class="panel">
+        <h3>Recent Enrollments</h3>
+        <ul class="list" id="enrollments-list"></ul>
+      </section>
+
+      <section id="section-progress" class="panel">
+        <h3>Course Progress</h3>
+        <ul class="list" id="progress-list"></ul>
+      </section>
+
+      <section id="section-certificates" class="panel">
+        <h3>Certificates</h3>
+        <ul class="list" id="certificates-list"></ul>
+      </section>
+
+      <section id="section-payments" class="panel">
+        <h3>Payments</h3>
+        <ul class="list" id="payments-list"></ul>
+      </section>
+
+      <section id="section-notifications" class="panel">
+        <h3>Notifications & Activity</h3>
+        <ul class="list" id="notifications-list"></ul>
+        <div style="height:10px"></div>
+        <ul class="list" id="activities-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('ocms_token');
+    if (!token) window.location.href = '/login.html';
+
+    const $ = (id) => document.getElementById(id);
+    const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : '';
+
+    const panels = document.querySelectorAll('.panel');
+    const navButtons = document.querySelectorAll('[data-section]');
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => switchSection(btn.dataset.section));
+    });
+
+    $('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('ocms_token');
+      window.location.href = '/login.html';
+    });
+
+    function switchSection(section) {
+      panels.forEach(p => p.classList.remove('active'));
+      navButtons.forEach(b => b.classList.remove('active'));
+      document.getElementById(`section-${section}`).classList.add('active');
+      document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    }
+
+    function setStats(stats = {}) {
+      $('stat-enrollments').textContent = stats.enrollmentsTotal ?? 0;
+      $('stat-active').textContent = stats.active ?? 0;
+      $('stat-completed').textContent = stats.completed ?? 0;
+      $('stat-certificates').textContent = stats.certificates ?? 0;
+      $('stat-payments').textContent = stats.payments ?? 0;
+      $('stat-quizzes').textContent = stats.quizAttempts ?? 0;
+      $('stat-notes').textContent = stats.notes ?? 0;
+    }
+
+    function renderHeader(user) {
+      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Student';
+      $('welcomeName').textContent = name;
+      $('userName').textContent = name;
+      $('userEmail').textContent = user.email;
+      $('avatar').textContent = (name || 'S').charAt(0).toUpperCase();
+    }
+
+    function renderOverview(dashboard) {
+      const list = $('overview-list');
+      list.innerHTML = '';
+      const overview = [
+        { label: 'Enrollments', value: dashboard.stats?.enrollmentsTotal },
+        { label: 'Certificates', value: dashboard.stats?.certificates },
+        { label: 'Payments', value: dashboard.stats?.payments },
+        { label: 'Quiz Attempts', value: dashboard.stats?.quizAttempts },
+      ];
+      overview.forEach(item => {
+        const li = document.createElement('div');
+        li.className = 'list-item';
+        li.innerHTML = `<div><strong>${item.value ?? 0}</strong><div class="muted">${item.label}</div></div>`;
+        list.appendChild(li);
+      });
+    }
+
+    function renderEnrollments(items = []) {
+      const list = $('enrollments-list');
+      list.innerHTML = '';
+      if (!items.length) list.innerHTML = '<div class="muted">No enrollments yet.</div>';
+      items.forEach(e => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<div><div>${e.courseTitle}</div><div class="muted">${fmtDate(e.enrolled_at)}</div></div><span class="pill">${e.status}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function renderProgress(items = []) {
+      const list = $('progress-list');
+      list.innerHTML = '';
+      if (!items.length) list.innerHTML = '<div class="muted">Progress will appear after you start learning.</div>';
+      items.forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<div><div>${p.courseTitle}</div><div class="muted">${p.percentage}% complete</div><div class="progress-bar"><div class="progress-fill" style="width:${p.percentage}%"></div></div></div>`;
+        list.appendChild(li);
+      });
+    }
+
+    function renderCertificates(items = []) {
+      const list = $('certificates-list');
+      list.innerHTML = '';
+      if (!items.length) list.innerHTML = '<div class="muted">No certificates issued yet.</div>';
+      items.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<div><div>${c.courseTitle}</div><div class="muted">Issued ${fmtDate(c.issued_at)}</div></div><span class="pill">${c.verification_code}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function renderPayments(items = []) {
+      const list = $('payments-list');
+      list.innerHTML = '';
+      if (!items.length) list.innerHTML = '<div class="muted">No payments recorded.</div>';
+      items.forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<div><div>${p.courseTitle}</div><div class="muted">${fmtDate(p.paid_at)}</div></div><div><strong>${p.amount ?? 0}</strong><div class="muted">${p.status}</div></div>`;
+        list.appendChild(li);
+      });
+    }
+
+    function renderNotifications(items = [], activities = []) {
+      const notifList = $('notifications-list');
+      notifList.innerHTML = '';
+      if (!items.length) notifList.innerHTML = '<div class="muted">No new notifications.</div>';
+      items.forEach(n => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<div>${n.message}</div><div class="muted">${fmtDate(n.created_at)}</div>`;
+        notifList.appendChild(li);
+      });
+
+      const activityList = $('activities-list');
+      activityList.innerHTML = '';
+      if (!activities.length) activityList.innerHTML = '<div class="muted">No recent activity.</div>';
+      activities.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        const courseTitle = a.course?.title || a.lesson?.title || 'Course activity';
+        li.innerHTML = `<div><div>${courseTitle}</div><div class="muted">${a.action || 'Activity'}</div></div><div class="muted">${fmtDate(a.created_at)}</div>`;
+        activityList.appendChild(li);
+      });
+    }
+
+    async function bootstrap() {
+      try {
+        const res = await fetch('/api/profile/me', { headers: { Authorization: `Bearer ${token}` } });
+        if (res.status === 401) throw new Error('unauthorized');
+        const payload = await res.json();
+        if (payload.dashboard?.role !== 'STUDENT') {
+          window.location.href = '/dashboards/instructor-dashboard.html';
+          return;
+        }
+
+        renderHeader(payload.user);
+        $('roleBadge').textContent = payload.dashboard.role;
+        setStats(payload.dashboard.stats);
+        renderOverview(payload.dashboard);
+        renderEnrollments(payload.dashboard.lists?.enrollments || []);
+        renderProgress(payload.dashboard.charts?.progress || []);
+        renderCertificates(payload.dashboard.lists?.certificates || []);
+        renderPayments(payload.dashboard.lists?.payments || []);
+        renderNotifications(payload.dashboard.lists?.notifications || [], payload.dashboard.lists?.activities || []);
+      } catch (err) {
+        localStorage.removeItem('ocms_token');
+        window.location.href = '/login.html';
+      }
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>

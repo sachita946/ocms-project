@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Instructor Dashboard | OCMS</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		.instructor-page-wrapper {
+			margin-left: 260px;
+			min-height: 100vh;
+			padding: 28px;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.header p { color: #9bb0c9; margin-top: 4px; }
+		.badge { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #7bd8ff; }
+		.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 14px; margin-bottom: 18px; }
+		.card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; min-height: 90px; }
+		.card strong { font-size: 22px; display: block; margin-top: 6px; color: #fff; }
+		.card .muted { color: #9bb0c9; font-size: 14px; }
+		.panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+		.panel h3 { margin-bottom: 16px; font-size: 18px; }
+		.list { list-style: none; display: grid; gap: 10px; }
+		.list-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+		.muted { color: #9bb0c9; font-size: 14px; }
+		.pill { display: inline-block; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); font-size: 12px; color: #9bb0c9; margin-left: 6px; }
+		.action-btn { padding: 10px 16px; background: linear-gradient(135deg, #06b6d4, #38bdf8); color: #0b1226; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+		.action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3); }
+		.chart-container { position: relative; height: 300px; margin-bottom: 20px; }
+		@media (max-width: 768px) { .instructor-page-wrapper { margin-left: 0; padding: 16px; } .header { flex-direction: column; align-items: flex-start; gap: 16px; } }
+	</style>
+</head>
+
+<body>
+	<script src="nav.js"></script>
+	<div class="instructor-page-wrapper">
+		<div class="container">
+			<div class="header">
+				<div>
+					<p>Track your teaching impact and revenue.</p>
+					<h1>Welcome, <span id="welcomeName">Instructor</span></h1>
+				</div>
+				<div class="badge" id="roleBadge">Instructor</div>
+			</div>
+
+			<section class="grid">
+				<div class="card"><div class="muted">Courses</div><strong id="stat-courses">0</strong></div>
+				<div class="card"><div class="muted">Published</div><strong id="stat-published">0</strong></div>
+				<div class="card"><div class="muted">Drafts</div><strong id="stat-drafts">0</strong></div>
+				<div class="card"><div class="muted">Students</div><strong id="stat-students">0</strong></div>
+				<div class="card"><div class="muted">Revenue</div><strong id="stat-revenue">$0</strong></div>
+				<div class="card"><div class="muted">Reviews</div><strong id="stat-reviews">0</strong></div>
+			</section>
+
+			<section class="panel">
+				<h3>📊 Teaching Statistics</h3>
+				<ul class="list" id="overview-list"></ul>
+				<div style="margin-top:16px">
+					<button class="action-btn" onclick="location.href='create-course.html'">+ Create New Course</button>
+				</div>
+			</section>
+
+			<section class="panel">
+				<h3>📚 Your Courses</h3>
+				<ul class="list" id="courses-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>💰 Earnings & Revenue</h3>
+				<ul class="list" id="earnings-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>📖 Your Lessons</h3>
+				<ul class="list" id="lessons-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>👥 Students Enrolled</h3>
+				<ul class="list" id="students-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>📝 Quizzes & Assessments</h3>
+				<ul class="list" id="quizzes-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>👤 My Profile</h3>
+				<ul class="list" id="profile-list"></ul>
+			</section>
+
+			<section class="panel">
+				<h3>🔔 Notifications & Activity</h3>
+				<ul class="list" id="notifications-list"></ul>
+			</section>
+		</div>
+	</div>
+
+	<script src="instructor-dashboard.js"></script>
+</body>
+</html>

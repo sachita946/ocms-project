@@ -1,72 +1,710 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>EduVerse | Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
-<script defer src="js/script.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVerse | Online Course Management System</title>
+  <style>
+    /* Enhanced Modern Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .search-field {
+      padding: 10px 16px;
+      border-radius: 25px;
+      border: 2px solid #e0e7ff;
+      width: 280px;
+      background: #f8fafc;
+      transition: all 0.3s ease;
+    }
+
+    .search-field:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .top-right {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-login, .btn-signup {
+      padding: 10px 24px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-login:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .btn-signup {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+    }
+
+    .btn-signup:hover {
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 100px 20px 80px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      font-weight: 800;
+      text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      margin-bottom: 40px;
+      opacity: 0.95;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-buttons a {
+      padding: 14px 32px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .hero-buttons a:first-child {
+      background: white;
+      color: #667eea;
+    }
+
+    .hero-buttons a:first-child:hover {
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .hero-buttons a:last-child {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      color: white;
+    }
+
+    .hero-buttons a:last-child:hover {
+      box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+      transform: translateY(-3px);
+    }
+
+    /* Stats Section */
+    .stats-section {
+      max-width: 1200px;
+      margin: -40px auto 60px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* Dashboard Roles Section */
+    .roles-section {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .role-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--role-color-1), var(--role-color-2));
+    }
+
+    .role-card.student-card {
+      --role-color-1: #22c55e;
+      --role-color-2: #0ea5e9;
+    }
+
+    .role-card.instructor-card {
+      --role-color-1: #06b6d4;
+      --role-color-2: #8b5cf6;
+    }
+
+    .role-card.admin-card {
+      --role-color-1: #f59e0b;
+      --role-color-2: #ef4444;
+    }
+
+    .role-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .role-icon {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+    }
+
+    .role-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1e293b;
+    }
+
+    .role-description {
+      color: #64748b;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .role-features {
+      list-style: none;
+      margin-bottom: 30px;
+    }
+
+    .role-features li {
+      padding: 10px 0;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .role-features li::before {
+      content: '✓';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--role-color-1), var(--role-color-2));
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .role-button {
+      display: block;
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, var(--role-color-1), var(--role-color-2));
+      color: white;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .role-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Features Section */
+    .features-section {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 20px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1e293b;
+    }
+
+    .feature-text {
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    /* Team Section */
+    .team {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .team h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 50px;
+    }
+
+    .team-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .team-member {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .team-member:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .team-member h4 {
+      font-size: 1.3rem;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .team-member p {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 50px 20px 30px;
+      margin-top: 80px;
+    }
+
+    .footer-links {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+    }
+
+    .footer-column h3 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #667eea;
+    }
+
+    .footer-column ul {
+      list-style: none;
+    }
+
+    .footer-column ul li {
+      margin-bottom: 10px;
+    }
+
+    .footer-column ul li a {
+      color: rgba(255, 255, 255, 0.8);
+      transition: color 0.3s ease;
+    }
+
+    .footer-column ul li a:hover {
+      color: white;
+    }
+
+    .footer-buttons {
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-buttons button {
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .footer-buttons button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    footer > p {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 30px;
+      margin-top: 30px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1.1rem; }
+      .top-bar { flex-direction: column; gap: 16px; padding: 16px 20px; }
+      .top-left { width: 100%; justify-content: space-between; }
+      .search-field { width: 100%; max-width: 300px; }
+      .roles-grid, .features-grid, .team-cards { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">EduVerse</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="courses.html">Courses</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="login.html">Login</a></li>
-        <li><a href="payment.html">Payment</a></li>
-        <li><a href="create-course.html">Create Course</a></li>
-        <li><a href ="student-dashboard.html">Student Dashboard</a></li>
-        <li><a href ="instructor-dashboard.html">Instructor Dashboard</a></li>
-      </ul>
-    </nav>
-  </header>
 
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Learn, Teach, Grow</h1>
-      <p>EduVerse is your gateway to interactive online learning.</p>
-      <div class="hero-buttons">
-        <a href="signup.html?role=student" class="btn zoom">Join as Student</a>
-        <a href="signup.html?role=instructor" class="btn zoom">Join as Instructor</a>
-      </div>
-    </div>
-  </section>
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="top-left">
+    <div class="logo">🎓 EduVerse</div>
+    <input type="text" placeholder="Search courses..." class="search-field" onclick="window.location.href='student/courses.html'">
+  </div>
+  <div class="top-right">
+    <a href="auth/login.html" class="btn-login">Login</a>
+    <a href="auth/signup.html" class="btn-signup">Sign Up</a>
+  </div>
+</header>
 
+<!-- HERO SECTION -->
+<section class="hero">
+  <h1>Learn, Teach, Grow</h1>
+  <p>EduVerse is your gateway to interactive online learning with comprehensive course management</p>
+  <div class="hero-buttons">
+    <a href="student/student-signup.html">Join as Student</a>
+    <a href="instructor/instructor-signup.html">Join as Instructor</a>
+  </div>
+</section>
 
-  <section class="team">
-    <h2>Our Creative Team</h2>
-    <div class="team-cards">
-      <div class="team-member zoom">
-        <h4>Jane Doe</h4>
-        <p>Lead Instructor</p>
-      </div>
-      <div class="team-member zoom">
-        <h4>John Smith</h4>
-        <p>Content Creator</p>
-      </div>
-      <div class="team-member zoom">
-        <h4>Mary Lee</h4>
-        <p>UI/UX Designer</p>
-      </div>
-    </div>
-  </section>
+<!-- STATS SECTION -->
+<section class="stats-section">
+  <div class="stat-card">
+    <div class="stat-number">1000+</div>
+    <div class="stat-label">Active Students</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">150+</div>
+    <div class="stat-label">Expert Instructors</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">500+</div>
+    <div class="stat-label">Quality Courses</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">5000+</div>
+    <div class="stat-label">Certificates Issued</div>
+  </div>
+</section>
 
+<!-- DASHBOARD ROLES SECTION -->
+<section class="roles-section">
+  <div class="section-header">
+    <h2>Choose Your Learning Path</h2>
+    <p>Access powerful dashboards tailored to your role</p>
+  </div>
   
+  <div class="roles-grid">
+    <!-- Student Dashboard -->
+    <div class="role-card student-card">
+      <div class="role-icon">👨‍🎓</div>
+      <h3 class="role-title">Student Dashboard</h3>
+      <p class="role-description">Your personalized learning hub with everything you need to succeed</p>
+      <ul class="role-features">
+        <li>Browse & enroll in courses</li>
+        <li>Watch video lessons</li>
+        <li>Take notes while learning</li>
+        <li>Attempt quizzes & assessments</li>
+        <li>Track progress & completion</li>
+        <li>Earn verified certificates</li>
+        <li>Manage payments & subscriptions</li>
+      </ul>
+      <a href="student/student-dashboard.html" class="role-button">Access Student Dashboard</a>
+    </div>
+
+    <!-- Instructor Dashboard -->
+    <div class="role-card instructor-card">
+      <div class="role-icon">👨‍🏫</div>
+      <h3 class="role-title">Instructor Dashboard</h3>
+      <p class="role-description">Comprehensive tools to create, manage, and monetize your courses</p>
+      <ul class="role-features">
+        <li>Create & publish courses</li>
+        <li>Upload lessons & content</li>
+        <li>Manage students & enrollments</li>
+        <li>Create quizzes & assessments</li>
+        <li>Track earnings & revenue</li>
+        <li>Issue certificates</li>
+        <li>View analytics & insights</li>
+      </ul>
+      <a href="instructor/instructor-dashboard.html" class="role-button">Access Instructor Dashboard</a>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="role-card admin-card">
+      <div class="role-icon">⚙️</div>
+      <h3 class="role-title">Admin Dashboard</h3>
+      <p class="role-description">Complete platform control and management capabilities</p>
+      <ul class="role-features">
+        <li>Manage all users & roles</li>
+        <li>Oversee courses & content</li>
+        <li>Monitor enrollments</li>
+        <li>Handle payments & refunds</li>
+        <li>Verify & issue certificates</li>
+        <li>Review quizzes & grades</li>
+        <li>System-wide analytics</li>
+      </ul>
+      <a href="admin/dashboard.html" class="role-button">Access Admin Dashboard</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="features-section">
+  <div class="section-header">
+    <h2>Platform Features</h2>
+    <p>Everything you need for a complete learning experience</p>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📹</div>
+      <h4 class="feature-title">HD Video Lessons</h4>
+      <p class="feature-text">High-quality video content with interactive player and speed controls</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📝</div>
+      <h4 class="feature-title">Smart Note Taking</h4>
+      <p class="feature-text">Take timestamped notes while watching lessons for better retention</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h4 class="feature-title">Quizzes & Tests</h4>
+      <p class="feature-text">Assess your knowledge with interactive quizzes and instant feedback</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h4 class="feature-title">Progress Tracking</h4>
+      <p class="feature-text">Monitor your learning journey with detailed analytics and insights</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <h4 class="feature-title">Verified Certificates</h4>
+      <p class="feature-text">Earn industry-recognized certificates upon course completion</p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">💳</div>
+      <h4 class="feature-title">Secure Payments</h4>
+      <p class="feature-text">Safe and flexible payment options for all course purchases</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM SECTION -->
+<section class="team">
+  <h2>Meet Our Creative Team</h2>
+  <div class="team-cards">
+    <div class="team-member">
+      <h4>Jane Doe</h4>
+      <p>Lead Instructor</p>
+    </div>
+    <div class="team-member">
+      <h4>John Smith</h4>
+      <p>Content Creator</p>
+    </div>
+    <div class="team-member">
+      <h4>Mary Lee</h4>
+      <p>UI/UX Designer</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
   <div class="footer-links">
-
     <div class="footer-column">
       <h3>Quick Links</h3>
       <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="courses.html">Courses</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="./student/courses.html">Courses</a></li>
+        <li><a href="./about.html">About</a></li>
+        <li><a href="./contact.html">Contact</a></li>
       </ul>
     </div>
-
-
+    <div class="footer-column">
+      <h3>For Students</h3>
+      <ul>
+        <li><a href="student/student-signup.html">Student Signup</a></li>
+        <li><a href="student/student-dashboard.html">Student Dashboard</a></li>
+        <li><a href="student/courses.html">My Courses</a></li>
+        <li><a href="student/certificate.html">My Certificates</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h3>For Instructors</h3>
+      <ul>
+        <li><a href="instructor/instructor-signup.html">Instructor Signup</a></li>
+        <li><a href="instructor/instructor-dashboard.html">Instructor Dashboard</a></li>
+        <li><a href="instructor/create-course.html">Create Course</a></li>
+        <li><a href="instructor/earnings.html">My Earnings</a></li>
+      </ul>
+    </div>
     <div class="footer-column">
       <h3>Resources</h3>
       <ul>
@@ -78,22 +716,15 @@
     </div>
   </div>
 
-  
   <div class="footer-buttons">
-    <button>Facebook</button>
-    <button>Twitter</button>
-    <button>LinkedIn</button>
-    <button>Instagram</button>
+    <button onclick="window.open('https://facebook.com', '_blank')">Facebook</button>
+    <button onclick="window.open('https://twitter.com', '_blank')">Twitter</button>
+    <button onclick="window.open('https://linkedin.com', '_blank')">LinkedIn</button>
+    <button onclick="window.open('https://instagram.com', '_blank')">Instagram</button>
   </div>
 
+  <p>📍 Banepa, Nepal | 📞 +977-9702682010 | 📧 eduverse@support.com<br>© 2025 EduVerse. All rights reserved.</p>
+</footer>
 
-      <h3>Contact Us</h3>
-      <p>📍 Banepa, Nepal | 📞 +977-9702682010 | 📧 eduverse@support.com</p>
-    </div>
-  </section>
-
-  </footer>
 </body>
 </html>
-
-

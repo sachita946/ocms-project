@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>My Courses & Lessons | Student Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0f172a 0%, #0b6b6b 100%);
+			background-attachment: fixed;
+			color: #eaf4f2;
+			min-height: 100vh;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.back-btn {
+			padding: 10px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #eaf4f2;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			border: none;
+		}
+		.back-btn:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+		.stat-card {
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 16px;
+		}
+		.stat-label { color: #9fb5b9; font-size: 12px; text-transform: uppercase; }
+		.stat-value { font-size: 24px; font-weight: 700; color: #22c55e; margin-top: 6px; }
+		
+		.course-card {
+			background: rgba(255,255,255,0.06);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 20px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.course-card:hover {
+			border-color: rgba(34,197,94,0.4);
+			background: rgba(255,255,255,0.08);
+		}
+		.course-card.expanded {
+			border-color: rgba(34,197,94,0.5);
+			background: rgba(255,255,255,0.09);
+		}
+		.course-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: start;
+			gap: 16px;
+		}
+		.course-title {
+			font-size: 18px;
+			font-weight: 700;
+			color: #eaf4f2;
+			margin-bottom: 8px;
+		}
+		.course-meta {
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+			margin-top: 8px;
+		}
+		.course-badge {
+			padding: 4px 10px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.badge-level {
+			background: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+		}
+		.badge-progress {
+			background: rgba(34,197,94,0.2);
+			color: #22c55e;
+		}
+		.expand-icon {
+			font-size: 20px;
+			transition: transform 0.2s ease;
+		}
+		.course-card.expanded .expand-icon {
+			transform: rotate(180deg);
+		}
+		
+		.lessons-container {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid rgba(255,255,255,0.08);
+			display: none;
+		}
+		.course-card.expanded .lessons-container {
+			display: block;
+		}
+		.lesson-item {
+			background: rgba(255,255,255,0.04);
+			border: 1px solid rgba(255,255,255,0.06);
+			border-radius: 8px;
+			padding: 14px;
+			margin-bottom: 10px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			transition: all 0.2s ease;
+		}
+		.lesson-item:hover {
+			background: rgba(255,255,255,0.08);
+			border-color: rgba(34,197,94,0.3);
+		}
+		.lesson-info {
+			flex: 1;
+		}
+		.lesson-title {
+			color: #eaf4f2;
+			font-weight: 600;
+			margin-bottom: 4px;
+		}
+		.lesson-meta {
+			font-size: 12px;
+			color: #9fb5b9;
+		}
+		.lesson-icon {
+			font-size: 24px;
+			margin-right: 12px;
+		}
+		.lesson-actions {
+			display: flex;
+			gap: 8px;
+		}
+		.lesson-btn {
+			padding: 8px 14px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+			transition: all 0.2s ease;
+		}
+		.btn-watch {
+			background: linear-gradient(135deg, #22c55e, #16a34a);
+			color: #0f172a;
+		}
+		.btn-watch:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 16px rgba(34,197,94,0.3);
+		}
+		.btn-notes {
+			background: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+			border: 1px solid rgba(6, 182, 212, 0.3);
+		}
+		.btn-notes:hover {
+			background: rgba(6, 182, 212, 0.3);
+		}
+		.btn-quiz {
+			background: rgba(249,115,22,0.2);
+			color: #f97316;
+			border: 1px solid rgba(249,115,22,0.3);
+		}
+		.btn-quiz:hover {
+			background: rgba(249,115,22,0.3);
+		}
+		.lesson-complete {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+			padding: 4px 10px;
+			border-radius: 6px;
+			background: rgba(34,197,94,0.2);
+			color: #22c55e;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.progress-bar {
+			width: 100%;
+			height: 8px;
+			background: rgba(255,255,255,0.08);
+			border-radius: 4px;
+			overflow: hidden;
+			margin-top: 8px;
+		}
+		.progress-fill {
+			height: 100%;
+			background: linear-gradient(90deg, #22c55e, #0ea5e9);
+			transition: width 0.3s ease;
+		}
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9fb5b9;
+		}
+		.empty-state-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+		.certificate-section {
+			background: rgba(34,197,94,0.1);
+			border: 1px solid rgba(34,197,94,0.3);
+			border-radius: 8px;
+			padding: 14px;
+			margin-top: 16px;
+		}
+		.certificate-section h4 {
+			color: #22c55e;
+			margin-bottom: 8px;
+		}
+		.btn-certificate {
+			padding: 10px 16px;
+			background: linear-gradient(135deg, #22c55e, #16a34a);
+			color: #0f172a;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-weight: 600;
+			margin-top: 8px;
+		}
+		.btn-certificate:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(34,197,94,0.3);
+		}
+		@media (max-width: 768px) {
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+			.lesson-item { flex-direction: column; align-items: flex-start; }
+			.lesson-actions { width: 100%; }
+			.lesson-btn { flex: 1; }
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="header">
+			<div>
+				<h1>📚 My Courses & Lessons</h1>
+				<p style="color: #9fb5b9; margin-top: 4px;">Continue your learning journey</p>
+			</div>
+			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+		</div>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-label">Enrolled Courses</div>
+				<div class="stat-value" id="stat-enrolled">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Completed Lessons</div>
+				<div class="stat-value" id="stat-completed">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Total Progress</div>
+				<div class="stat-value" id="stat-progress">0%</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Certificates Earned</div>
+				<div class="stat-value" id="stat-certificates">0</div>
+			</div>
+		</div>
+
+		<div id="coursesContainer">
+			<div style="text-align: center; padding: 40px; color: #9fb5b9;">Loading your courses...</div>
+		</div>
+
+		<div class="empty-state" id="emptyState" style="display: none;">
+			<div class="empty-state-icon">🎓</div>
+			<p>No courses enrolled yet.</p>
+			<p style="font-size: 13px; margin-top: 8px;">Browse available courses and start learning!</p>
+		</div>
+	</div>
+
+	<script>
+		const token = localStorage.getItem('ocms_token');
+		if (!token) window.location.href = '/login.html';
+
+		document.addEventListener('DOMContentLoaded', loadCourses);
+
+		async function loadCourses() {
+			try {
+				const res = await fetch('/api/profile/me', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (res.status === 401) throw new Error('unauthorized');
+				const data = await res.json();
+
+				if (data.dashboard?.role !== 'STUDENT') {
+					window.location.href = '/dashboards/instructor-dashboard.html';
+					return;
+				}
+
+				const enrollments = data.dashboard.lists?.enrollments || [];
+				
+				if (!enrollments.length) {
+					document.getElementById('emptyState').style.display = 'block';
+					document.getElementById('coursesContainer').innerHTML = '';
+					return;
+				}
+
+				updateStats(data.dashboard);
+				renderCourses(enrollments, data.dashboard);
+
+			} catch (err) {
+				console.error(err);
+				localStorage.removeItem('ocms_token');
+				window.location.href = '/login.html';
+			}
+		}
+
+		function updateStats(dashboard) {
+			const enrollments = dashboard.lists?.enrollments || [];
+			const progress = dashboard.charts?.progress || [];
+			const certificates = dashboard.lists?.certificates || [];
+			
+			let completedLessons = 0;
+			let totalProgress = 0;
+			
+			progress.forEach(p => {
+				totalProgress += p.percentage || 0;
+			});
+			
+			const avgProgress = progress.length > 0 ? Math.round(totalProgress / progress.length) : 0;
+
+			document.getElementById('stat-enrolled').textContent = enrollments.length;
+			document.getElementById('stat-completed').textContent = completedLessons;
+			document.getElementById('stat-progress').textContent = avgProgress + '%';
+			document.getElementById('stat-certificates').textContent = certificates.length;
+		}
+
+		function renderCourses(enrollments, dashboard) {
+			const container = document.getElementById('coursesContainer');
+			const certificates = dashboard.lists?.certificates || [];
+			const progress = dashboard.charts?.progress || [];
+			
+			container.innerHTML = enrollments.map((enrollment, idx) => {
+				const courseProgress = progress.find(p => p.courseId === enrollment.courseId) || { percentage: 0 };
+				const hasCertificate = certificates.some(c => c.courseId === enrollment.courseId);
+				
+				// Mock lessons data (replace with actual API data when available)
+				const mockLessons = [
+					{ id: 1, title: 'Introduction', type: 'VIDEO', duration: 15, completed: true },
+					{ id: 2, title: 'Core Concepts', type: 'VIDEO', duration: 25, completed: true },
+					{ id: 3, title: 'Practical Examples', type: 'VIDEO', duration: 30, completed: false },
+					{ id: 4, title: 'Advanced Topics', type: 'VIDEO', duration: 20, completed: false },
+					{ id: 5, title: 'Final Assessment', type: 'QUIZ', duration: 10, completed: false }
+				];
+
+				return `
+					<div class="course-card" onclick="toggleCourse(${idx})">
+						<div class="course-header">
+							<div style="flex: 1;">
+								<div class="course-title">${enrollment.courseTitle || 'Course'}</div>
+								<div class="course-meta">
+									<span class="course-badge badge-level">${enrollment.level || 'Beginner'}</span>
+									<span class="course-badge badge-progress">${courseProgress.percentage}% Complete</span>
+									${hasCertificate ? '<span class="course-badge" style="background: rgba(34,197,94,0.2); color: #22c55e;">✓ Certified</span>' : ''}
+								</div>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: ${courseProgress.percentage}%"></div>
+								</div>
+							</div>
+							<div class="expand-icon">▼</div>
+						</div>
+						
+						<div class="lessons-container">
+							${mockLessons.map(lesson => `
+								<div class="lesson-item">
+									<div style="display: flex; align-items: center; flex: 1;">
+										<span class="lesson-icon">${lesson.type === 'VIDEO' ? '🎬' : lesson.type === 'QUIZ' ? '📝' : '📄'}</span>
+										<div class="lesson-info">
+											<div class="lesson-title">${lesson.title}</div>
+											<div class="lesson-meta">${lesson.type} • ${lesson.duration} mins</div>
+										</div>
+									</div>
+									<div class="lesson-actions">
+										${lesson.completed ? '<span class="lesson-complete">✓ Completed</span>' : ''}
+										${lesson.type === 'VIDEO' ? `
+											<button class="lesson-btn btn-watch" onclick="event.stopPropagation(); watchLesson(${enrollment.courseId}, ${lesson.id})">▶ Watch</button>
+											<button class="lesson-btn btn-notes" onclick="event.stopPropagation(); viewNotes(${enrollment.courseId}, ${lesson.id})">📝 Notes</button>
+										` : lesson.type === 'QUIZ' ? `
+											<button class="lesson-btn btn-quiz" onclick="event.stopPropagation(); takeQuiz(${enrollment.courseId}, ${lesson.id})">Start Quiz</button>
+										` : ''}
+									</div>
+								</div>
+							`).join('')}
+							
+							${courseProgress.percentage >= 80 && !hasCertificate ? `
+								<div class="certificate-section">
+									<h4>🎓 Certificate Available!</h4>
+									<p style="color: #9fb5b9; font-size: 13px;">You've completed this course. Click below to get your certificate.</p>
+									<button class="btn-certificate" onclick="event.stopPropagation(); getCertificate(${enrollment.courseId})">Download Certificate</button>
+								</div>
+							` : ''}
+						</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+		function toggleCourse(index) {
+			const cards = document.querySelectorAll('.course-card');
+			cards[index].classList.toggle('expanded');
+		}
+
+		function watchLesson(courseId, lessonId) {
+			// Navigate to notes.html with lesson video player
+			window.location.href = `/student/notes.html?course=${courseId}&lesson=${lessonId}`;
+		}
+
+		function viewNotes(courseId, lessonId) {
+			// Navigate to notes page
+			window.location.href = `/student/notes.html?course=${courseId}&lesson=${lessonId}`;
+		}
+
+		function takeQuiz(courseId, quizId) {
+			// Navigate to quiz page
+			window.location.href = `/student/quizees.html?course=${courseId}&quiz=${quizId}`;
+		}
+
+		function getCertificate(courseId) {
+			// Navigate to certificate page
+			window.location.href = `/student/certificate.html?course=${courseId}`;
+		}
+
+		function goBack() {
+			window.location.href = '/student/student-dashboard.html';
+		}
+	</script>
+</body>
+</html>

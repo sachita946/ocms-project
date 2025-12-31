@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduVerse — Login</title>
+
+<style>
+:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--muted:#9fb5b9;--bg-card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);background-attachment:fixed;color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.container{width:100%;max-width:460px}
+.login-card{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px 28px;box-shadow:0 10px 40px rgba(0,0,0,0.25);transition:all 0.3s}
+.login-card:hover{border-color:rgba(255,255,255,0.12);box-shadow:0 16px 55px rgba(0,0,0,0.3)}
+.title{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.form input{width:100%;padding:14px 16px;margin-bottom:14px;font-size:15px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--text);transition:all 0.2s}
+.form input::placeholder{color:var(--muted)}
+.form input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.1);box-shadow:0 0 0 3px rgba(34,197,94,0.15)}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;margin-top:6px;box-shadow:0 6px 20px rgba(34,197,94,0.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(34,197,94,0.45)}
+.btn-secondary{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,0.2);margin-top:10px}
+.btn-secondary:hover{background:rgba(255,255,255,0.08);border-color:var(--accent);color:var(--accent)}
+.social-login{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.btn-google{background:#fff;border:1px solid #e5e7eb;color:#000}
+.btn-google:hover{background:#f8fafc}
+.btn-facebook{background:#1877F2;color:#fff}
+.btn-facebook:hover{background:#166fe5}
+hr{margin:20px 0;border:none;border-top:1px solid rgba(255,255,255,0.15)}
+.signup-link{text-align:center;margin-top:18px;font-size:14px}
+.signup-link a{color:#22c55e;font-weight:700;text-decoration:none}
+.signup-link a:hover{text-decoration:underline}
+.error{color:#ef4444;font-size:13px;margin:-8px 0 10px}
+.server-error{color:#ef4444;font-size:13px;margin-top:10px}
+.muted{color:var(--muted);font-size:13px;margin-top:8px}
+.hidden{display:none}
+.back-btn{position:fixed;bottom:20px;left:20px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.12);padding:10px 14px;border-radius:10px;cursor:pointer;color:var(--text)}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+@media (max-width:480px){.container{max-width:100%}.login-card{padding:24px}}
+</style>
+
+<script type="module" defer src="js/login.js"></script>
+<script defer src="js/auth-forms.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="login-card">
+
+    <h2 class="title">Log in to EduVerse</h2>
+
+    <!-- LOGIN -->
+    <form id="loginForm" class="form" novalidate>
+      <input id="loginEmail" type="email" placeholder="Email address" required>
+      <div class="error" id="loginEmailError"></div>
+
+      <input id="loginPassword" type="password" placeholder="Password" required>
+      <div class="error" id="loginPasswordError"></div>
+
+      <button type="submit" class="btn btn-primary">Log In</button>
+      <button type="button" id="showForgotBtn" class="btn btn-secondary">Forgot password?</button>
+
+      <div class="social-login">
+        <button type="button" id="socialGoogleBtn" class="btn btn-google">
+          Continue with Google
+        </button>
+        <button type="button" id="socialFacebookBtn" class="btn btn-facebook">
+          Continue with Facebook
+        </button>
+      </div>
+
+      <div class="server-error" id="loginServerError"></div>
+
+      <div class="signup-link">
+        Don’t have an account? <a href="signup.html">Sign up</a>
+      </div>
+    </form>
+
+    <!-- FORGOT -->
+    <div id="forgot" class="hidden">
+      <hr>
+      <h3>Find your account</h3>
+
+      <form id="forgotForm" class="form" novalidate>
+        <input id="forgotEmail" type="email" placeholder="Email address" required>
+        <div class="error" id="forgotEmailError"></div>
+
+        <button type="submit" class="btn btn-primary">Send reset link</button>
+        <button type="button" id="cancelForgot" class="btn btn-secondary">Cancel</button>
+
+        <div class="server-error" id="forgotServerError"></div>
+        <div class="muted" id="forgotSuccess"></div>
+      </form>
+    </div>
+
+    <!-- RESET -->
+    <div id="reset" class="hidden">
+      <hr>
+      <h3>Reset your password</h3>
+
+      <form id="resetForm" class="form" novalidate>
+        <input id="resetToken" type="text" placeholder="Reset token" required>
+        <div class="error" id="resetTokenError"></div>
+
+        <input id="newPassword" type="password" placeholder="New password" required>
+        <div class="error" id="newPasswordError"></div>
+
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+        <button type="button" id="cancelReset" class="btn btn-secondary">Cancel</button>
+
+        <div class="server-error" id="resetServerError"></div>
+        <div class="muted" id="resetSuccess"></div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<button class="back-btn" onclick="window.location.href='../index.html'">
+  ← Back to Home
+</button>
+
+</body>
+</html>

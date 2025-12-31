@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { auth } from '../middleware/auth.js';
+import  {auth} from '../middleware/auth.js';
 import { requireRole } from '../middleware/role.js';
 import {
   getAllResources,

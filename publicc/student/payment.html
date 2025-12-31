@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Course Payment | EduVerse</title>
+
+  <style>
+    :root {
+      --primary:#0f172a;
+      --accent:#22c55e;
+      --text:#eaf4f2;
+      --bg-card:rgba(255,255,255,0.08);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #0d1c42, #0b6b6b);
+      color: var(--text);
+      min-height:100vh;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display:flex;
+      justify-content:space-between;
+      padding:16px 40px;
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(15px);
+    }
+
+    .logo {
+      font-size:1.6rem;
+      font-weight:800;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .navbar a {
+      margin-left:20px;
+      text-decoration:none;
+      color:var(--text);
+    }
+
+    /* MAIN */
+    .payment-container {
+      max-width:700px;
+      margin:40px auto;
+      padding:20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius:14px;
+      padding:24px;
+      margin-bottom:24px;
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    .card h2 {
+      margin-bottom:12px;
+    }
+
+    .form-group {
+      margin-bottom:16px;
+    }
+
+    label {
+      display:block;
+      margin-bottom:6px;
+      font-weight:600;
+    }
+
+    input, select {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid rgba(54, 134, 180, 0.2);
+      background:rgba(182, 109, 109, 0.05);
+      color:rgb(152, 122, 122);
+    }
+
+    .pay-btn {
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      color:#0f172a;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">EduVerse</div>
+  <nav>
+    <a href="student-dashboard.html">Home</a>
+    <a href="courses.html">Courses</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+</header>
+
+<main class="payment-container">
+
+  <h1>Complete Your Payment</h1>
+
+  <!-- COURSE INFO -->
+  <div class="card">
+    <h2>Course Information</h2>
+    <p><strong>Course:</strong> Web Development</p>
+    <p><strong>Instructor:</strong> Dr. Sharma</p>
+    <p><strong>Price:</strong> NPR 1500</p>
+  </div>
+
+  <!-- PAYMENT -->
+  <form class="card">
+    <h2>Payment Method</h2>
+
+    <div class="form-group">
+      <label>Choose Method</label>
+      <select>
+        <option>Khalti</option>
+        <option>Esewa</option>
+        <option>Bank Transfer</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Transaction ID</label>
+      <input type="text" placeholder="Enter Transaction ID">
+    </div>
+
+    <button class="pay-btn">Pay Now</button>
+  </form>
+
+</main>
+
+</body>
+</html>

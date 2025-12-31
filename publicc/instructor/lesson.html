@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Lessons | Instructor Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+		}
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.header-actions {
+			display: flex;
+			gap: 12px;
+		}
+		.btn {
+			padding: 10px 16px;
+			border-radius: 8px;
+			border: none;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 600;
+		}
+		.btn-back {
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+		}
+		.btn-back:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.btn-primary {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #0b1226;
+		}
+		.btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+		.stat-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 16px;
+		}
+		.stat-label { color: #9bb0c9; font-size: 12px; text-transform: uppercase; }
+		.stat-value { font-size: 24px; font-weight: 700; color: #06b6d4; margin-top: 6px; }
+		.course-section {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+		.course-title {
+			font-size: 18px;
+			font-weight: 700;
+			color: #38bdf8;
+			margin-bottom: 16px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.course-btn {
+			padding: 6px 12px;
+			background: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+			border: 1px solid rgba(6, 182, 212, 0.3);
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+			transition: all 0.2s ease;
+		}
+		.course-btn:hover {
+			background: rgba(6, 182, 212, 0.3);
+		}
+		.lessons-list {
+			display: grid;
+			gap: 12px;
+		}
+		.lesson-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 14px;
+			background: rgba(255,255,255,0.03);
+			border: 1px solid rgba(255,255,255,0.06);
+			border-radius: 8px;
+			transition: all 0.2s ease;
+		}
+		.lesson-item:hover {
+			background: rgba(255,255,255,0.08);
+			border-color: rgba(6, 182, 212, 0.3);
+		}
+		.lesson-info {
+			flex: 1;
+		}
+		.lesson-title {
+			color: #e9f2ff;
+			font-weight: 600;
+			margin-bottom: 4px;
+		}
+		.lesson-meta {
+			font-size: 12px;
+			color: #9bb0c9;
+		}
+		.lesson-icon {
+			font-size: 20px;
+			margin-right: 12px;
+		}
+		.lesson-actions {
+			display: flex;
+			gap: 8px;
+		}
+		.lesson-btn {
+			padding: 6px 12px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+			transition: all 0.2s ease;
+		}
+		.lesson-btn-edit {
+			background: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+		}
+		.lesson-btn-edit:hover {
+			background: rgba(6, 182, 212, 0.3);
+		}
+		.lesson-btn-delete {
+			background: rgba(239,68,68,0.2);
+			color: #ef4444;
+		}
+		.lesson-btn-delete:hover {
+			background: rgba(239,68,68,0.3);
+		}
+		.no-lessons {
+			text-align: center;
+			padding: 20px;
+			color: #9bb0c9;
+			font-size: 13px;
+		}
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9bb0c9;
+		}
+		.empty-state-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+		@media (max-width: 768px) {
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+			.header-actions { width: 100%; }
+			.lesson-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+			.lesson-actions { width: 100%; }
+		}
+	</style>
+  <script defer src="../student/js/lessons.js"></script>
+</head>
+
+<body>
+	<div class="container">
+	    <div class="header" style="margin-bottom:20px;">
+	      <div>
+	        <h1>📖 Lessons & Content</h1>
+	        <p style="color:#9bb0c9;margin-top:4px;">Create and manage lesson content for your courses</p>
+	      </div>
+	      <div class="header-actions">
+	        <button class="btn btn-back" onclick="window.location.href='/instructor/instructor-dashboard.html'">← Back</button>
+	      </div>
+	    </div>
+
+	    <section class="create-lesson-section course-section">
+	      <h2 style="margin-bottom:12px;">Create Lesson</h2>
+	      <form id="lessonForm">
+	        <label for="course_id">Select Course:</label>
+	        <select id="course_id" required></select>
+
+	        <label for="title" style="display:block;margin-top:8px;">Lesson Title:</label>
+	        <input type="text" id="title" placeholder="Lesson Title" required>
+
+	        <label for="content_type" style="display:block;margin-top:8px;">Content Type:</label>
+	        <select id="content_type" required>
+	          <option value="VIDEO">Video</option>
+	          <option value="ARTICLE">Article</option>
+	          <option value="QUIZ">Quiz</option>
+	          <option value="ASSIGNMENT">Assignment</option>
+	          <option value="DOWNLOAD">Download</option>
+	        </select>
+
+	        <label for="content_url" style="display:block;margin-top:8px;">Content URL:</label>
+	        <input type="text" id="content_url" placeholder="https://...">
+
+	        <label for="pdf_url" style="display:block;margin-top:8px;">PDF Notes URL (optional):</label>
+	        <input type="text" id="pdf_url" placeholder="/uploads/lesson-notes.pdf">
+
+	        <label for="duration" style="display:block;margin-top:8px;">Duration (minutes):</label>
+	        <input type="number" id="duration" placeholder="Duration">
+
+	        <button type="submit" class="btn btn-primary" style="margin-top:12px;">Create Lesson</button>
+	        <p id="lessonMsg" style="margin-top:8px;"></p>
+	      </form>
+	    </section>
+
+	    <section class="video-player-section course-section">
+	      <h2>Now Playing</h2>
+	      <div class="player">
+	        <video id="lessonVideo" controls preload="metadata" style="width:100%;border-radius:12px;">
+	          <source id="lessonVideoSrc" src="" type="video/mp4">
+	          Your browser does not support the video tag.
+	        </video>
+	      </div>
+	      <div class="player-actions" style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+	        <button id="btnMarkComplete" class="btn btn-primary">Mark Complete</button>
+	        <a id="btnNotes" class="btn btn-back" href="#">Notes</a>
+	        <a id="btnQuiz" class="btn btn-back" href="#">Quiz</a>
+	        <a id="btnDownload" class="btn btn-back" href="#" target="_blank">Download PDF</a>
+	        <a id="btnCertificate" class="btn btn-back" href="#">Certificate</a>
+	      </div>
+	      <p id="playerMsg" style="margin-top:0.5rem;"></p>
+	      <div class="card" style="margin-top:12px;">
+	        <h3 style="margin-bottom:8px;">Lesson Notes (PDF)</h3>
+	        <p id="pdfMsg" style="margin-bottom:8px;">If provided, the PDF notes will appear below.</p>
+	        <iframe id="pdfFrame" src="" style="width:100%;min-height:400px;border:0;border-radius:10px;background:rgba(255,255,255,0.03)"></iframe>
+	      </div>
+	    </section>
+
+	    <section class="lesson-list-section course-section">
+	      <h2>Lessons</h2>
+	      <div id="lessonsContainer"></div>
+	    </section>
+	</div>
+
+</body>
+</html>

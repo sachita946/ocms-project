@@ -1,20 +1,13 @@
 import { Router } from 'express';
-import { auth } from '../middleware/auth.js';
-import { requireRole } from '../middleware/role.js';
-import {
-  getAllLessons,
-  getLesson,
-  createLesson,
-  updateLesson,
-  deleteLesson
-} from '../controllers/lessons.controller.js';
+import {auth} from '../middleware/auth.js';
+import { getAllLessons, createLesson, getLessonsByCourse, getLesson, updateLesson, deleteLesson } from '../controllers/lessons.controller.js';
 
 const router = Router();
-
 router.get('/', getAllLessons);
+router.post('/', auth, createLesson);
+router.get('/course/:courseId', getLessonsByCourse);
 router.get('/:id', getLesson);
-router.post('/', auth, requireRole(['INSTRUCTOR', 'ADMIN']), createLesson);
-router.put('/:id', auth, requireRole(['INSTRUCTOR', 'ADMIN']), updateLesson);
-router.delete('/:id', auth, requireRole(['INSTRUCTOR', 'ADMIN']), deleteLesson);
+router.put('/:id', auth, updateLesson);
+router.delete('/:id', auth, deleteLesson);
 
 export default router;

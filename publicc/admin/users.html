@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users Management | Admin</title>
+  <style>/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; min-height: 100vh; display: flex; overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+/* ============================================
+   LAYOUT
+   ============================================ */
+.layout { display: grid; grid-template-columns: 280px 1fr; width: 100%; height: 100%; }
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar { background: linear-gradient(180deg, rgba(10,10,30,0.98) 0%, rgba(15,15,40,0.98) 100%); backdrop-filter: blur(10px); padding: 24px 16px; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+.logo-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 20px; }
+.logo-text { color: #ffffff; font-weight: 600; font-size: 14px; }
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.nav button { background: transparent; color: #b0b0b0; border: 1px solid transparent; padding: 11px 14px; border-radius: 10px; text-align: left; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; }
+.nav button:hover { background: rgba(255,255,255,0.12); color: #f0f0f0; border-color: rgba(255,255,255,0.15); }
+.nav button.active { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(255,107,107,0.4); }
+.logout { margin-top: auto; background: transparent; border-color: rgba(255,107,107,0.3); color: #ff8787; }
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+main { padding: 28px; overflow-y: auto; background: linear-gradient(180deg, rgba(30,30,50,1) 0%, rgba(25,25,45,1) 100%); }
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 26px; background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05)); padding: 22px; border-radius: 16px; border: 1px solid rgba(255,107,107,0.2); }
+.hero h1 { font-size: 26px; color: #ffffff; font-weight: 600; }
+.hero p { color: #a0a0a0; font-size: 14px; }
+/* ============================================
+   BADGES
+   ============================================ */
+.badge { padding: 8px 16px; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; font-weight: 600; font-size: 12px; }
+.badge-role { display: inline-block; padding: 5px 10px; border-radius: 6px; background: rgba(255,107,107,0.15); color: #ff8787; font-size: 12px; font-weight: 600; }
+.badge-status { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: rgba(74,222,128,0.15); color: #4ade80; }
+.badge-status.pending { background: rgba(250,204,21,0.15); color: #facc15; }
+.badge-status.failed { background: rgba(248,113,113,0.15); color: #f87171; }
+.badge-status.draft { background: rgba(250,204,21,0.15); color: #facc15; }
+.badge-active { color: #4ade80; }
+.badge-inactive { color: #f87171; }
+/* ============================================
+   SEARCH & FILTERS
+   ============================================ */
+.search-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+.search-bar input, .filters select { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; font-size: 14px; flex: 1; }
+.search-bar input::placeholder, .filters select::placeholder { color: #a0a0a0; }
+.search-bar button, .filters button { padding: 12px 20px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+.search-bar button:hover, .filters button:hover { transform: translateY(-2px); }
+.filters { display: flex; gap: 12px; margin-bottom: 20px; }
+/* ============================================
+   TABLES
+   ============================================ */
+.table-container { background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; overflow: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+table { width: 100%; border-collapse: collapse; color: #e0e0e0; }
+th { background: rgba(255,255,255,0.08); padding: 14px; text-align: left; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255,107,107,0.2); }
+td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+tr:hover { background: rgba(255,107,107,0.05); }
+/* ============================================
+   CARDS & LISTS
+   ============================================ */
+.course-card, .review-card { background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+.course-card { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; }
+.course-icon { width: 50px; height: 50px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.course-info h3, .review-meta h4 { color: #ffffff; margin-bottom: 6px; font-size: 16px; }
+.course-info p, .review-meta p { color: #a0a0a0; font-size: 13px; margin: 3px 0; }
+.course-meta { display: flex; gap: 20px; justify-content: flex-end; }
+.meta-item { text-align: right; }
+.meta-item strong { display: block; color: #ffffff; font-size: 16px; }
+.meta-item span { color: #a0a0a0; font-size: 12px; }
+/* ============================================
+   REVIEW CARD
+   ============================================ */
+.review-header { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.review-meta { flex: 1; }
+.review-rating { font-size: 18px; color: #facc15; }
+.review-content { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-top: 12px; color: #d0d0d0; font-size: 14px; line-height: 1.5; }
+.review-actions { margin-top: 12px; display: flex; gap: 8px; }
+/* ============================================
+   BUTTONS & ACTIONS
+   ============================================ */
+.action-btn { padding: 6px 12px; border-radius: 6px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 6px; transition: all 0.3s ease; }
+.action-btn:hover { transform: translateY(-2px); }
+.action-btn-danger { background: linear-gradient(135deg, #ff7675, #d63031); }
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state { text-align: center; padding: 60px 20px; color: #a0a0a0; }
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); } .search-bar, .filters { flex-direction: column; } .search-bar input, .filters select { flex: 1; } .course-card { grid-template-columns: 1fr; } .course-meta { justify-content: flex-start; flex-wrap: wrap; } .review-header { flex-direction: column; } }  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">⚙️</div>
+        <div class="logo-text">ADMIN PANEL</div>
+      </div>
+      <nav class="nav">
+        <button data-section="overview" onclick="window.location.href='dashboard.html'">📊 Overview</button>
+        <button class="active" data-section="users" onclick="window.location.href='users.html'">👥 Users</button>
+        <button data-section="courses" onclick="window.location.href='courses.html'">📚 Courses</button>
+        <button data-section="student-progress" onclick="window.location.href='student-progress.html'">📊 Student Progress</button>
+        <button data-section="payments" onclick="window.location.href='payment.html'">💳 Payments</button>
+        <button data-section="reviews" onclick="window.location.href='reviews.html'">⭐ Reviews</button>
+        <button data-section="notifications" onclick="window.location.href='notifications.html'">🔔 Notifications</button>
+        <button data-section="activities" onclick="window.location.href='activity.html'">📋 Activities</button>
+        <button data-section="messages" onclick="window.location.href='messages.html'">✉️ Messages</button>
+        <button data-section="settings" onclick="window.location.href='dashboard.html#settings'">⚙️ Settings</button>
+      </nav>
+      <button class="nav logout" id="logoutBtn">🚪 Logout</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <div class="hero">
+        <div>
+          <p>Manage all users on the platform</p>
+          <h1>👥 Users Management</h1>
+        </div>
+        <div class="badge">USERS</div>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by name, email, or role...">
+        <button onclick="filterUsers()">Search</button>
+      </div>
+
+      <div class="table-container">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Profile</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="users-empty" style="display: none;">
+        <p>No users found.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="js/users.js"></script>
+</body>
+</html>

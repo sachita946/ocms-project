@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications Management | Admin</title>
+  <style>/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; min-height: 100vh; display: flex; overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+/* ============================================
+   LAYOUT
+   ============================================ */
+.layout { display: grid; grid-template-columns: 280px 1fr; width: 100%; height: 100%; }
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar { background: linear-gradient(180deg, rgba(10,10,30,0.98) 0%, rgba(15,15,40,0.98) 100%); backdrop-filter: blur(10px); padding: 24px 16px; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+.logo-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 20px; }
+.logo-text { color: #ffffff; font-weight: 600; font-size: 14px; }
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.nav button { background: transparent; color: #b0b0b0; border: 1px solid transparent; padding: 11px 14px; border-radius: 10px; text-align: left; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; }
+.nav button:hover { background: rgba(255,255,255,0.12); color: #f0f0f0; border-color: rgba(255,255,255,0.15); }
+.nav button.active { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(255,107,107,0.4); }
+.logout { margin-top: auto; background: transparent; border-color: rgba(255,107,107,0.3); color: #ff8787; }
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+main { padding: 28px; overflow-y: auto; background: linear-gradient(180deg, rgba(30,30,50,1) 0%, rgba(25,25,45,1) 100%); }
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 26px; background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05)); padding: 22px; border-radius: 16px; border: 1px solid rgba(255,107,107,0.2); }
+.hero h1 { font-size: 26px; color: #ffffff; font-weight: 600; }
+.hero p { color: #a0a0a0; font-size: 14px; }
+/* ============================================
+   BADGES
+   ============================================ */
+.badge { padding: 8px 16px; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; font-weight: 600; font-size: 12px; }
+.badge-status { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; background: rgba(74,222,128,0.15); color: #4ade80; }
+.badge-status.pending { background: rgba(250,204,21,0.15); color: #facc15; }
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+.form-container { background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.form-row { margin-bottom: 16px; }
+.form-row input, .form-row textarea { width: 100%; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; font-size: 14px; font-family: inherit; }
+.form-row input::placeholder, .form-row textarea::placeholder { color: #a0a0a0; }
+.form-row textarea { min-height: 100px; resize: vertical; }
+.btn { padding: 12px 20px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 14px; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,107,107,0.5); }
+.msg { margin-left: 12px; color: #4ade80; font-weight: 500; }
+/* ============================================
+   CARDS & LISTS
+   ============================================ */
+.list-container { background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.list-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.list-item:hover { background: rgba(255,255,255,0.08); }
+.list-header { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+.list-header input { flex: 1; padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; font-size: 13px; }
+.list-header input::placeholder { color: #a0a0a0; }
+.btn-ghost { background: transparent; border: 1px solid rgba(255,107,107,0.3); }
+.btn-ghost:hover { background: rgba(255,107,107,0.1); }
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state { text-align: center; padding: 60px 20px; color: #a0a0a0; }
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); } }</style>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">⚙️</div>
+        <div class="logo-text">ADMIN PANEL</div>
+      </div>
+      <nav class="nav">
+        <button data-section="overview" onclick="window.location.href='dashboard.html'">📊 Overview</button>
+        <button data-section="users" onclick="window.location.href='users.html'">👥 Users</button>
+        <button data-section="courses" onclick="window.location.href='courses.html'">📚 Courses</button>
+        <button data-section="student-progress" onclick="window.location.href='student-progress.html'">📊 Student Progress</button>
+        <button data-section="payments" onclick="window.location.href='payment.html'">💳 Payments</button>
+        <button data-section="reviews" onclick="window.location.href='reviews.html'">⭐ Reviews</button>
+        <button class="active" data-section="notifications" onclick="window.location.href='notifications.html'">🔔 Notifications</button>
+        <button data-section="activities" onclick="window.location.href='activity.html'">📋 Activities</button>
+        <button data-section="messages" onclick="window.location.href='messages.html'">✉️ Messages</button>
+        <button data-section="settings" onclick="window.location.href='dashboard.html#settings'">⚙️ Settings</button>
+      </nav>
+      <button class="nav logout" id="logoutBtn">🚪 Logout</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <div class="hero">
+        <div>
+          <p>Send and manage notifications</p>
+          <h1>🔔 Notifications Management</h1>
+        </div>
+        <div class="badge">NOTIFICATIONS</div>
+      </div>
+
+      <div class="form-container">
+        <h2 style="color: #ffffff; margin-bottom: 16px; font-size: 18px;">📤 Send Notification</h2>
+        <form id="notifForm">
+          <div class="form-row">
+            <input id="user_id" type="text" placeholder="User ID (required)">
+          </div>
+          <div class="form-row">
+            <textarea id="message" placeholder="Notification message..."></textarea>
+          </div>
+          <button class="btn" type="submit">Send Notification</button>
+          <span id="msg" class="msg"></span>
+        </form>
+      </div>
+
+      <div class="list-container">
+        <h2 style="color: #ffffff; margin-bottom: 16px; font-size: 18px;">📋 All Notifications</h2>
+        <div class="list-header">
+          <input id="filterUser" type="text" placeholder="Filter by User ID...">
+          <button class="btn btn-ghost" id="btnFilter">Load Notifications</button>
+        </div>
+        <div id="list"></div>
+        <div class="empty-state" id="notifications-empty" style="display: none;">
+          <p>No notifications found.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="notifications.js"></script>
+</body>
+</html>

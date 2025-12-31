@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Progress | Instructor Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+      background-attachment: fixed;
+      color: #e9f2ff;
+      min-height: 100vh;
+      display: flex;
+    }
+    .layout { display: grid; grid-template-columns: 260px 1fr; width: 100%; }
+    .sidebar { background: rgba(6, 9, 20, 0.9); padding: 24px; border-right: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(6px); }
+    .user-card { display: flex; gap: 12px; align-items: center; margin-bottom: 22px; }
+    .avatar { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(140deg, #38bdf8, #06b6d4); color: #0b1226; font-weight: 700; }
+    .user-meta small { color: #9bb0c9; }
+    .nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav button { background: rgba(255,255,255,0.06); color: #e9f2ff; border: 1px solid transparent; padding: 12px 14px; border-radius: 10px; text-align: left; cursor: pointer; transition: all 0.2s ease; }
+    .nav button.active, .nav button:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.12); }
+    .logout { margin-top: 18px; background: transparent; color: #f3b8b8; border-color: rgba(255,255,255,0.18); }
+    
+    main { padding: 28px; overflow-y: auto; }
+    .hero { margin-bottom: 24px; }
+    .hero h1 { font-size: 28px; letter-spacing: 0.3px; margin-bottom: 6px; }
+    .hero p { color: #9bb0c9; }
+    
+    .course-selector { 
+      display: flex; 
+      gap: 12px; 
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .course-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: #e9f2ff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .course-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+    .course-btn.active { background: linear-gradient(135deg, #38bdf8, #06b6d4); border-color: transparent; color: #0b1226; font-weight: 600; }
+    
+    .panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+    .panel h3 { margin-bottom: 14px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-align: center; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #38bdf8; display: block; }
+    .stat-label { font-size: 11px; color: #9bb0c9; margin-top: 6px; text-transform: uppercase; }
+    
+    .student-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .student-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+    .student-item.selected { background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); }
+    
+    .student-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .student-name { font-weight: 600; color: #fff; font-size: 14px; }
+    .progress-percent { color: #38bdf8; font-weight: 600; font-size: 14px; }
+    
+    .progress-bar { width: 100%; height: 8px; border-radius: 6px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #0ea5e9); border-radius: 6px; }
+    
+    .detail-view { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px; display: none; }
+    .detail-view.active { display: block; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .detail-header { margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
+    .detail-header h4 { font-size: 16px; margin-bottom: 4px; color: #fff; }
+    .detail-header p { font-size: 12px; color: #9bb0c9; }
+    
+    .lesson-progress {
+      display: grid;
+      gap: 8px;
+    }
+    .lesson-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #b0bcc9;
+    }
+    .lesson-item.completed { color: #86efac; background: rgba(34, 197, 94, 0.08); }
+    .lesson-status { min-width: 40px; text-align: center; font-weight: 600; }
+    .lesson-date { margin-left: auto; font-size: 11px; color: #6b7c95; }
+    
+    .empty-state { text-align: center; padding: 40px 20px; color: #9bb0c9; }
+    .empty-state h3 { margin-bottom: 10px; color: #e9f2ff; }
+    
+    .loading { text-align: center; padding: 40px; color: #9bb0c9; }
+    .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .chart-container { position: relative; height: 300px; margin-top: 16px; }
+    
+    @media (max-width: 980px) { 
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="user-card">
+        <div class="avatar" id="avatarInitial">I</div>
+        <div class="user-meta">
+          <strong id="userName">Instructor</strong>
+          <small>INSTRUCTOR</small>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="nav-btn" data-page="dashboard">📊 Dashboard</button>
+        <button class="nav-btn active" data-page="students">👥 Student Progress</button>
+        <button class="nav-btn" data-page="courses">📚 My Courses</button>
+        <button class="nav-btn" data-page="earnings">💰 Earnings</button>
+        <button class="nav-btn logout" id="logoutBtn">🚪 Logout</button>
+      </div>
+    </div>
+
+    <main>
+      <div class="hero">
+        <h1>Student Progress Tracking</h1>
+        <p>Monitor your students' course completion and performance</p>
+      </div>
+
+      <div class="panel">
+        <h3>📚 Select Course</h3>
+        <div class="course-selector" id="courseSelector"></div>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <span class="stat-value" id="totalStudents">0</span>
+          <span class="stat-label">Total Students</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="avgProgress">0%</span>
+          <span class="stat-label">Avg Progress</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="completedCount">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>👥 Student List</h3>
+        <div id="loadingState" class="loading" style="display: none;">
+          <div class="spinner"></div>
+          <p style="margin-top: 12px;">Loading students...</p>
+        </div>
+        <div id="studentsContainer"></div>
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <h3>No Students Enrolled</h3>
+          <p>Students who enroll in your courses will appear here</p>
+        </div>
+      </div>
+
+      <div class="detail-view" id="detailView">
+        <div class="detail-header">
+          <h4 id="detailStudentName">Student Name</h4>
+          <p id="detailStudentEmail">student@email.com</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; color: #9bb0c9;">
+            <span id="progressLabel">Progress</span>
+            <span id="progressPercent" style="color: #38bdf8; font-weight: 600;">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progressBarFill" class="progress-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <h4 style="font-size: 13px; margin-bottom: 10px; color: #e9f2ff;">Lesson Progress</h4>
+        <div class="lesson-progress" id="lessonProgressContainer"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let currentUser = null;
+    let selectedCourse = null;
+    let coursesData = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadCurrentUser();
+      await loadCourses();
+      setupNavigation();
+    });
+
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch(`${API_BASE}/auth/me`);
+        if (!response.ok) throw new Error('Not authenticated');
+        currentUser = await response.json();
+        
+        const initial = currentUser.first_name?.charAt(0) || 'I';
+        document.getElementById('avatarInitial').textContent = initial;
+        document.getElementById('userName').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+      } catch (err) {
+        console.error('Failed to load user:', err);
+        window.location.href = '/auth/login.html';
+      }
+    }
+
+    async function loadCourses() {
+      try {
+        const response = await fetch(`${API_BASE}/courses/instructor-courses`);
+        if (!response.ok) throw new Error('Failed to load courses');
+        coursesData = await response.json();
+        
+        const selector = document.getElementById('courseSelector');
+        selector.innerHTML = coursesData.map(course => 
+          `<button class="course-btn" data-course-id="${course.id}" data-course-name="${course.title}">${course.title}</button>`
+        ).join('');
+        
+        if (coursesData.length > 0) {
+          const firstBtn = selector.querySelector('.course-btn');
+          firstBtn.classList.add('active');
+          await loadStudentProgress(coursesData[0].id);
+          selectedCourse = coursesData[0].id;
+        }
+        
+        selector.querySelectorAll('.course-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            selector.querySelectorAll('.course-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedCourse = parseInt(btn.getAttribute('data-course-id'));
+            await loadStudentProgress(selectedCourse);
+          });
+        });
+      } catch (err) {
+        console.error('Error loading courses:', err);
+      }
+    }
+
+    async function loadStudentProgress(courseId) {
+      const container = document.getElementById('studentsContainer');
+      const loadingState = document.getElementById('loadingState');
+      const emptyState = document.getElementById('emptyState');
+      
+      loadingState.style.display = 'block';
+      container.innerHTML = '';
+      
+      try {
+        const response = await fetch(`${API_BASE}/progress/course/${courseId}/stats`);
+        if (!response.ok) throw new Error('Failed to load progress');
+        
+        const data = await response.json();
+        loadingState.style.display = 'none';
+        
+        if (!data.students || data.students.length === 0) {
+          emptyState.style.display = 'block';
+          updateStats(data);
+          return;
+        }
+        
+        emptyState.style.display = 'none';
+        updateStats(data);
+        
+        container.innerHTML = data.students.map((student, idx) => `
+          <div class="student-item" data-enrollment-id="${student.enrollmentId}">
+            <div class="student-header">
+              <div>
+                <div class="student-name">${student.studentName}</div>
+                <div style="font-size: 11px; color: #9bb0c9;">${student.studentEmail}</div>
+              </div>
+              <div class="progress-percent">${student.progressPercentage}%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${student.progressPercentage}%"></div>
+            </div>
+            <div style="font-size: 11px; color: #6b7c95; margin-top: 6px;">
+              ${student.completedLessons}/${student.totalLessons} lessons • Enrolled: ${new Date(student.enrolledAt).toLocaleDateString()}
+            </div>
+          </div>
+        `).join('');
+        
+        container.querySelectorAll('.student-item').forEach(item => {
+          item.addEventListener('click', () => loadStudentDetail(item.getAttribute('data-enrollment-id')));
+        });
+      } catch (err) {
+        console.error('Error loading progress:', err);
+        loadingState.style.display = 'none';
+        container.innerHTML = '<div class="empty-state"><h3>Error Loading Progress</h3><p>' + err.message + '</p></div>';
+      }
+    }
+
+    async function loadStudentDetail(enrollmentId) {
+      try {
+        const response = await fetch(`${API_BASE}/enrollments/${enrollmentId}/progress-detail`);
+        if (!response.ok) throw new Error('Failed to load student details');
+        
+        const data = await response.json();
+        const detailView = document.getElementById('detailView');
+        
+        document.getElementById('detailStudentName').textContent = data.student.user.first_name + ' ' + data.student.user.last_name;
+        document.getElementById('detailStudentEmail').textContent = data.student.user.email;
+        document.getElementById('progressLabel').textContent = `Progress: ${data.completedLessons}/${data.totalLessons}`;
+        document.getElementById('progressPercent').textContent = data.progressPercentage + '%';
+        document.getElementById('progressBarFill').style.width = data.progressPercentage + '%';
+        
+        const lessonContainer = document.getElementById('lessonProgressContainer');
+        lessonContainer.innerHTML = data.progress.map(p => `
+          <div class="lesson-item ${p.is_completed ? 'completed' : ''}">
+            <span class="lesson-status">${p.is_completed ? '✓' : '○'}</span>
+            <span>${p.lesson?.title || 'Lesson ' + p.lesson_id}</span>
+            ${p.completed_at ? `<span class="lesson-date">${new Date(p.completed_at).toLocaleDateString()}</span>` : ''}
+          </div>
+        `).join('');
+        
+        detailView.classList.add('active');
+        
+        // Highlight selected student
+        document.querySelectorAll('.student-item').forEach(item => {
+          item.classList.remove('selected');
+          if (item.getAttribute('data-enrollment-id') === enrollmentId) {
+            item.classList.add('selected');
+          }
+        });
+      } catch (err) {
+        console.error('Error loading student detail:', err);
+      }
+    }
+
+    function updateStats(data) {
+      document.getElementById('totalStudents').textContent = data.totalStudents || 0;
+      document.getElementById('avgProgress').textContent = (data.averageProgress || 0) + '%';
+      const completed = data.students?.filter(s => s.progressPercentage === 100).length || 0;
+      document.getElementById('completedCount').textContent = completed;
+    }
+
+    function setupNavigation() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const page = e.target.getAttribute('data-page');
+          if (page === 'students') return;
+          
+          const pages = {
+            'dashboard': '/instructor/instructor-dashboard.html',
+            'courses': '/instructor/create-course.html',
+            'earnings': '/instructor/earnings.html'
+          };
+          
+          if (pages[page]) window.location.href = pages[page];
+        });
+      });
+      
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+          await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
+          window.location.href = '/auth/login.html';
+        } catch (err) {
+          console.error('Logout failed:', err);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

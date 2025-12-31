@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Quizzes | Instructor Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+			margin-left: 260px;
+		}
+		@media (max-width: 768px) { body { margin-left: 0; } }
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.header-actions {
+			display: flex;
+			gap: 12px;
+		}
+		.btn {
+			padding: 10px 16px;
+			border-radius: 8px;
+			border: none;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 600;
+		}
+		.btn-back {
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+		}
+		.btn-back:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.btn-primary {
+			background: linear-gradient(135deg, #06b6d4, #0891b2);
+			color: #0b1226;
+		}
+		.btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+		.stat-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 16px;
+		}
+		.stat-label { color: #9bb0c9; font-size: 12px; text-transform: uppercase; }
+		.stat-value { font-size: 24px; font-weight: 700; color: #06b6d4; margin-top: 6px; }
+		.quizzes-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 16px;
+			margin-bottom: 20px;
+		}
+		.quiz-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+			transition: all 0.2s ease;
+		}
+		.quiz-card:hover {
+			border-color: rgba(6, 182, 212, 0.4);
+			background: rgba(255,255,255,0.08);
+		}
+		.quiz-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: start;
+			margin-bottom: 12px;
+		}
+		.quiz-title {
+			font-size: 16px;
+			font-weight: 700;
+			color: #e9f2ff;
+			flex: 1;
+		}
+		.quiz-status {
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: 600;
+			white-space: nowrap;
+		}
+		.status-published {
+			background: rgba(34,197,94,0.2);
+			color: #22c55e;
+		}
+		.status-draft {
+			background: rgba(249,115,22,0.2);
+			color: #f97316;
+		}
+		.quiz-course {
+			color: #9bb0c9;
+			font-size: 12px;
+			margin-bottom: 12px;
+		}
+		.quiz-stats {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-bottom: 12px;
+			padding: 12px;
+			background: rgba(255,255,255,0.03);
+			border-radius: 8px;
+		}
+		.quiz-stat {
+			font-size: 13px;
+		}
+		.quiz-stat-label {
+			color: #9bb0c9;
+			font-size: 11px;
+		}
+		.quiz-stat-value {
+			color: #06b6d4;
+			font-weight: 700;
+			margin-top: 4px;
+		}
+		.quiz-actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+		}
+		.quiz-btn {
+			padding: 8px 12px;
+			border: none;
+			border-radius: 6px;
+			font-size: 12px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 600;
+		}
+		.quiz-btn-edit {
+			background: rgba(6, 182, 212, 0.2);
+			color: #06b6d4;
+			border: 1px solid rgba(6, 182, 212, 0.3);
+		}
+		.quiz-btn-edit:hover {
+			background: rgba(6, 182, 212, 0.3);
+		}
+		.quiz-btn-preview {
+			background: rgba(249,115,22,0.2);
+			color: #f97316;
+			border: 1px solid rgba(249,115,22,0.3);
+		}
+		.quiz-btn-preview:hover {
+			background: rgba(249,115,22,0.3);
+		}
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9bb0c9;
+		}
+		.empty-state-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+		@media (max-width: 768px) {
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+			.header-actions { width: 100%; }
+			.quizzes-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+
+<body>	<script src="nav.js"></script>	<div class="container">
+		<div class="header">
+			<div>
+				<h1>📋 Quizzes & Assessments</h1>
+				<p style="color: #9bb0c9; margin-top: 4px;">Manage your course quizzes and assessments</p>
+			</div>
+			<div class="header-actions">
+				<button class="btn btn-back" onclick="goBack()">← Back</button>
+				<button class="btn btn-primary" onclick="createNewQuiz()">+ Create Quiz</button>
+			</div>
+		</div>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-label">Total Quizzes</div>
+				<div class="stat-value" id="stat-total">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Published</div>
+				<div class="stat-value" id="stat-published">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Total Attempts</div>
+				<div class="stat-value" id="stat-attempts">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Avg Pass Rate</div>
+				<div class="stat-value" id="stat-passrate">0%</div>
+			</div>
+		</div>
+
+		<div class="quizzes-grid" id="quizzesGrid">
+			<div style="text-align: center; padding: 40px; grid-column: 1/-1; color: #9bb0c9;">Loading quizzes...</div>
+		</div>
+
+		<div class="empty-state" id="emptyState" style="display: none;">
+			<div class="empty-state-icon">📊</div>
+			<p>No quizzes yet.</p>
+			<p style="font-size: 13px; margin-top: 8px;">Create quizzes to assess your students' understanding</p>
+		</div>
+	</div>
+
+	<script>
+		const token = localStorage.getItem('ocms_token');
+		if (!token) window.location.href = '/auth/login.html';
+
+		document.addEventListener('DOMContentLoaded', loadQuizzes);
+
+		async function loadQuizzes() {
+			try {
+				const res = await fetch('/api/profile/me', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (res.status === 401) throw new Error('unauthorized');
+				const data = await res.json();
+
+				if (data.dashboard?.role !== 'INSTRUCTOR') {
+					window.location.href = '/instructor/instructor-dashboard.html';
+					return;
+				}
+
+				const courses = data.dashboard.lists?.courses || [];
+				const quizzes = extractQuizzes(courses);
+
+				if (!quizzes.length) {
+					document.getElementById('emptyState').style.display = 'block';
+					document.getElementById('quizzesGrid').innerHTML = '';
+					return;
+				}
+
+				updateStats(quizzes);
+				renderQuizzes(quizzes);
+
+			} catch (err) {
+				console.error(err);
+			}
+		}
+
+		function extractQuizzes(courses) {
+			const quizzes = [];
+			courses.forEach(course => {
+				if (course.quizzes && Array.isArray(course.quizzes)) {
+					course.quizzes.forEach(quiz => {
+						quizzes.push({
+							...quiz,
+							courseId: course.id,
+							courseName: course.title
+						});
+					});
+				}
+			});
+			return quizzes;
+		}
+
+		function updateStats(quizzes) {
+			const published = quizzes.filter(q => q.published).length;
+			const totalAttempts = quizzes.reduce((sum, q) => sum + (q.attempts || 0), 0);
+			const avgPassRate = quizzes.length > 0 
+				? Math.round(quizzes.reduce((sum, q) => sum + (q.passRate || 0), 0) / quizzes.length) 
+				: 0;
+
+			document.getElementById('stat-total').textContent = quizzes.length;
+			document.getElementById('stat-published').textContent = published;
+			document.getElementById('stat-attempts').textContent = totalAttempts;
+			document.getElementById('stat-passrate').textContent = avgPassRate + '%';
+		}
+
+		function renderQuizzes(quizzes) {
+			const grid = document.getElementById('quizzesGrid');
+			grid.innerHTML = quizzes.map(quiz => `
+				<div class="quiz-card">
+					<div class="quiz-header">
+						<div class="quiz-title">${quiz.title}</div>
+						<span class="quiz-status ${quiz.published ? 'status-published' : 'status-draft'}">
+							${quiz.published ? 'Published' : 'Draft'}
+						</span>
+					</div>
+					<div class="quiz-course">📚 ${quiz.courseName}</div>
+					<div class="quiz-stats">
+						<div class="quiz-stat">
+							<div class="quiz-stat-label">Questions</div>
+							<div class="quiz-stat-value">${quiz.questions || 0}</div>
+						</div>
+						<div class="quiz-stat">
+							<div class="quiz-stat-label">Attempts</div>
+							<div class="quiz-stat-value">${quiz.attempts || 0}</div>
+						</div>
+						<div class="quiz-stat">
+							<div class="quiz-stat-label">Pass Rate</div>
+							<div class="quiz-stat-value">${quiz.passRate || 0}%</div>
+						</div>
+						<div class="quiz-stat">
+							<div class="quiz-stat-label">Passing Score</div>
+							<div class="quiz-stat-value">${quiz.passingScore || 70}%</div>
+						</div>
+					</div>
+					<div class="quiz-actions">
+						<button class="quiz-btn quiz-btn-edit" onclick="editQuiz('${quiz.id}')">✏️ Edit</button>
+						<button class="quiz-btn quiz-btn-preview" onclick="previewQuiz('${quiz.id}')">👁️ Preview</button>
+					</div>
+				</div>
+			`).join('');
+		}
+
+		function editQuiz(quizId) {
+			alert('Edit quiz: ' + quizId);
+		}
+
+		function previewQuiz(quizId) {
+			alert('Preview quiz: ' + quizId);
+		}
+
+		function createNewQuiz() {
+			alert('Creating new quiz...');
+		}
+
+		function goBack() {
+			window.location.href = '/instructor/instructor-dashboard.html';
+		}
+	</script>
+</body>
+</html>

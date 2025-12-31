@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVerse | Notes</title>
+  <style>:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--bg-card:rgba(255,255,255,0.06)}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);color:var(--text);min-height:100vh}.navbar{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:1000}.navbar .logo{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.container{max-width:1400px;margin:0 auto;padding:32px 16px;position:relative;z-index:1}.card{background:var(--bg-card);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.15);margin-bottom:24px}.btn{display:inline-flex;padding:12px 24px;border-radius:10px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;text-decoration:none;transition:all 0.2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(34,197,94,0.4)}video{width:100%;border-radius:10px;margin-bottom:16px}h2{margin-bottom:16px}p{margin-bottom:12px}</style>
+  <script defer src="js/notes.js"></script>
+  </head>
+<body>
+  <header class="navbar">
+    <div class="logo">EduVerse</div>
+    <nav>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="lesson.html">Lessons</a></li>
+        <li><a href="certificate.html">Certificates</a></li>
+        <li><a href="../about.html">About</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="video-player-section card">
+      <h2 id="lessonTitle">Lesson</h2>
+      <div class="player">
+        <video id="video" controls preload="metadata" style="width:100%;border-radius:12px;">
+          <source id="lessonVideoSrc" src="" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div class="player-actions" style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button id="btnMarkComplete" class="btn">Mark Complete</button>
+        <a id="btnNotes" class="btn ghost" href="#">Notes</a>
+        <a id="btnQuiz" class="btn ghost" href="#">Quiz</a>
+        <a id="btnDownload" class="btn ghost" href="#" target="_blank">Download PDF</a>
+        <a id="btnCertificate" class="btn ghost" href="#">Certificate</a>
+        <span id="curTime" class="muted" style="margin-left:auto"></span>
+      </div>
+      <p id="playerMsg" style="margin-top:0.5rem;"></p>
+      <div class="card" style="margin-top:12px;">
+        <h3 style="margin-bottom:8px;">Lesson Notes (PDF)</h3>
+        <p id="pdfMsg" style="margin-bottom:8px;">If provided by the instructor, the PDF notes will appear below.</p>
+        <iframe id="pdfFrame" src="" style="width:100%;min-height:480px;border:0;border-radius:10px;background:rgba(255,255,255,0.03)"></iframe>
+      </div>
+    </section>
+
+    <section class="notes-editor card" style="max-width:900px;margin:0 auto">
+      <h3>Your Notes</h3>
+      <textarea id="noteText" placeholder="Write note for current timestamp" rows="3" style="width:100%"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="addNote" class="btn">Add Note at current time</button>
+      </div>
+      <div id="notesList" style="margin-top:12px"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p style="text-align:center;padding:16px">&copy; 2025 EduVerse. All rights reserved.</p>
+  </footer>
+</body>
+</html>

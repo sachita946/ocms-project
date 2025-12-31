@@ -1,38 +1,43 @@
 import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
-import Router from './src/routes/index.routes.js';
-import authRoutes from './src/routes/auth.routes.js'; // optional placeholder if you'll implement social auth
+import passport from 'passport';
+import session from 'express-session';
+import apiRouter from './src/routes/index.routes.js';
+import './src/config/passport.js';
+import fileUpload from 'express-fileupload';
 
-dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const __dirname = process.cwd();
 
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend static files from publicc
-const publicDir = path.join(process.cwd(), 'publicc');
-app.use(express.static(publicDir));
+// Session for OAuth
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'ocms-session-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // set to true in production with HTTPS
+}));
 
-// API routes
-app.use('/api', Router);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(fileUpload());
 
-// Optional placeholder auth routes (OAuth) — implement separately if needed
-app.use('/auth', authRoutes);
+app.use('/api', apiRouter);
 
-// Fallback: serve index
-app.get('/', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+// Serve static files
+app.use(express.static(path.join(__dirname, 'publicc')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'publicc/uploads')));
+app.use('/background', express.static(path.join(__dirname, 'publicc/background')));
+
+// SPA fallback — use a RegExp to match any path (avoids path-to-regexp '*' parsing error)
+app.get(/^\/.*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'publicc', 'index.html'), (err) => {
+    if (err) res.status(404).send('Not found');
+  });
 });
 
-// Basic error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack || err);
-  res.status(500).json({ message: 'Internal server error' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5500;
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

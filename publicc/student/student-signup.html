@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EduVerse · Student Signup</title>
+  <style>
+:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--muted:#9fb5b9;--bg-card:rgba(255,255,255,0.06);--error:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);background-attachment:fixed;color:var(--text);min-height:100vh;padding:40px 20px;overflow-y:auto}
+.page{max-width:900px;margin:0 auto;animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.header{text-align:center;margin-bottom:40px}
+.logo{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;letter-spacing:-0.5px}
+.subtitle{font-size:1.1rem;color:var(--muted);font-weight:500}
+.form-card{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:48px;box-shadow:0 10px 40px rgba(0,0,0,0.2);transition:all 0.3s}
+.form-card:hover{border-color:rgba(255,255,255,0.12);box-shadow:0 15px 50px rgba(0,0,0,0.25)}
+h2{font-size:2rem;font-weight:800;margin-bottom:12px;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lead{color:var(--muted);margin-bottom:32px;font-size:1rem;line-height:1.6}
+form{display:flex;flex-direction:column;gap:20px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.label{display:block;margin-bottom:8px;font-weight:600;font-size:0.9rem;color:var(--text);letter-spacing:0.3px}
+.input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-size:1rem;font-family:inherit;transition:all 0.2s;appearance:none}
+.input:focus{outline:0;border-color:var(--accent);background:rgba(255,255,255,0.08);box-shadow:0 0 0 3px rgba(34,197,94,0.15)}
+.input::placeholder{color:var(--muted);opacity:0.6}
+select.input{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2322c55e' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+textarea.input{min-height:100px;resize:vertical;line-height:1.6}
+input[type="file"]{padding:10px;background:rgba(255,255,255,0.03);border:2px dashed rgba(255,255,255,0.15);cursor:pointer;font-size:0.9rem}
+input[type="file"]:hover{border-color:var(--accent);background:rgba(255,255,255,0.06)}
+input[type="file"]::file-selector-button{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;margin-right:12px;transition:all 0.2s}
+input[type="file"]::file-selector-button:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(34,197,94,0.4)}
+.error{display:block;color:var(--error);font-size:0.85rem;margin-top:6px;font-weight:500;min-height:20px}
+.error:empty{display:none}
+.actions{display:flex;gap:16px;margin-top:32px;flex-wrap:wrap}
+.btn{flex:1;min-width:200px;padding:14px 28px;border-radius:10px;font-weight:700;border:none;cursor:pointer;font-size:1rem;transition:all 0.3s;text-transform:uppercase;letter-spacing:0.5px}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;box-shadow:0 4px 15px rgba(34,197,94,0.3)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(34,197,94,0.5)}
+.btn.primary:active{transform:translateY(0);box-shadow:0 4px 15px rgba(34,197,94,0.3)}
+.btn.ghost{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,0.2)}
+.btn.ghost:hover{background:rgba(255,255,255,0.08);border-color:var(--accent);color:var(--accent)}
+@media (max-width:768px){body{padding:20px 10px}.form-card{padding:32px 24px}.row{grid-template-columns:1fr;gap:16px}.actions{flex-direction:column}.btn{min-width:100%}}
+@media (max-width:480px){.logo{font-size:2rem}.subtitle{font-size:1rem}h2{font-size:1.6rem}.form-card{padding:24px 16px}}
+  </style>
+  <script defer src="js/student-signup.js"></script>
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="logo">EduVerse</div>
+    <div class="subtitle">Join as a student — learn from top instructors</div>
+  </header>
+
+  <main class="signup-wrap">
+    <section class="form-card">
+      <h2>Student Signup</h2>
+      <p class="lead">Fill in your details to create your student account.</p>
+      <form id="studentForm">
+        <div class="row">
+          <div class="half">
+            <label class="label">Full Name *</label>
+            <input class="input" type="text" id="studentName" placeholder="Your full name">
+            <small class="error" id="errName"></small>
+          </div>
+          <div class="half">
+            <label class="label">Date of Birth</label>
+            <input class="input" type="date" id="studentDob">
+            <small class ="error" id="errDob"></small>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="half">
+            <label class="label">Father's Name</label>
+            <input class="input" type="text" id="studentFatherName">
+          </div>
+          <div class="half">
+            <label class="label">Mother's Name</label>
+            <input class="input" type="text" id="studentMotherName">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="half">
+            <label class="label">Gender</label>
+            <select class="input" id="studentGender">
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+            <small class="error" id="errGender"></small>
+          </div>
+          <div class="half">
+            <label class="label">Phone Number</label>
+            <input class="input" type="tel" id="studentPhone">
+            <small class="error" id="errPhone"></small>
+          </div>
+        </div>
+
+        <label class="label">Email *</label>
+        <input class="input" type="email" id="studentEmail" placeholder="you@example.com">
+        <small class="error" id="errEmail"></small>
+
+        <label class="label">Address</label>
+        <input class="input" type="text" id="studentAddress">
+
+        <div class="row">
+          <div class="half">
+            <label class="label">Country</label>
+            <input class="input" type="text" id="studentCountry">
+          </div>
+          <div class="half">
+            <label class="label">City</label>
+            <input class="input" type="text" id="studentCity">
+          </div>
+        </div>
+
+        <label class="label">Postal Code</label>
+        <input class="input" type="text" id="studentPostal">
+        <small class="error" id="errPostal"></small>
+
+        <div class="row">
+          <div class="half">
+            <label class="label">Password *</label>
+            <input class="input" type="password" id="studentPassword">
+            <small class="error" id="errPassword"></small>
+          </div>
+          <div class="half">
+            <label class="label">Confirm Password *</label>
+            <input class="input" type="password" id="studentConfirmPassword">
+            <small class="error" id="errConfirmPassword"></small>
+          </div>
+        </div>
+
+        <label class="label">Education Level</label>
+        <select class="input" id="studentEducation">
+          <option>High School</option>
+          <option>Bachelor</option>
+          <option>Master</option>
+          <option>Other</option>
+        </select>
+        <small class="error" id="errEducation"></small>
+
+        <label class="label">Skills (comma separated)</label>
+        <input class="input" type="text" id="studentSkills" placeholder="Python, Excel, SQL">
+        <small class="error" id="errSkills"></small>
+
+        <label class="label">Hobbies</label>
+        <input class="input" type="text" id="studentHobbies" placeholder="Reading, Music">
+
+        <label class="label">LinkedIn Profile</label>
+        <input class="input" type="url" id="studentLinkedIn" placeholder="https://linkedin.com/...">
+        <small class="error" id="errLinkedIn"></small>
+
+        <label class="label">GitHub / Portfolio</label>
+        <input class="input" type="url" id="studentGitHub" placeholder="https://github.com/...">
+        <small class="error" id="errGitHub"></small>
+
+        <label class="label">Short Bio / Interests</label>
+        <textarea class="input" id="studentBio" placeholder="Tell us about yourself"></textarea>
+
+        <div class="row file-row">
+          <div class="half">
+            <label class="label">Profile Image</label>
+            <input type="file" id="studentProfileFile" accept="image/*">
+            <small class="error" id="errProfileFile"></small>
+          </div>
+          <div class="half">
+            <label class="label">Resume</label>
+            <input type="file" id="studentResumeFile" accept=".pdf,.doc,.docx">
+            <small class="error" id="errResumeFile"></small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Create Student Account</button>
+          <button class="btn ghost" type="button" onclick="location.href='././login.html'">Back to Login</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+</body>
+</html>

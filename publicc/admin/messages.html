@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages Management | Admin</title>
+  <style>/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; min-height: 100vh; display: flex; overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+/* ============================================
+   LAYOUT
+   ============================================ */
+.layout { display: grid; grid-template-columns: 280px 1fr; width: 100%; height: 100%; }
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar { background: linear-gradient(180deg, rgba(10,10,30,0.98) 0%, rgba(15,15,40,0.98) 100%); backdrop-filter: blur(10px); padding: 24px 16px; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+.logo-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 20px; }
+.logo-text { color: #ffffff; font-weight: 600; font-size: 14px; }
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.nav button { background: transparent; color: #b0b0b0; border: 1px solid transparent; padding: 11px 14px; border-radius: 10px; text-align: left; cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 500; }
+.nav button:hover { background: rgba(255,255,255,0.12); color: #f0f0f0; border-color: rgba(255,255,255,0.15); }
+.nav button.active { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(255,107,107,0.4); }
+.logout { margin-top: auto; background: transparent; border-color: rgba(255,107,107,0.3); color: #ff8787; }
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+main { padding: 28px; overflow-y: auto; background: linear-gradient(180deg, rgba(30,30,50,1) 0%, rgba(25,25,45,1) 100%); }
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 26px; background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05)); padding: 22px; border-radius: 16px; border: 1px solid rgba(255,107,107,0.2); }
+.hero h1 { font-size: 26px; color: #ffffff; font-weight: 600; }
+.hero p { color: #a0a0a0; font-size: 14px; }
+/* ============================================
+   BADGES
+   ============================================ */
+.badge { padding: 8px 16px; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; font-weight: 600; font-size: 12px; }
+/* ============================================
+   TABLES
+   ============================================ */
+.table-container { background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; overflow: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+table { width: 100%; border-collapse: collapse; color: #e0e0e0; }
+th { background: rgba(255,255,255,0.08); padding: 14px; text-align: left; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255,107,107,0.2); }
+td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+tr:hover { background: rgba(255,107,107,0.05); }
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state { text-align: center; padding: 60px 20px; color: #a0a0a0; }
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); } }</style>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">⚙️</div>
+        <div class="logo-text">ADMIN PANEL</div>
+      </div>
+      <nav class="nav">
+        <button data-section="overview" onclick="window.location.href='dashboard.html'">📊 Overview</button>
+        <button data-section="users" onclick="window.location.href='users.html'">👥 Users</button>
+        <button data-section="courses" onclick="window.location.href='courses.html'">📚 Courses</button>
+        <button data-section="student-progress" onclick="window.location.href='student-progress.html'">📊 Student Progress</button>
+        <button data-section="payments" onclick="window.location.href='payment.html'">💳 Payments</button>
+        <button data-section="reviews" onclick="window.location.href='reviews.html'">⭐ Reviews</button>
+        <button data-section="notifications" onclick="window.location.href='notifications.html'">🔔 Notifications</button>
+        <button data-section="activities" onclick="window.location.href='activity.html'">📋 Activities</button>
+        <button class="active" data-section="messages" onclick="window.location.href='messages.html'">✉️ Messages</button>
+        <button data-section="settings" onclick="window.location.href='dashboard.html#settings'">⚙️ Settings</button>
+      </nav>
+      <button class="nav logout" id="logoutBtn">🚪 Logout</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <div class="hero">
+        <div>
+          <p>View and manage contact messages</p>
+          <h1>✉️ Contact Messages</h1>
+        </div>
+        <div class="badge">MESSAGES</div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Message</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="messages"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="messages-empty" style="display: none;">
+        <p>No messages found.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script src="messages.js"></script>
+  <script>
+    (async () => {
+      try {
+        const data = await fetchData("/admin/messages");
+        const tbody = document.getElementById("messages");
+        const emptyState = document.getElementById("messages-empty");
+        
+        if (data && data.length > 0) {
+          tbody.innerHTML = data.map(m => `
+            <tr>
+              <td>${m.name || 'N/A'}</td>
+              <td>${m.email || 'N/A'}</td>
+              <td>${m.message || 'N/A'}</td>
+              <td>${m.createdAt ? new Date(m.createdAt).toLocaleDateString() : 'N/A'}</td>
+            </tr>
+          `).join("");
+          emptyState.style.display = 'none';
+        } else {
+          tbody.innerHTML = '';
+          emptyState.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        document.getElementById("messages-empty").style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>

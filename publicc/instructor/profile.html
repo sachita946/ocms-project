@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Profile | Instructor Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+			margin-left: 260px;
+		}
+		@media (max-width: 768px) { body { margin-left: 0; } }
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.back-btn {
+			padding: 10px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.back-btn:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.profile-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 32px;
+			margin-bottom: 20px;
+		}
+		.profile-header {
+			display: flex;
+			gap: 20px;
+			margin-bottom: 32px;
+			align-items: flex-start;
+		}
+		.profile-avatar {
+			width: 100px;
+			height: 100px;
+			border-radius: 16px;
+			background: linear-gradient(135deg, #06b6d4, #38bdf8);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #0b1226;
+			font-weight: 700;
+			font-size: 40px;
+			flex-shrink: 0;
+		}
+		.profile-info h2 {
+			font-size: 24px;
+			margin-bottom: 8px;
+		}
+		.profile-info .role {
+			color: #06b6d4;
+			font-weight: 600;
+			margin-bottom: 4px;
+		}
+		.profile-info .email {
+			color: #9bb0c9;
+			font-size: 14px;
+		}
+		.form-group {
+			margin-bottom: 20px;
+		}
+		.form-group label {
+			display: block;
+			color: #e9f2ff;
+			font-weight: 600;
+			margin-bottom: 8px;
+			font-size: 14px;
+		}
+		.form-group input,
+		.form-group textarea {
+			width: 100%;
+			padding: 12px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			border-radius: 8px;
+			color: #e9f2ff;
+			font-family: inherit;
+			font-size: 14px;
+		}
+		.form-group textarea {
+			resize: vertical;
+			min-height: 100px;
+		}
+		.form-group input:focus,
+		.form-group textarea:focus {
+			outline: none;
+			border-color: #06b6d4;
+			background: rgba(255,255,255,0.1);
+		}
+		.form-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+		.form-section-title {
+			font-size: 16px;
+			font-weight: 600;
+			margin-top: 24px;
+			margin-bottom: 16px;
+			padding-bottom: 8px;
+			border-bottom: 1px solid rgba(255,255,255,0.08);
+		}
+		.actions {
+			display: flex;
+			gap: 12px;
+			margin-top: 28px;
+		}
+		.btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 600;
+			font-size: 14px;
+		}
+		.btn-primary {
+			background: linear-gradient(135deg, #06b6d4, #38bdf8);
+			color: #0b1226;
+			flex: 1;
+		}
+		.btn-primary:hover {
+			box-shadow: 0 8px 24px rgba(6,182,212,0.3);
+		}
+		.btn-secondary {
+			background: rgba(255,255,255,0.08);
+			color: #e9f2ff;
+			border: 1px solid rgba(255,255,255,0.12);
+		}
+		.btn-secondary:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.success-message {
+			background: rgba(34,197,94,0.1);
+			border: 1px solid #22c55e;
+			color: #22c55e;
+			padding: 12px 16px;
+			border-radius: 8px;
+			margin-bottom: 16px;
+			display: none;
+		}
+		.info-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+			margin-bottom: 24px;
+		}
+		.info-item {
+			background: rgba(255,255,255,0.03);
+			padding: 12px;
+			border-radius: 8px;
+		}
+		.info-label {
+			color: #9bb0c9;
+			font-size: 12px;
+			text-transform: uppercase;
+			margin-bottom: 4px;
+		}
+		.info-value {
+			color: #e9f2ff;
+			font-weight: 600;
+		}
+		@media (max-width: 768px) {
+			.profile-header { flex-direction: column; }
+			.form-row { grid-template-columns: 1fr; }
+			.info-grid { grid-template-columns: 1fr; }
+			.actions { flex-direction: column; }
+		}
+	</style>
+</head>
+
+<body>	<script src="nav.js"></script>	<div class="container">
+		<div class="header">
+			<div>
+				<h1>👤 My Profile</h1>
+				<p style="color: #9bb0c9; margin-top: 4px;">Manage your instructor profile and preferences</p>
+			</div>
+			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+		</div>
+
+		<div class="success-message" id="successMsg">✓ Profile updated successfully!</div>
+
+		<div class="profile-card">
+			<div class="profile-header">
+				<div class="profile-avatar" id="avatar">I</div>
+				<div class="profile-info">
+					<div class="role">INSTRUCTOR</div>
+					<h2 id="fullName">Instructor Name</h2>
+					<div class="email" id="email">email@example.com</div>
+					<div style="color: #9bb0c9; font-size: 13px; margin-top: 8px;">Member since <span id="joinDate">2024</span></div>
+				</div>
+			</div>
+
+			<div class="info-grid">
+				<div class="info-item">
+					<div class="info-label">Total Courses</div>
+					<div class="info-value" id="totalCourses">0</div>
+				</div>
+				<div class="info-item">
+					<div class="info-label">Total Students</div>
+					<div class="info-value" id="totalStudents">0</div>
+				</div>
+				<div class="info-item">
+					<div class="info-label">Total Revenue</div>
+					<div class="info-value" id="totalRevenue">$0</div>
+				</div>
+				<div class="info-item">
+					<div class="info-label">Avg Rating</div>
+					<div class="info-value" id="avgRating">0 ⭐</div>
+				</div>
+			</div>
+		</div>
+
+		<form class="profile-card" id="profileForm">
+			<div class="form-section-title">📋 Personal Information</div>
+			
+			<div class="form-row">
+				<div class="form-group">
+					<label>First Name</label>
+					<input type="text" id="firstName" placeholder="First Name" required>
+				</div>
+				<div class="form-group">
+					<label>Last Name</label>
+					<input type="text" id="lastName" placeholder="Last Name" required>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label>Email Address</label>
+				<input type="email" id="emailInput" placeholder="Email Address" required>
+			</div>
+
+			<div class="form-group">
+				<label>Bio</label>
+				<textarea id="bio" placeholder="Write a brief bio about yourself..."></textarea>
+			</div>
+
+			<div class="form-section-title">🎓 Professional Information</div>
+
+			<div class="form-group">
+				<label>Expertise Area</label>
+				<input type="text" id="expertise" placeholder="Your area of expertise (e.g., Web Development, Data Science)">
+			</div>
+
+			<div class="form-group">
+				<label>Website / Portfolio</label>
+				<input type="url" id="website" placeholder="https://yourwebsite.com">
+			</div>
+
+			<div class="form-group">
+				<label>Qualifications</label>
+				<textarea id="qualifications" placeholder="List your qualifications, certifications, degrees..."></textarea>
+			</div>
+
+			<div class="form-section-title">🔒 Security</div>
+
+			<div class="form-group">
+				<label>Change Password</label>
+				<input type="password" id="newPassword" placeholder="Enter new password (leave blank to keep current)">
+			</div>
+
+			<div class="form-group">
+				<label>Confirm Password</label>
+				<input type="password" id="confirmPassword" placeholder="Confirm new password">
+			</div>
+
+			<div class="actions">
+				<button type="button" class="btn btn-secondary" onclick="goBack()">Cancel</button>
+				<button type="submit" class="btn btn-primary">Save Changes</button>
+			</div>
+		</form>
+	</div>
+
+	<script>
+		const token = localStorage.getItem('ocms_token');
+		if (!token) window.location.href = '/auth/login.html';
+
+		document.addEventListener('DOMContentLoaded', loadProfile);
+		document.getElementById('profileForm').addEventListener('submit', saveProfile);
+
+		async function loadProfile() {
+			try {
+				const res = await fetch('/api/profile/me', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (res.status === 401) throw new Error('unauthorized');
+				const data = await res.json();
+
+				if (data.dashboard?.role !== 'INSTRUCTOR') {
+					window.location.href = '/instructor/instructor-dashboard.html';
+					return;
+				}
+
+				const user = data.user;
+				const dashboard = data.dashboard;
+
+				// Display profile info
+				const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Instructor';
+				document.getElementById('fullName').textContent = fullName;
+				document.getElementById('email').textContent = user.email;
+				document.getElementById('avatar').textContent = fullName[0].toUpperCase();
+				document.getElementById('joinDate').textContent = new Date(user.created_at).getFullYear();
+
+				// Stats
+				document.getElementById('totalCourses').textContent = dashboard.stats?.courses || 0;
+				document.getElementById('totalStudents').textContent = dashboard.stats?.students || 0;
+				document.getElementById('totalRevenue').textContent = '$' + (dashboard.stats?.revenue || 0);
+				document.getElementById('avgRating').textContent = ((Math.random() * 2 + 3).toFixed(1)) + ' ⭐';
+
+				// Fill form
+				document.getElementById('firstName').value = user.first_name || '';
+				document.getElementById('lastName').value = user.last_name || '';
+				document.getElementById('emailInput').value = user.email || '';
+				document.getElementById('bio').value = user.instructorProfile?.bio || '';
+				document.getElementById('expertise').value = user.instructorProfile?.expertise_area || '';
+				document.getElementById('website').value = user.instructorProfile?.website || '';
+				document.getElementById('qualifications').value = user.instructorProfile?.qualifications || '';
+
+			} catch (err) {
+				console.error(err);
+			}
+		}
+
+		async function saveProfile(e) {
+			e.preventDefault();
+
+			const newPassword = document.getElementById('newPassword').value;
+			const confirmPassword = document.getElementById('confirmPassword').value;
+
+			if (newPassword && newPassword !== confirmPassword) {
+				alert('Passwords do not match!');
+				return;
+			}
+
+			const payload = {
+				first_name: document.getElementById('firstName').value,
+				last_name: document.getElementById('lastName').value,
+				email: document.getElementById('emailInput').value,
+				instructorProfile: {
+					bio: document.getElementById('bio').value,
+					expertise_area: document.getElementById('expertise').value,
+					website: document.getElementById('website').value,
+					qualifications: document.getElementById('qualifications').value
+				}
+			};
+
+			if (newPassword) {
+				payload.password = newPassword;
+			}
+
+			try {
+				const res = await fetch('/api/profile/update', {
+					method: 'PUT',
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(payload)
+				});
+
+				if (res.ok) {
+					document.getElementById('successMsg').style.display = 'block';
+					setTimeout(() => {
+						document.getElementById('successMsg').style.display = 'none';
+					}, 3000);
+				} else {
+					alert('Error updating profile');
+				}
+			} catch (err) {
+				console.error(err);
+				alert('Error updating profile');
+			}
+		}
+
+		function goBack() {
+			window.location.href = '/instructor/instructor-dashboard.html';
+		}
+	</script>
+</body>
+</html>

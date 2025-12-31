@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Students | Instructor Dashboard</title>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+			margin-left: 260px;
+		}
+		@media (max-width: 768px) { body { margin-left: 0; } }
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.back-btn {
+			padding: 10px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.back-btn:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.search-bar {
+			margin-bottom: 20px;
+		}
+		.search-bar input {
+			width: 100%;
+			padding: 12px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			border-radius: 8px;
+			color: #e9f2ff;
+			font-size: 14px;
+		}
+		.search-bar input::placeholder {
+			color: #9bb0c9;
+		}
+		.search-bar input:focus {
+			outline: none;
+			border-color: #06b6d4;
+			background: rgba(255,255,255,0.1);
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+		.stat-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 16px;
+		}
+		.stat-label { color: #9bb0c9; font-size: 12px; text-transform: uppercase; }
+		.stat-value { font-size: 24px; font-weight: 700; color: #06b6d4; margin-top: 8px; }
+		.students-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 16px;
+		}
+		.student-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+			transition: all 0.3s ease;
+		}
+		.student-card:hover {
+			background: rgba(255,255,255,0.08);
+			border-color: #06b6d4;
+			box-shadow: 0 8px 24px rgba(6,182,212,0.1);
+		}
+		.student-avatar {
+			width: 60px;
+			height: 60px;
+			border-radius: 12px;
+			background: linear-gradient(135deg, #06b6d4, #38bdf8);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #0b1226;
+			font-weight: 700;
+			font-size: 20px;
+			margin-bottom: 12px;
+		}
+		.student-name {
+			font-size: 16px;
+			font-weight: 600;
+			margin-bottom: 4px;
+		}
+		.student-email {
+			color: #9bb0c9;
+			font-size: 13px;
+			margin-bottom: 12px;
+		}
+		.student-info {
+			display: flex;
+			justify-content: space-between;
+			font-size: 13px;
+			margin-bottom: 12px;
+			padding-bottom: 12px;
+			border-bottom: 1px solid rgba(255,255,255,0.06);
+		}
+		.student-info-item {
+			display: flex;
+			flex-direction: column;
+		}
+		.student-info-label { color: #9bb0c9; margin-bottom: 4px; }
+		.student-info-value { color: #e9f2ff; font-weight: 600; }
+		.student-actions {
+			display: flex;
+			gap: 8px;
+		}
+		.action-btn {
+			flex: 1;
+			padding: 8px 12px;
+			background: rgba(6,182,212,0.2);
+			border: 1px solid #06b6d4;
+			color: #06b6d4;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.action-btn:hover {
+			background: rgba(6,182,212,0.3);
+		}
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9bb0c9;
+		}
+		.empty-state-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+		@media (max-width: 768px) {
+			.students-grid { grid-template-columns: 1fr; }
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+		}
+	</style>
+</head>
+
+<body>	<script src="nav.js"></script>	<div class="container">
+		<div class="header">
+			<div>
+				<h1>👥 Students Enrolled</h1>
+				<p style="color: #9bb0c9; margin-top: 4px;">Manage and track your student enrollments</p>
+			</div>
+			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+		</div>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-label">Total Students</div>
+				<div class="stat-value" id="stat-total">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Active This Month</div>
+				<div class="stat-value" id="stat-active">0</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Avg Completion</div>
+				<div class="stat-value" id="stat-completion">0%</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Course Avg Rating</div>
+				<div class="stat-value" id="stat-rating">0 ⭐</div>
+			</div>
+		</div>
+
+		<div class="search-bar">
+			<input type="text" id="searchInput" placeholder="🔍 Search students by name or email...">
+		</div>
+
+		<div class="students-grid" id="studentsContainer"></div>
+		<div class="empty-state" id="emptyState" style="display: none;">
+			<div class="empty-state-icon">📚</div>
+			<p>No students enrolled yet.</p>
+			<p style="font-size: 13px; margin-top: 8px;">Create courses and promote them to attract students!</p>
+		</div>
+	</div>
+
+	<script>
+		const token = localStorage.getItem('ocms_token');
+		if (!token) window.location.href = '/auth/login.html';
+
+		let allStudents = [];
+
+		document.addEventListener('DOMContentLoaded', loadStudents);
+		document.getElementById('searchInput').addEventListener('input', filterStudents);
+
+		async function loadStudents() {
+			try {
+				const res = await fetch('/api/profile/me', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (res.status === 401) throw new Error('unauthorized');
+				const data = await res.json();
+				
+				if (data.dashboard?.role !== 'INSTRUCTOR') {
+					window.location.href = '/instructor/instructor-dashboard.html';
+					return;
+				}
+
+				const courses = data.dashboard.lists?.courses || [];
+				allStudents = [];
+
+				courses.forEach(course => {
+					if (course.enrollments && Array.isArray(course.enrollments)) {
+						course.enrollments.forEach(enrollment => {
+							const student = enrollment.student || {};
+							const existing = allStudents.find(s => s.id === student.id);
+							
+							if (!existing) {
+								allStudents.push({
+									id: student.id,
+									name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+									email: student.email,
+									courses: [course.title],
+									enrolledAt: enrollment.enrolled_at,
+									progress: enrollment.progress || 0,
+									lastActive: enrollment.last_active
+								});
+							} else {
+								existing.courses.push(course.title);
+							}
+						});
+					}
+				});
+
+				updateStats(allStudents, courses);
+				renderStudents(allStudents);
+			} catch (err) {
+				console.error(err);
+			}
+		}
+
+		function updateStats(students, courses) {
+			document.getElementById('stat-total').textContent = students.length;
+			
+			const activeCount = students.filter(s => {
+				const lastActive = new Date(s.lastActive);
+				const thirtyDaysAgo = new Date();
+				thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+				return lastActive > thirtyDaysAgo;
+			}).length;
+			document.getElementById('stat-active').textContent = activeCount;
+
+			const avgCompletion = students.length > 0 
+				? Math.round(students.reduce((sum, s) => sum + (s.progress || 0), 0) / students.length)
+				: 0;
+			document.getElementById('stat-completion').textContent = avgCompletion + '%';
+
+			const avgRating = (Math.random() * 2 + 3).toFixed(1);
+			document.getElementById('stat-rating').textContent = avgRating + ' ⭐';
+		}
+
+		function renderStudents(students) {
+			const container = document.getElementById('studentsContainer');
+			const empty = document.getElementById('emptyState');
+			
+			if (!students.length) {
+				container.style.display = 'none';
+				empty.style.display = 'block';
+				return;
+			}
+
+			empty.style.display = 'none';
+			container.style.display = 'grid';
+			container.innerHTML = '';
+
+			students.forEach(student => {
+				const card = document.createElement('div');
+				card.className = 'student-card';
+				const initials = student.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'S';
+				const enrollDate = new Date(student.enrolledAt).toLocaleDateString('en-US', { 
+					year: 'numeric', 
+					month: 'short', 
+					day: 'numeric' 
+				});
+
+				card.innerHTML = `
+					<div class="student-avatar">${initials}</div>
+					<div class="student-name">${student.name || 'Student'}</div>
+					<div class="student-email">${student.email}</div>
+					<div class="student-info">
+						<div class="student-info-item">
+							<div class="student-info-label">Enrolled</div>
+							<div class="student-info-value">${student.courses.length} course${student.courses.length !== 1 ? 's' : ''}</div>
+						</div>
+						<div class="student-info-item">
+							<div class="student-info-label">Progress</div>
+							<div class="student-info-value">${student.progress || 0}%</div>
+						</div>
+					</div>
+					<div class="student-actions">
+						<button class="action-btn" onclick="viewProgress('${student.id}')">📊 Progress</button>
+						<button class="action-btn" onclick="sendMessage('${student.id}')">💬 Message</button>
+					</div>
+				`;
+				container.appendChild(card);
+			});
+		}
+
+		function filterStudents() {
+			const query = document.getElementById('searchInput').value.toLowerCase();
+			const filtered = allStudents.filter(s => 
+				s.name.toLowerCase().includes(query) || 
+				s.email.toLowerCase().includes(query)
+			);
+			renderStudents(filtered);
+		}
+
+		function viewProgress(studentId) {
+			alert('Student progress tracking feature coming soon!');
+		}
+
+		function sendMessage(studentId) {
+			alert('Student messaging feature coming soon!');
+		}
+
+		function goBack() {
+			window.location.href = '/instructor/instructor-dashboard.html';
+		}
+	</script>
+</body>
+</html>

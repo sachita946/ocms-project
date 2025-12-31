@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Earnings | Instructor Dashboard</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: "Segoe UI", Arial, sans-serif;
+			background: linear-gradient(135deg, #0b1226 0%, #0d1c42 50%, #0d5b7c 100%);
+			background-attachment: fixed;
+			color: #e9f2ff;
+			min-height: 100vh;
+			margin-left: 260px;
+		}
+		@media (max-width: 768px) { body { margin-left: 0; } }
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 28px 16px;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 28px;
+		}
+		.header h1 {
+			font-size: 28px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.back-btn {
+			padding: 10px 16px;
+			background: rgba(255,255,255,0.08);
+			border: 1px solid rgba(255,255,255,0.12);
+			color: #e9f2ff;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+		.back-btn:hover {
+			background: rgba(255,255,255,0.12);
+			border-color: rgba(255,255,255,0.2);
+		}
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+		.stat-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+		}
+		.stat-label { color: #9bb0c9; font-size: 12px; text-transform: uppercase; }
+		.stat-value { font-size: 28px; font-weight: 700; color: #06b6d4; margin-top: 8px; }
+		.stat-change { font-size: 12px; color: #22c55e; margin-top: 4px; }
+		.chart-card {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid rgba(255,255,255,0.08);
+			border-radius: 12px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+		.chart-card h3 {
+			margin-bottom: 16px;
+			font-size: 16px;
+		}
+		.chart-container {
+			position: relative;
+			height: 400px;
+			margin-bottom: 20px;
+		}
+		.earnings-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 20px;
+		}
+		.earnings-table thead {
+			border-bottom: 1px solid rgba(255,255,255,0.08);
+		}
+		.earnings-table th {
+			padding: 12px;
+			text-align: left;
+			color: #9bb0c9;
+			font-weight: 600;
+			font-size: 12px;
+			text-transform: uppercase;
+		}
+		.earnings-table td {
+			padding: 12px;
+			border-bottom: 1px solid rgba(255,255,255,0.06);
+		}
+		.course-name {
+			color: #e9f2ff;
+			font-weight: 600;
+		}
+		.status-badge {
+			display: inline-block;
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.status-published {
+			background: rgba(34,197,94,0.2);
+			color: #22c55e;
+		}
+		.status-draft {
+			background: rgba(249,115,22,0.2);
+			color: #f97316;
+		}
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #9bb0c9;
+		}
+		.empty-state-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+		@media (max-width: 768px) {
+			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
+			.chart-container { height: 300px; }
+			.earnings-table { font-size: 13px; }
+		}
+	</style>
+</head>
+
+<body>	<script src="nav.js"></script>	<div class="container">
+		<div class="header">
+			<div>
+				<h1>💰 Earnings & Revenue</h1>
+				<p style="color: #9bb0c9; margin-top: 4px;">Track your earnings and course revenue</p>
+			</div>
+			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+		</div>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-label">Total Earnings</div>
+				<div class="stat-value" id="stat-total">$0</div>
+				<div class="stat-change">↑ +12.5% this month</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">This Month</div>
+				<div class="stat-value" id="stat-month">$0</div>
+				<div class="stat-change">↑ +8.2% vs last month</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Pending Payment</div>
+				<div class="stat-value" id="stat-pending">$0</div>
+				<div class="stat-change">⏳ Next payout in 7 days</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Courses</div>
+				<div class="stat-value" id="stat-courses">0</div>
+				<div class="stat-change">Active courses</div>
+			</div>
+		</div>
+
+		<div class="chart-card">
+			<h3>📈 Revenue Trend (Last 12 Months)</h3>
+			<div class="chart-container">
+				<canvas id="revenueChart"></canvas>
+			</div>
+		</div>
+
+		<div class="chart-card">
+			<h3>🎓 Revenue by Course</h3>
+			<div class="chart-container">
+				<canvas id="courseChart"></canvas>
+			</div>
+		</div>
+
+		<div class="chart-card">
+			<h3>📊 Course Performance</h3>
+			<table class="earnings-table">
+				<thead>
+					<tr>
+						<th>Course Name</th>
+						<th>Students</th>
+						<th>Total Revenue</th>
+						<th>Avg per Student</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody id="earningsTableBody">
+					<tr>
+						<td colspan="5" style="text-align: center; padding: 20px;">Loading...</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="empty-state" id="emptyState" style="display: none;">
+			<div class="empty-state-icon">📚</div>
+			<p>No earnings yet.</p>
+			<p style="font-size: 13px; margin-top: 8px;">Create and publish courses to start earning!</p>
+		</div>
+	</div>
+
+	<script>
+		const token = localStorage.getItem('ocms_token');
+		if (!token) window.location.href = '/auth/login.html';
+
+		let revenueChart = null;
+		let courseChart = null;
+
+		document.addEventListener('DOMContentLoaded', loadEarnings);
+
+		async function loadEarnings() {
+			try {
+				const res = await fetch('/api/profile/me', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (res.status === 401) throw new Error('unauthorized');
+				const data = await res.json();
+
+				if (data.dashboard?.role !== 'INSTRUCTOR') {
+					window.location.href = '/instructor/instructor-dashboard.html';
+					return;
+				}
+
+				const courses = data.dashboard.lists?.courses || [];
+				
+				if (!courses.length) {
+					document.getElementById('emptyState').style.display = 'block';
+					return;
+				}
+
+				updateStats(courses, data.dashboard.stats);
+				renderRevenueChart(courses);
+				renderCourseChart(courses);
+				renderEarningsTable(courses);
+
+			} catch (err) {
+				console.error(err);
+			}
+		}
+
+		function updateStats(courses, stats) {
+			const totalRevenue = courses.reduce((sum, c) => sum + (c.revenue || 0), 0);
+			const monthRevenue = totalRevenue * 0.3; // Assume 30% of total is this month
+			const pendingRevenue = monthRevenue * 0.2; // Assume 20% is pending
+
+			document.getElementById('stat-total').textContent = '$' + Math.round(totalRevenue);
+			document.getElementById('stat-month').textContent = '$' + Math.round(monthRevenue);
+			document.getElementById('stat-pending').textContent = '$' + Math.round(pendingRevenue);
+			document.getElementById('stat-courses').textContent = courses.filter(c => c.published).length;
+		}
+
+		function renderRevenueChart(courses) {
+			const ctx = document.getElementById('revenueChart');
+			if (!ctx) return;
+
+			const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			const totalRevenue = courses.reduce((sum, c) => sum + (c.revenue || 0), 0);
+			const revenueData = months.map((_, i) => Math.round((totalRevenue / 12) * (Math.random() * 1.5 + 0.7)));
+
+			if (revenueChart) revenueChart.destroy();
+
+			revenueChart = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: months,
+					datasets: [{
+						label: 'Revenue ($)',
+						data: revenueData,
+						borderColor: '#06b6d4',
+						backgroundColor: 'rgba(6, 182, 212, 0.1)',
+						borderWidth: 3,
+						fill: true,
+						tension: 0.4,
+						pointRadius: 5,
+						pointBackgroundColor: '#06b6d4',
+						pointBorderColor: '#0b1226',
+						pointBorderWidth: 2
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: { labels: { color: '#e9f2ff' } }
+					},
+					scales: {
+						y: {
+							ticks: {
+								color: '#9bb0c9',
+								callback: (val) => '$' + val
+							},
+							grid: { color: 'rgba(255,255,255,0.08)' }
+						},
+						x: {
+							ticks: { color: '#9bb0c9' },
+							grid: { color: 'rgba(255,255,255,0.08)' }
+						}
+					}
+				}
+			});
+		}
+
+		function renderCourseChart(courses) {
+			const ctx = document.getElementById('courseChart');
+			if (!ctx || !courses.length) return;
+
+			if (courseChart) courseChart.destroy();
+
+			const publishedCourses = courses.filter(c => c.published).slice(0, 8);
+			const labels = publishedCourses.map(c => c.title);
+			const data = publishedCourses.map(c => c.revenue || 0);
+
+			courseChart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels,
+					datasets: [{
+						label: 'Revenue ($)',
+						data,
+						backgroundColor: '#06b6d4',
+						borderRadius: 6
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: { labels: { color: '#e9f2ff' } }
+					},
+					scales: {
+						y: {
+							ticks: {
+								color: '#9bb0c9',
+								callback: (val) => '$' + val
+							},
+							grid: { color: 'rgba(255,255,255,0.08)' }
+						},
+						x: {
+							ticks: { color: '#9bb0c9' },
+							grid: { color: 'rgba(255,255,255,0.08)' }
+						}
+					}
+				}
+			});
+		}
+
+		function renderEarningsTable(courses) {
+			const tbody = document.getElementById('earningsTableBody');
+			tbody.innerHTML = '';
+
+			courses.forEach(course => {
+				const students = course.enrollments || 0;
+				const revenue = course.revenue || 0;
+				const avgPerStudent = students > 0 ? Math.round(revenue / students) : 0;
+				const statusClass = course.published ? 'status-published' : 'status-draft';
+				const statusText = course.published ? 'Published' : 'Draft';
+
+				const row = document.createElement('tr');
+				row.innerHTML = `
+					<td class="course-name">${course.title}</td>
+					<td>${students}</td>
+					<td>$${revenue}</td>
+					<td>$${avgPerStudent}</td>
+					<td><span class="status-badge ${statusClass}">${statusText}</span></td>
+				`;
+				tbody.appendChild(row);
+			});
+		}
+
+		function goBack() {
+			window.location.href = '/instructor/instructor-dashboard.html';
+		}
+	</script>
+</body>
+</html>

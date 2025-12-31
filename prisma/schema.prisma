@@ -13,30 +13,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ...existing code...
-
 enum Role {
   STUDENT
   INSTRUCTOR
   ADMIN
 }
 
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+  QUIZ
+  ASSIGNMENT
+  DOWNLOAD
+}
+
+enum CompletionStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
 model User {
-  id              String  @id @default(uuid())
-  email           String  @unique
+  id              String   @id @default(uuid())
+  email           String   @unique
   password        String
   first_name      String
   last_name       String
   profile_picture String?
-  is_active       Boolean @default(true)
-
-  role       Role     @default(STUDENT)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  google_id       String?  @unique
+  facebook_id     String?  @unique
+  bio             String?
+  is_active       Boolean  @default(true)
+  role            Role     @default(STUDENT)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   studentProfile    StudentProfile?
   instructorProfile InstructorProfile?
-  courses_created   Course[]           @relation("CourseInstructor")
+
+  courses_created Course[] @relation("CourseInstructor")
+
+  notes         VideoNote[]
+  reviews       Review[]
+  certificates  Certificate[]
+  payments      Payment[]
+  activities    Activity[]
+  notifications Notification[]
 }
 
 model StudentProfile {
@@ -96,6 +136,7 @@ model Course {
   certificates Certificate[] @relation("CourseCertificates")
   payments     Payment[]     @relation("CoursePayments")
   reviews      Review[]      @relation("CourseReviews")
+  activities   Activity[]
 }
 
 model Lesson {
@@ -107,18 +148,76 @@ model Lesson {
   duration     Int?
   updated_at   DateTime    @updatedAt
 
-  course    Course     @relation(fields: [course_id], references: [id], onDelete: Cascade)
-  resources Resource[]
-  quiz      Quiz?
-  progress  Progress[]
+  course     Course      @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  resources  Resource[]
+  notes      VideoNote[]
+  quiz       Quiz?
+  progress   Progress[]
+  activities Activity[]
 }
 
-enum ContentType {
-  VIDEO
-  ARTICLE
-  QUIZ
-  ASSIGNMENT
-  DOWNLOAD
+model VideoNote {
+  id                String @id @default(uuid())
+  user_id           String
+  lesson_id         Int
+  timestamp_seconds Int    @default(0)
+  text              String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  student_id Int
+  course_id  Int
+  rating     Int      @default(0)
+  comment    String?
+  created_at DateTime @default(now())
+
+  student StudentProfile @relation("StudentReviews", fields: [student_id], references: [id], onDelete: Cascade)
+  course  Course         @relation("CourseReviews", fields: [course_id], references: [id], onDelete: Cascade)
+  User    User?          @relation(fields: [userId], references: [id])
+  userId  String?
+}
+
+model Certificate {
+  id                Int      @id @default(autoincrement())
+  student_id        Int
+  course_id         Int
+  issued_at         DateTime @default(now())
+  certificate_url   String
+  verification_code String   @unique
+
+  student StudentProfile @relation("StudentCertificates", fields: [student_id], references: [id], onDelete: Cascade)
+  course  Course         @relation("CourseCertificates", fields: [course_id], references: [id], onDelete: Cascade)
+  User    User?          @relation(fields: [userId], references: [id])
+  userId  String?
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    String
+  message    String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id         Int      @id @default(autoincrement())
+  user_id    String
+  lesson_id  Int?
+  course_id  Int?
+  action     String
+  created_at DateTime @default(now())
+
+  user   User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [course_id], references: [id], onDelete: Cascade)
 }
 
 model Resource {
@@ -146,12 +245,6 @@ model Enrollment {
   progress Progress[]
 }
 
-enum CompletionStatus {
-  ACTIVE
-  COMPLETED
-  DROPPED
-}
-
 model Progress {
   id            Int       @id @default(autoincrement())
   enrollment_id Int
@@ -165,23 +258,12 @@ model Progress {
   @@unique([enrollment_id, lesson_id])
 }
 
-model Review {
-  id         Int            @id @default(autoincrement())
-  student_id Int
-  course_id  Int
-  rating     Int            @default(0)
-  comment    String?
-  created_at DateTime       @default(now())
-  student    StudentProfile @relation("StudentReviews", fields: [student_id], references: [id], onDelete: Cascade)
-  course     Course         @relation("CourseReviews", fields: [course_id], references: [id], onDelete: Cascade)
-}
-
 model Quiz {
   id            Int    @id @default(autoincrement())
   lesson_id     Int    @unique
   title         String
   passing_score Int    @default(70)
-  duration      Int? // in minutes
+  duration      Int?
 
   lesson    Lesson        @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
   questions Question[]
@@ -197,12 +279,6 @@ model Question {
 
   quiz    Quiz     @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
   answers Answer[]
-}
-
-enum QuestionType {
-  MULTIPLE_CHOICE
-  TRUE_FALSE
-  SHORT_ANSWER
 }
 
 model Answer {
@@ -225,18 +301,6 @@ model QuizAttempt {
   quiz    Quiz           @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
 }
 
-model Certificate {
-  id                Int      @id @default(autoincrement())
-  student_id        Int
-  course_id         Int
-  issued_at         DateTime @default(now())
-  certificate_url   String
-  verification_code String   @unique
-
-  student StudentProfile @relation("StudentCertificates", fields: [student_id], references: [id], onDelete: Cascade)
-  course  Course         @relation("CourseCertificates", fields: [course_id], references: [id], onDelete: Cascade)
-}
-
 model Payment {
   id             Int           @id @default(autoincrement())
   student_id     Int
@@ -246,21 +310,10 @@ model Payment {
   transaction_id String
   status         PaymentStatus
   updated_at     DateTime      @updatedAt
-
-  paid_at DateTime @default(now())
+  paid_at        DateTime      @default(now())
 
   student StudentProfile @relation("StudentPayments", fields: [student_id], references: [id], onDelete: Cascade)
   course  Course         @relation("CoursePayments", fields: [course_id], references: [id], onDelete: Cascade)
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-}
-
-enum Level {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
+  User    User?          @relation(fields: [userId], references: [id])
+  userId  String?
 }

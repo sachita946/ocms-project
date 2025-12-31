@@ -1,21 +1,22 @@
-import express from 'express';
+import { Router } from 'express';
+import { auth } from '../middleware/auth.js';
+
 import {
-  getStudentProfile, updateStudentProfile, getStudentDashboard,
-  getInstructorProfile, updateInstructorProfile, getInstructorDashboard
+  getMyProfile,
+  getProfileByUserId,
+  updateMyProfile
 } from '../controllers/profileDashboard.controller.js';
-import authMiddleware from '../middleware/auth.js';
 
-const router = express.Router();
-router.use(authMiddleware);
+const router = Router();
 
-/* Student */
-router.get('/student/me', getStudentProfile);
-router.put('/student/me', updateStudentProfile);
-router.get('/student/dashboard', getStudentDashboard);
+// Get logged-in user's profile
+router.get('/me', auth, getMyProfile);
 
-/* Instructor */
-router.get('/instructor/me', getInstructorProfile);
-router.put('/instructor/me', updateInstructorProfile);
-router.get('/instructor/dashboard', getInstructorDashboard);
+// Update logged-in user's profile
+router.put('/me', auth, updateMyProfile);
+
+// Get profile of any user by ID
+router.get('/:id', auth, getProfileByUserId); 
+// If you want public access, remove auth
 
 export default router;
