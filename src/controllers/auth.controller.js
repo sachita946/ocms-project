@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
 import { success, error } from "../utils/json.js";
 
-// ------------------ SIGNUP ------------------
+// SIGNUP
 export const signup = async (req, res) => {
   try {
     const { first_name, last_name, full_name, email, password, role } = req.body;
@@ -57,7 +57,7 @@ export const signup = async (req, res) => {
   }
 };
 
-// ------------------ LOGIN ------------------
+// LOGIN
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -78,10 +78,10 @@ export const login = async (req, res) => {
   }
 };
 
-// ------------------ OAUTH LOGIN ------------------
+//  OAUTH LOGIN 
 export const oauthLogin = async (req, res) => {
   try {
-    const { email, first_name, last_name, role = "STUDENT" } = req.user; // populated by Passport
+    const { email, first_name, last_name, role = "STUDENT" } = req.user; 
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {

@@ -13,20 +13,12 @@ const router = Router();
 
 // GET all users — protected
 router.get('/', auth, getAllUsers);
-
-// GET single user by ID — protected
 router.get('/:id', auth, getOneUser);
 
 // CREATE a new user — public
 router.post('/', createUser);
-
-// LOGIN — public
 router.post('/login', loginUser);
-
-// UPDATE user by ID — protected
 router.put('/:id', auth, updateUser);
-
-// DELETE user by ID — protected
 router.delete('/:id', auth, deleteUser);
 
 // Example route for profile — protected

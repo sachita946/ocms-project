@@ -18,8 +18,6 @@ export const getMyPerformance = async (req, res) => {
       }, 0);
       avgPercent = Math.round((totalPercent / attempts.length) * 100) / 100;
     }
-
-    // per-course progress using Progress & Quiz counts
     const courseStats = [];
     for (const en of enrollments) {
       const c = en.course;
@@ -28,7 +26,6 @@ export const getMyPerformance = async (req, res) => {
         where: { enrollment_id: en.id, is_completed: true }
       });
       const quizzesCount = await prisma.quiz.count({ where: { lesson: { course_id: c.id } } }).catch(() => 0);
-      // attempts for this course
       const attemptsForCourse = attempts.filter(a => a.quiz && a.quiz.lesson && a.quiz.lesson.course_id === c.id);
       const passedCount = attemptsForCourse.filter(a => a.is_passed).length;
 
@@ -46,7 +43,7 @@ export const getMyPerformance = async (req, res) => {
     }
 
     const recentAttempts = attempts.slice(0, 10).map(a => ({
-      id: a.id, quiz_id: a.quiz_id, score: a.score, passed: a.is_passed, taken_at: a.id // no createdAt field in this schema; use id as placeholder
+      id: a.id, quiz_id: a.quiz_id, score: a.score, passed: a.is_passed, taken_at: a.id
     }));
 
     return res.json({

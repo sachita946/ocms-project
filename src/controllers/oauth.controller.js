@@ -19,7 +19,7 @@ export const googleAuthSuccess = async (req, res) => {
           first_name: profile.name?.givenName || 'User',
           last_name: profile.name?.familyName || '',
           role: 'STUDENT',
-          password: '' // OAuth users don't need password
+          password: ''
         }
       });
 
@@ -55,11 +55,9 @@ export const facebookAuthSuccess = async (req, res) => {
           first_name: profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User',
           last_name: profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '',
           role: 'STUDENT',
-          password: '' // OAuth users don't need password
+          password: ''
         }
       });
-
-      // Create student profile
       await prisma.studentProfile.create({
         data: {
           user_id: user.id,

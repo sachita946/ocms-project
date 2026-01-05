@@ -1,14 +1,9 @@
 import { prisma } from '../utils/prisma-client.js';
 
-/**
- * Create a new course resource (notes, questions, preboard, or board)
- */
 export const createCourseResource = async (req, res) => {
   try {
     const { course_id, type, title, content, zoom_link } = req.body;
     const userId = req.user.id;
-
-    // Validate required fields
     if (!course_id || !type || !title || !content) {
       return res.status(400).json({
         message: 'Missing required fields: course_id, type, title, content'
@@ -55,14 +50,11 @@ export const createCourseResource = async (req, res) => {
   }
 };
 
-/**
- * Get course resources with optional filters
- */
+//get course resources
 export const getCourseResources = async (req, res) => {
   try {
     const { courseId, type } = req.query;
 
-    // Build filter object
     const filter = {};
     if (courseId) filter.course_id = parseInt(courseId);
     if (type) filter.type = type;
@@ -95,9 +87,7 @@ export const getCourseResources = async (req, res) => {
   }
 };
 
-/**
- * Get a specific course resource by ID
- */
+// Get a specific course resource by ID
 export const getCourseResourceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -132,16 +122,13 @@ export const getCourseResourceById = async (req, res) => {
   }
 };
 
-/**
- * Update a course resource
- */
+//Update a course resource
 export const updateCourseResource = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content } = req.body;
     const userId = req.user.id;
 
-    // Check if resource exists
     const resource = await prisma.courseResource.findUnique({
       where: { id: parseInt(id) }
     });
@@ -191,15 +178,12 @@ export const updateCourseResource = async (req, res) => {
   }
 };
 
-/**
- * Delete a course resource
- */
+// Delete a course resource
 export const deleteCourseResource = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Check if resource exists
     const resource = await prisma.courseResource.findUnique({
       where: { id: parseInt(id) }
     });
@@ -210,7 +194,6 @@ export const deleteCourseResource = async (req, res) => {
       });
     }
 
-    // Check if user is the owner or admin
     if (resource.user_id !== userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({
         message: 'You do not have permission to delete this resource'

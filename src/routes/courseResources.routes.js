@@ -15,14 +15,8 @@ router.post('/', auth, createCourseResource);
 
 // Get course resources with filters
 router.get('/', auth, getCourseResources);
-
-// Get a specific resource by ID
 router.get('/:id', auth, getCourseResourceById);
-
-// Update a course resource
 router.put('/:id', auth, updateCourseResource);
-
-// Delete a course resource
 router.delete('/:id', auth, deleteCourseResource);
 
 export default router;

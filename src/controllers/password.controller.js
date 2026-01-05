@@ -11,12 +11,9 @@ export const forgotPassword = async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email required' });
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      // do not reveal user absence in production, but return ok
       return res.json({ message: 'If a matching account exists, a reset link was sent' });
     }
-    // create short-lived JWT token for reset (1 hour)
     const resetToken = jwt.sign({ id: user.id }, SECRET, { expiresIn: '1h' });
-    // In production: send resetToken via email. For dev return token in response.
     console.log(`Password reset token for ${email}: ${resetToken}`);
     return res.json({ message: 'Reset token generated (in production send via email)', resetToken });
   } catch (err) {

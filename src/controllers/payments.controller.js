@@ -4,7 +4,6 @@ import {prisma} from '../utils/prisma-client.js';
 
 // Create payment with SHA-256 transaction_id
 async function createPayment(studentId, courseId, amount, method, transactionId = null) {
-  // Use provided transaction ID or generate one
   const txId = transactionId || crypto
     .createHash('sha256')
     .update(studentId.toString() + courseId.toString() + amount.toString() + Date.now())
@@ -14,7 +13,7 @@ async function createPayment(studentId, courseId, amount, method, transactionId 
     data: {
       student_id: studentId,
       course_id: courseId,
-      amount: parseFloat(amount), // Ensure amount is a float for NPR
+      amount: parseFloat(amount), 
       payment_method: method,
       transaction_id: txId,
       status: 'PENDING',
@@ -38,8 +37,6 @@ export const payCourse = async (req, res) => {
     if (!validMethods.includes(payment_method.toUpperCase())) {
       return res.status(400).json({ message: 'Invalid payment method. Use KHALTI, ESEWA, or BANK_TRANSFER' });
     }
-
-    // Check if course exists
     const course = await prisma.course.findUnique({
       where: { id: parseInt(course_id) }
     });
@@ -47,8 +44,6 @@ export const payCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
-
-    // Check if student already paid for this course
     const existingPayment = await prisma.payment.findFirst({
       where: {
         student_id: studentId,
@@ -134,8 +129,6 @@ export const getPayments = async (req, res) => {
         created_at: 'desc'
       }
     });
-
-    // Format response with NPR currency
     const formattedPayments = payments.map(p => ({
       ...p,
       amount: parseFloat(p.amount),
@@ -175,8 +168,6 @@ export const updatePaymentStatus = async (req, res) => {
       where: { id },
       data: { status },
     });
-
-    // If status changed to COMPLETED, create enrollment
     if (status === 'COMPLETED' && payment.status !== 'COMPLETED') {
       await prisma.enrollment.upsert({
         where: {

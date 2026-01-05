@@ -65,8 +65,6 @@ export const getProgressByEnrollment = async (req, res) => {
 export const getCourseProgressStats = async (req, res) => {
   try {
     const { courseId } = req.params;
-
-    // Verify instructor owns the course
     const course = await prisma.course.findUnique({
       where: { id: parseInt(courseId) }
     });
@@ -137,7 +135,7 @@ export const getAllStudentsProgress = async (req, res) => {
         course: true,
         progress: true
       },
-      take: 100 // Limit for performance
+      take: 100 
     });
 
     const progressData = enrollments.map(enrollment => {

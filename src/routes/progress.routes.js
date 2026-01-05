@@ -10,15 +10,15 @@ import {
 const router = Router();
 
 // Mark lesson as complete
-router.post('/', auth, markLessonComplete); // POST /api/progress
+router.post('/', auth, markLessonComplete); 
 
 // Get progress for a specific enrollment
-router.get('/:enrollmentId', auth, getProgressByEnrollment); // GET /api/progress/:enrollmentId
+router.get('/:enrollmentId', auth, getProgressByEnrollment);
 
 // Get progress stats for a course (instructor view)
-router.get('/course/:courseId/stats', auth, getCourseProgressStats); // GET /api/progress/course/:courseId/stats
+router.get('/course/:courseId/stats', auth, getCourseProgressStats); 
 
 // Get all students progress (admin view)
-router.get('/all-students', auth, getAllStudentsProgress); // GET /api/progress/all-students
+router.get('/all-students', auth, getAllStudentsProgress);
 
 export default router;

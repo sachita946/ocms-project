@@ -7,25 +7,18 @@ export const createLessonResource = async (req, res) => {
   try {
     const { lesson_id, type, title, content, zoom_link } = req.body;
     const user_id = req.user.id;
-
-    // Validate input
     if (!lesson_id || !type || !title || !content) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Validate type
     if (!['notes', 'questions', 'preboard', 'zoom'].includes(type)) {
       return res.status(400).json({ message: 'Invalid resource type' });
     }
-
-    // Validate zoom link if type is zoom
     if (type === 'zoom' && !zoom_link) {
       return res.status(400).json({
         message: 'Zoom link is required for zoom type resources'
       });
     }
-
-    // Check if lesson exists
     const lesson = await prisma.lesson.findUnique({
       where: { id: lesson_id }
     });
@@ -60,8 +53,6 @@ export const createLessonResource = async (req, res) => {
 export const getLessonResources = async (req, res) => {
   try {
     const { lesson_id, type } = req.query;
-
-    // Build filter
     const where = {};
     if (lesson_id) where.lesson_id = parseInt(lesson_id);
     if (type) where.type = type;
@@ -130,8 +121,6 @@ export const updateLessonResource = async (req, res) => {
     const { id } = req.params;
     const { type, title, content } = req.body;
     const user_id = req.user.id;
-
-    // Check if resource exists
     const resource = await prisma.lessonResource.findUnique({
       where: { id: parseInt(id) }
     });
@@ -139,8 +128,6 @@ export const updateLessonResource = async (req, res) => {
     if (!resource) {
       return res.status(404).json({ message: 'Resource not found' });
     }
-
-    // Check if user is the owner or admin
     if (resource.user_id !== user_id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ message: 'Unauthorized' });
     }
@@ -170,8 +157,6 @@ export const deleteLessonResource = async (req, res) => {
   try {
     const { id } = req.params;
     const user_id = req.user.id;
-
-    // Check if resource exists
     const resource = await prisma.lessonResource.findUnique({
       where: { id: parseInt(id) }
     });
@@ -179,8 +164,6 @@ export const deleteLessonResource = async (req, res) => {
     if (!resource) {
       return res.status(404).json({ message: 'Resource not found' });
     }
-
-    // Check if user is the owner or admin
     if (resource.user_id !== user_id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ message: 'Unauthorized' });
     }

@@ -17,6 +17,5 @@ router.put('/me', auth, updateMyProfile);
 
 // Get profile of any user by ID
 router.get('/:id', auth, getProfileByUserId); 
-// If you want public access, remove auth
 
 export default router;

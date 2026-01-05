@@ -53,7 +53,6 @@ export const getLesson = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // Update lesson
 export const updateLesson = async (req, res) => {
   try {

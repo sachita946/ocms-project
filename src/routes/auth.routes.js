@@ -6,27 +6,26 @@ import { success, error } from "../utils/json.js";
 
 const router = Router();
 
-// ------------------ SIGNUP ------------------
+//SIGNUP 
 router.post("/signup", async (req, res) => {
   try {
-    await signup(req, res); // signup controller already handles response
+    await signup(req, res);
   } catch (err) {
     console.error(err);
     return error(res, "Server error", 500);
   }
 });
-
-// ------------------ LOGIN ------------------
+//login
 router.post("/login", async (req, res) => {
   try {
-    await login(req, res); // login controller handles response
+    await login(req, res);
   } catch (err) {
     console.error(err);
     return error(res, "Server error", 500);
   }
 });
 
-// ------------------ OAUTH LOGIN ------------------
+// OAUTH LOGIN
 router.post("/oauth", async (req, res) => {
   try {
     await oauthLogin(req, res);
@@ -36,7 +35,7 @@ router.post("/oauth", async (req, res) => {
   }
 });
 
-// ------------------ TEST PROTECTED ROUTE ------------------
+// TEST PROTECTED ROUTE 
 router.get("/me", auth, async (req, res) => {
   try {
     return success(res, { user: req.user, studentProfileId: req.studentProfileId, instructorProfileId: req.instructorProfileId });

@@ -26,9 +26,8 @@ router.put('/lesson-resources/:id', auth, lessonResourcesController.updateLesson
 // Delete lesson resource (admin or owner)
 router.delete('/lesson-resources/:id', auth, lessonResourcesController.deleteLessonResource);
 
-// ============================================
+
 // HIERARCHY ROUTES (Students + Admin)
-// ============================================
 
 // Get all semesters (public for students)
 router.get('/semesters', auth, getSemesters);
@@ -44,8 +43,6 @@ router.post('/semesters', auth, requireRole(['ADMIN']), createSemester);
 
 // Create subject
 router.post('/subjects', auth, requireRole(['ADMIN']), createSubject);
-
-// Create lesson
 router.post('/lessons', auth, requireRole(['ADMIN']), createLesson);
 
 export default router;
