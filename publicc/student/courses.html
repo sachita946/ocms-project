@@ -4,8 +4,643 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EduVerse | Courses</title>
-  <style>:root{--primary:#0f172a;--secondary:#0b6b6b;--accent:#22c55e;--text:#eaf4f2;--muted:#9fb5b9;--bg-card:rgba(255,255,255,0.06)}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,var(--secondary) 100%);background-attachment:fixed;color:var(--text);line-height:1.6;min-height:100vh}.navbar{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:1000}.navbar .logo{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.navbar nav{display:flex;gap:24px}.navbar nav a{padding:8px 16px;border-radius:10px;font-weight:600;transition:all 0.2s;text-decoration:none;color:inherit}.navbar nav a:hover,.navbar nav a.active{background:var(--bg-card);color:var(--accent);transform:translateY(-2px)}.container{max-width:1400px;margin:0 auto;padding:32px 16px;position:relative;z-index:1}.page-header{margin-bottom:32px;text-align:center}.page-header h1{font-size:2.5rem;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.page-header p{color:var(--muted);font-size:1.1rem}.card{background:var(--bg-card);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.15);transition:all 0.2s}.card:hover{border-color:rgba(255,255,255,0.14);box-shadow:0 10px 30px rgba(0,0,0,0.2);transform:translateY(-4px)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 24px;border-radius:10px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none}.btn-primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;box-shadow:0 4px 15px rgba(34,197,94,0.3)}.btn-primary:hover{box-shadow:0 8px 25px rgba(34,197,94,0.4);transform:translateY(-2px)}.form-group{margin-bottom:16px}.form-group label{display:block;margin-bottom:8px;color:var(--text);font-weight:600;font-size:0.9rem}.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text);font-size:0.95rem}.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:0;border-color:var(--accent);background:rgba(255,255,255,0.08);box-shadow:0 0 0 3px rgba(34,197,94,0.1)}table{width:100%;border-collapse:collapse;color:var(--text)}th{background:rgba(255,255,255,0.08);padding:14px;text-align:left;font-weight:600;color:#fff;border-bottom:2px solid rgba(34,197,94,0.2)}td{padding:14px;border-bottom:1px solid rgba(255,255,255,0.08)}tr:hover{background:rgba(34,197,94,0.05)}.alert{padding:16px 24px;border-radius:10px;margin-bottom:16px;animation:slideIn 0.3s ease}.alert-success{background:rgba(34,197,94,0.2);border:1px solid var(--accent);color:var(--accent)}.alert-error{background:rgba(239,68,68,0.2);border:1px solid #ef4444;color:#ef4444}@media (max-width:768px){.navbar{flex-direction:column;gap:16px;padding:16px}.navbar nav{flex-wrap:wrap;justify-content:center}.page-header h1{font-size:2rem}.grid{grid-template-columns:1fr}}</style>
-  <script defer src="js/courses.js"></script>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --accent: #22c55e;
+      --text: #fff;
+      --muted: rgba(255, 255, 255, 0.8);
+      --bg-card: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, #e0d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .navbar nav ul {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .navbar nav a {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .navbar nav a:hover,
+    .navbar nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* Main Content */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Course Filters */
+    .course-filters {
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .course-filters h2 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff, #d4b3ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .program-selection {
+      display: none;
+    }
+
+    .semester-selection {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .semester-btn {
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .semester-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .semester-btn.active {
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    /* Courses Container */
+    .courses-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .courses-container.hidden {
+      display: none;
+    }
+
+    /* Course Card */
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .card .course-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .card .course-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .course-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .course-price.free {
+      color: #0ea5e9;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 14px;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .course-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      margin-top: 60px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .empty-state h3 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    /* Curriculum Grid */
+    .curriculum-section {
+      margin-top: 40px;
+      padding: 28px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    .curriculum-section h3 {
+      margin-bottom: 12px;
+      font-size: 22px;
+      background: linear-gradient(135deg, #fff, #d4b3ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .curriculum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .semester-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .semester-card h4 {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .semester-card ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .resource-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    /* Inline course actions for static lists */
+    .course-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .course-entry:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .course-actions-inline {
+      display: none;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .course-entry.active .course-actions-inline {
+      display: flex;
+    }
+
+    .course-pill {
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 12px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .course-pill:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px;
+      }
+
+      .navbar nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .course-filters h2 {
+        font-size: 24px;
+      }
+
+      .semester-selection {
+        gap: 8px;
+      }
+
+      .semester-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      .courses-container {
+        grid-template-columns: 1fr;
+      }
+
+      .course-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      margin: 5% auto;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .close-modal:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 30px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .course-detail-section {
+      margin-bottom: 24px;
+    }
+
+    .course-detail-section h3 {
+      color: #fff;
+      font-size: 18px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .course-detail-section p {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .modal-footer {
+      padding: 24px 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-size: 14px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Inline Message Styles */
+    .inline-message {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      max-width: 400px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: slideInRight 0.3s ease-out;
+      font-weight: 500;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .inline-message.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border-left: 4px solid #10b981;
+    }
+
+    .inline-message.error {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      border-left: 4px solid #ef4444;
+    }
+
+    .inline-message.info {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .inline-message .close-message {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .inline-message .close-message:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    /* Responsive Modal */
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 10% auto;
+        width: 95%;
+      }
+
+      .modal-header,
+      .modal-body,
+      .modal-footer {
+        padding: 20px;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+      }
+
+      .modal-footer .btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <script defer src="courses.js"></script>
 </head>
 <body>
   <header class="navbar">
@@ -14,6 +649,7 @@
       <ul>
         <li><a href="../index.html">Home</a></li>
         <li><a href="courses.html" class="active">Courses</a></li>
+        <li><a href="my-enrollments.html">My Enrollments</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li><a href="../contact.html">Contact</a></li>
         <li><a href="../about.html">About</a></li>
@@ -61,6 +697,7 @@
         <button class="semester-btn" data-sem="8">8th Sem</button>
       </div>
     </section>
+    <section id="CSIT-resources" class="semester-resources hidden"></section>
     <section id="CSIT-courses" class="courses-container hidden"></section>
 
     <!-- BCA Courses -->
@@ -80,12 +717,580 @@
         <button class="semester-btn" data-sem="8">8th Sem</button>
       </div>
     </section>
+    <section id="BCA-resources" class="semester-resources hidden"></section>
     <section id="BCA-courses" class="courses-container hidden"></section>
+
+    <!-- Advanced Courses Section -->
+    <section class="course-filters">
+      <h2>🚀 Advanced Technology Courses</h2>
+      <p>Master cutting-edge technologies with live Zoom sessions by qualified instructors</p>
+    </section>
+    <section id="advanced-courses" class="courses-container">
+      
+      <!-- UI/UX Design Course -->
+      <div class="card" data-course-id="adv-1">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #c084fc;">
+            ADVANCED
+          </span>
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+            🎥 Live Zoom Sessions
+          </span>
+        </div>
+        
+        <h3>UI/UX Design Masterclass</h3>
+        
+        <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">
+          👨‍🏫 Sarah Johnson
+        </div>
+        
+        <p>Learn modern UI/UX design principles with Figma, Adobe XD, and prototyping tools. Includes live Zoom sessions with industry experts.</p>
+        
+        <div class="course-meta">
+          <span>⏱️ 8 weeks</span>
+          <span>📁 Design</span>
+          <span>🌐 English</span>
+        </div>
+        
+        <div class="course-footer">
+          <div class="course-price">NPR 15,000</div>
+          <div class="course-actions">
+            <button class="btn btn-primary" onclick="enrollAdvancedCourse('adv-1', 'UI/UX Design Masterclass', 15000)">
+              ✨ Enroll Now
+            </button>
+            <button class="btn btn-secondary" onclick="showCourseDetails('UI/UX Design Masterclass', 'Learn modern UI/UX design principles with Figma, Adobe XD, and prototyping tools. Includes live Zoom sessions with industry experts.', 'Sarah Johnson', '8 weeks', 'Design', 'English', '15000')">
+              ℹ️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- React.js Course -->
+      <div class="card" data-course-id="adv-2">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #c084fc;">
+            INTERMEDIATE
+          </span>
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+            🎥 Live Zoom Sessions
+          </span>
+        </div>
+        
+        <h3>React.js Development Bootcamp</h3>
+        
+        <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">
+          👨‍🏫 Mike Chen
+        </div>
+        
+        <p>Master React.js from basics to advanced concepts including hooks, context, Redux, and Next.js. Live coding sessions via Zoom.</p>
+        
+        <div class="course-meta">
+          <span>⏱️ 8 weeks</span>
+          <span>📁 Web Development</span>
+          <span>🌐 English</span>
+        </div>
+        
+        <div class="course-footer">
+          <div class="course-price">NPR 20,000</div>
+          <div class="course-actions">
+            <button class="btn btn-primary" onclick="enrollAdvancedCourse('adv-2', 'React.js Development Bootcamp', 20000)">
+              ✨ Enroll Now
+            </button>
+            <button class="btn btn-secondary" onclick="showCourseDetails('React.js Development Bootcamp', 'Master React.js from basics to advanced concepts including hooks, context, Redux, and Next.js. Live coding sessions via Zoom.', 'Mike Chen', '8 weeks', 'Web Development', 'English', '20000')">
+              ℹ️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Node.js Course -->
+      <div class="card" data-course-id="adv-3">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #c084fc;">
+            INTERMEDIATE
+          </span>
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+            🎥 Live Zoom Sessions
+          </span>
+        </div>
+        
+        <h3>Node.js Backend Development</h3>
+        
+        <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">
+          👨‍🏫 Alex Rodriguez
+        </div>
+        
+        <p>Build scalable backend applications with Node.js, Express, MongoDB, and REST APIs. Includes live Zoom workshops.</p>
+        
+        <div class="course-meta">
+          <span>⏱️ 8 weeks</span>
+          <span>📁 Backend Development</span>
+          <span>🌐 English</span>
+        </div>
+        
+        <div class="course-footer">
+          <div class="course-price">NPR 18,000</div>
+          <div class="course-actions">
+            <button class="btn btn-primary" onclick="enrollAdvancedCourse('adv-3', 'Node.js Backend Development', 18000)">
+              ✨ Enroll Now
+            </button>
+            <button class="btn btn-secondary" onclick="showCourseDetails('Node.js Backend Development', 'Build scalable backend applications with Node.js, Express, MongoDB, and REST APIs. Includes live Zoom workshops.', 'Alex Rodriguez', '8 weeks', 'Backend Development', 'English', '18000')">
+              ℹ️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Python Django Course -->
+      <div class="card" data-course-id="adv-4">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #c084fc;">
+            INTERMEDIATE
+          </span>
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+            🎥 Live Zoom Sessions
+          </span>
+        </div>
+        
+        <h3>Python with Django Framework</h3>
+        
+        <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">
+          👨‍🏫 Emma Davis
+        </div>
+        
+        <p>Full-stack Python development with Django, PostgreSQL, and modern web development practices. Live Zoom mentoring included.</p>
+        
+        <div class="course-meta">
+          <span>⏱️ 8 weeks</span>
+          <span>📁 Python Development</span>
+          <span>🌐 English</span>
+        </div>
+        
+        <div class="course-footer">
+          <div class="course-price">NPR 17,000</div>
+          <div class="course-actions">
+            <button class="btn btn-primary" onclick="enrollAdvancedCourse('adv-4', 'Python with Django Framework', 17000)">
+              ✨ Enroll Now
+            </button>
+            <button class="btn btn-secondary" onclick="showCourseDetails('Python with Django Framework', 'Full-stack Python development with Django, PostgreSQL, and modern web development practices. Live Zoom mentoring included.', 'Emma Davis', '8 weeks', 'Python Development', 'English', '17000')">
+              ℹ️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI/ML Course -->
+      <div class="card" data-course-id="adv-5">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #c084fc;">
+            ADVANCED
+          </span>
+          <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+            🎥 Live Zoom Sessions
+          </span>
+        </div>
+        
+        <h3>Artificial Intelligence & Machine Learning</h3>
+        
+        <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">
+          👨‍🏫 Dr. James Wilson
+        </div>
+        
+        <p>Comprehensive AI/ML course covering Python, TensorFlow, scikit-learn, and deep learning. Includes live Zoom discussions with AI experts.</p>
+        
+        <div class="course-meta">
+          <span>⏱️ 8 weeks</span>
+          <span>📁 AI/ML</span>
+          <span>🌐 English</span>
+        </div>
+        
+        <div class="course-footer">
+          <div class="course-price">NPR 25,000</div>
+          <div class="course-actions">
+            <button class="btn btn-primary" onclick="enrollAdvancedCourse('adv-5', 'Artificial Intelligence & Machine Learning', 25000)">
+              ✨ Enroll Now
+            </button>
+            <button class="btn btn-secondary" onclick="showCourseDetails('Artificial Intelligence & Machine Learning', 'Comprehensive AI/ML course covering Python, TensorFlow, scikit-learn, and deep learning. Includes live Zoom discussions with AI experts.', 'Dr. James Wilson', '8 weeks', 'AI/ML', 'English', '25000')">
+              ℹ️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Course Details Modal -->
+    <div id="courseModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Course Details</h2>
+          <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="course-detail-section">
+            <h3>📚 Course Description</h3>
+            <p id="modalDescription"></p>
+          </div>
+          
+          <div class="course-detail-section">
+            <h3>👨‍🏫 Instructor</h3>
+            <p id="modalInstructor"></p>
+          </div>
+          
+          <div class="course-detail-grid">
+            <div class="detail-item">
+              <h4>⏱️ Duration</h4>
+              <p id="modalDuration"></p>
+            </div>
+            <div class="detail-item">
+              <h4>📁 Category</h4>
+              <p id="modalCategory"></p>
+            </div>
+            <div class="detail-item">
+              <h4>🌐 Language</h4>
+              <p id="modalLanguage"></p>
+            </div>
+            <div class="detail-item">
+              <h4>💰 Price</h4>
+              <p id="modalPrice">NPR <span id="modalPriceValue"></span></p>
+            </div>
+          </div>
+          
+          <div class="course-detail-section">
+            <h3>🎯 What You'll Learn</h3>
+            <ul id="modalFeatures">
+              <li>Live Zoom sessions with qualified instructors</li>
+              <li>Hands-on projects and assignments</li>
+              <li>Certificate upon completion</li>
+              <li>Access to course materials and resources</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+          <button class="btn btn-primary" id="modalEnrollBtn" onclick="enrollFromModal()">✨ Enroll Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inline Message Container -->
+    <div id="inlineMessage" class="inline-message" style="display: none;">
+      <div class="message-content">
+        <span id="messageText"></span>
+        <button class="close-message" onclick="hideInlineMessage()">&times;</button>
+      </div>
+    </div>
+
+    <!-- Static Curriculum Lists (frontend) -->
+    <section class="curriculum-section">
+      <h3>BIM Curriculum (8 Semesters)</h3>
+      <div class="curriculum-grid">
+        <div class="semester-card">
+          <h4>Semester 1</h4>
+          <ul>
+            <li>Business Mathematics</li>
+            <li>English I</li>
+            <li>Introduction to Information Technology</li>
+            <li>Sociology</li>
+            <li>Principles of Management</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 2</h4>
+          <ul>
+            <li>Financial Accounting</li>
+            <li>English II</li>
+            <li>Micro Economics</li>
+            <li>Computer Programming</li>
+            <li>Business Statistics</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 3</h4>
+          <ul>
+            <li>Data Communication and Networking</li>
+            <li>Web Technology I</li>
+            <li>Cost and Management Accounting</li>
+            <li>Organizational Behavior</li>
+            <li>System Analysis and Design</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 4</h4>
+          <ul>
+            <li>Database Management System</li>
+            <li>Web Technology II</li>
+            <li>Macro Economics</li>
+            <li>Operations Management</li>
+            <li>Business Research Methods</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 5</h4>
+          <ul>
+            <li>Object-Oriented Programming (Java)</li>
+            <li>Software Engineering</li>
+            <li>Information Security Management</li>
+            <li>Financial Management</li>
+            <li>Management Information System</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 6</h4>
+          <ul>
+            <li>Artificial Intelligence</li>
+            <li>E-Commerce</li>
+            <li>Mobile Application Development</li>
+            <li>Business Strategy</li>
+            <li>Internship</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 7</h4>
+          <ul>
+            <li>Project Management</li>
+            <li>Digital Marketing</li>
+            <li>Cloud Computing</li>
+            <li>Data Mining</li>
+            <li>Elective I</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 8</h4>
+          <ul>
+            <li>Final Year Project</li>
+            <li>Entrepreneurship</li>
+            <li>Knowledge Management</li>
+            <li>Elective II</li>
+            <li>Seminar</li>
+          </ul>
+        </div>
+      </div>
+      <p class="resource-note">Resources: Notes, Board Questions, Pre-board Questions (Admin CRUD for PDFs; students view).</p>
+    </section>
+
+    <section class="curriculum-section">
+      <h3>CSIT Curriculum (8 Semesters)</h3>
+      <div class="curriculum-grid">
+        <div class="semester-card">
+          <h4>Semester 1</h4>
+          <ul>
+            <li>Introduction to Information Technology</li>
+            <li>C Programming</li>
+            <li>Digital Logic</li>
+            <li>Mathematics I</li>
+            <li>Physics</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 2</h4>
+          <ul>
+            <li>Discrete Mathematics</li>
+            <li>Object-Oriented Programming (C++)</li>
+            <li>Microprocessor</li>
+            <li>Mathematics II</li>
+            <li>Statistics I</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 3</h4>
+          <ul>
+            <li>Data Structures and Algorithms</li>
+            <li>Computer Organization and Architecture</li>
+            <li>Numerical Methods</li>
+            <li>Statistics II</li>
+            <li>Computer Graphics</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 4</h4>
+          <ul>
+            <li>Operating Systems</li>
+            <li>Database Management System</li>
+            <li>Artificial Intelligence</li>
+            <li>Theory of Computation</li>
+            <li>Computer Networks</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 5</h4>
+          <ul>
+            <li>Software Engineering</li>
+            <li>Web Technology</li>
+            <li>Cryptography</li>
+            <li>Simulation and Modeling</li>
+            <li>Technical Writing</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 6</h4>
+          <ul>
+            <li>Compiler Design</li>
+            <li>E-Governance</li>
+            <li>Image Processing</li>
+            <li>Mobile Computing</li>
+            <li>Minor Project</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 7</h4>
+          <ul>
+            <li>Data Mining and Warehousing</li>
+            <li>Cloud Computing</li>
+            <li>Network Security</li>
+            <li>Distributed Systems</li>
+            <li>Elective I</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 8</h4>
+          <ul>
+            <li>Final Year Project</li>
+            <li>Advanced Java Programming</li>
+            <li>Big Data Technologies</li>
+            <li>Elective II</li>
+            <li>Seminar</li>
+          </ul>
+        </div>
+      </div>
+      <p class="resource-note">Resources: Notes, Board Questions, Pre-board Questions (Admin CRUD for PDFs; students view).</p>
+    </section>
+
+    <section class="curriculum-section">
+      <h3>BCA Curriculum (8 Semesters)</h3>
+      <div class="curriculum-grid">
+        <div class="semester-card">
+          <h4>Semester 1</h4>
+          <ul>
+            <li>Computer Fundamentals</li>
+            <li>Programming in C</li>
+            <li>Mathematics</li>
+            <li>English</li>
+            <li>Digital Systems</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 2</h4>
+          <ul>
+            <li>Data Structures</li>
+            <li>Object-Oriented Programming (C++)</li>
+            <li>Discrete Mathematics</li>
+            <li>Financial Accounting</li>
+            <li>Communication Skills</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 3</h4>
+          <ul>
+            <li>Database Management System</li>
+            <li>Operating System</li>
+            <li>Software Engineering</li>
+            <li>Computer Networks</li>
+            <li>Web Technology</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 4</h4>
+          <ul>
+            <li>Java Programming</li>
+            <li>System Analysis and Design</li>
+            <li>Numerical Methods</li>
+            <li>Computer Graphics</li>
+            <li>E-Commerce</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 5</h4>
+          <ul>
+            <li>Python Programming</li>
+            <li>Mobile Application Development</li>
+            <li>Artificial Intelligence</li>
+            <li>Linux Administration</li>
+            <li>MIS</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 6</h4>
+          <ul>
+            <li>Data Mining</li>
+            <li>Cloud Computing</li>
+            <li>Network Security</li>
+            <li>Project Work</li>
+            <li>Internship</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 7</h4>
+          <ul>
+            <li>Big Data Analytics</li>
+            <li>Internet of Things (IoT)</li>
+            <li>Software Testing</li>
+            <li>Elective I</li>
+            <li>Research Methodology</li>
+          </ul>
+        </div>
+        <div class="semester-card">
+          <h4>Semester 8</h4>
+          <ul>
+            <li>Final Year Project</li>
+            <li>Cyber Law and Ethics</li>
+            <li>Digital Marketing</li>
+            <li>Elective II</li>
+            <li>Seminar</li>
+          </ul>
+        </div>
+      </div>
+      <p class="resource-note">Resources: Notes, Board Questions, Pre-board Questions (Admin CRUD for PDFs; students view).</p>
+    </section>
 
   </main>
 
   <footer>
     <p>&copy; 2025 EduVerse. All rights reserved.</p>
   </footer>
+
+  <script>
+    // Enhance static curriculum lists: clicking a course shows resource buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const courseItems = document.querySelectorAll('.curriculum-section li');
+      courseItems.forEach(li => {
+        const title = li.textContent.trim();
+        li.textContent = '';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'course-entry';
+
+        const label = document.createElement('span');
+        label.textContent = title;
+
+        const actions = document.createElement('div');
+        actions.className = 'course-actions-inline';
+
+        const types = [
+          { key: 'notes', label: '📝 Notes' },
+          { key: 'board', label: '🏁 Board Questions' },
+          { key: 'preboard', label: '📋 Pre-board Questions' }
+        ];
+
+        types.forEach(t => {
+          const link = document.createElement('a');
+          link.className = 'course-pill';
+          link.textContent = t.label;
+          link.href = `course-resources.html?courseName=${encodeURIComponent(title)}&type=${t.key}`;
+          actions.appendChild(link);
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(actions);
+        li.appendChild(wrapper);
+
+        wrapper.addEventListener('click', (e) => {
+          // avoid navigating when clicking the pills directly
+          if (e.target.closest('a')) return;
+          wrapper.classList.toggle('active');
+        });
+      });
+    });
+  </script>
 </body>
 </html>

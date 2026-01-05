@@ -51,6 +51,11 @@ function renderUsers(users = []) {
     const status = user.is_active ? '✓ Active' : '✗ Inactive';
     const statusClass = user.is_active ? 'badge-active' : 'badge-inactive';
     const profileInfo = user.studentProfile ? '👨‍🎓 Student' : user.instructorProfile ? '👨‍🏫 Instructor' : '—';
+    
+    // Check if instructor is pending approval
+    const isPendingInstructor = user.role === 'INSTRUCTOR' && user.instructorProfile?.is_pending_approval;
+    const instructorStatus = user.instructorProfile?.is_verified ? 'Verified' : 
+                           user.instructorProfile?.is_pending_approval ? 'Pending Approval' : 'Not Verified';
 
     const row = `
       <tr>
@@ -59,10 +64,15 @@ function renderUsers(users = []) {
         <td><span class="badge-role">${user.role}</span></td>
         <td><span class="${statusClass}">${status}</span></td>
         <td>${fmtDate(user.created_at)}</td>
-        <td>${profileInfo}</td>
+        <td>${profileInfo} ${user.role === 'INSTRUCTOR' ? `<br><small style="color: #facc15;">${instructorStatus}</small>` : ''}</td>
         <td>
-          <button class="action-btn" onclick="editUser('${user.id}')">Edit</button>
-          <button class="action-btn action-btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+          ${isPendingInstructor ? `
+            <button class="action-btn" onclick="approveInstructor('${user.id}')">✓ Approve</button>
+            <button class="action-btn action-btn-danger" onclick="rejectInstructor('${user.id}')">✗ Reject</button>
+          ` : `
+            <button class="action-btn" onclick="editUser('${user.id}')">Edit</button>
+            <button class="action-btn action-btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+          `}
         </td>
       </tr>
     `;
@@ -90,6 +100,56 @@ function editUser(userId) {
 function deleteUser(userId) {
   if (confirm('Are you sure you want to delete this user?')) {
     alert(`Delete user ${userId} - Feature coming soon`);
+  }
+}
+
+// Approve instructor
+async function approveInstructor(userId) {
+  if (!confirm('Are you sure you want to approve this instructor?')) return;
+  
+  try {
+    const response = await fetch(`/api/admin/instructors/${userId}/approve`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      alert('Instructor approved successfully!');
+      loadUsers(); // Reload the users list
+    } else {
+      alert('Failed to approve instructor');
+    }
+  } catch (error) {
+    console.error('Error approving instructor:', error);
+    alert('Error approving instructor');
+  }
+}
+
+// Reject instructor
+async function rejectInstructor(userId) {
+  if (!confirm('Are you sure you want to reject this instructor?')) return;
+  
+  try {
+    const response = await fetch(`/api/admin/instructors/${userId}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      alert('Instructor rejected successfully!');
+      loadUsers(); // Reload the users list
+    } else {
+      alert('Failed to reject instructor');
+    }
+  } catch (error) {
+    console.error('Error rejecting instructor:', error);
+    alert('Error rejecting instructor');
   }
 }
 

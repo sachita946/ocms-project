@@ -148,3 +148,46 @@ export const unenroll = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getMyEnrollmentsWithDetails = async (req, res) => {
+  try {
+    const enrollments = await prisma.enrollment.findMany({
+      where: { student_id: req.user.id },
+      include: {
+        course: {
+          include: {
+            instructor: {
+              select: {
+                first_name: true,
+                last_name: true,
+                email: true
+              }
+            }
+          }
+        },
+        progress: {
+          include: {
+            lesson: true
+          }
+        }
+      }
+    });
+
+    // Calculate progress for each enrollment
+    const enrollmentsWithProgress = enrollments.map(enrollment => {
+      const totalLessons = enrollment.course.lessons?.length || 0;
+      const completedLessons = enrollment.progress?.length || 0;
+      const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+      return {
+        ...enrollment,
+        progress: progress
+      };
+    });
+
+    res.json(enrollmentsWithProgress);
+  } catch (err) {
+    console.error('getMyEnrollmentsWithDetails', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

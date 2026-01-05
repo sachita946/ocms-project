@@ -8,7 +8,9 @@ import {
   getAllPayments,
   getAllReviews,
   getAllNotifications,
-  getAllActivities
+  getAllActivities,
+  approveInstructor,
+  rejectInstructor
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -23,5 +25,9 @@ router.get('/payments', getAllPayments);
 router.get('/reviews', getAllReviews);
 router.get('/notifications', getAllNotifications);
 router.get('/activities', getAllActivities);
+
+// Instructor management
+router.put('/instructors/:userId/approve', approveInstructor);
+router.put('/instructors/:userId/reject', rejectInstructor);
 
 export default router;

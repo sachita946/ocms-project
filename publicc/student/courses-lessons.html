@@ -5,258 +5,682 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>My Courses & Lessons | Student Dashboard</title>
 	<style>
-		* { box-sizing: border-box; margin: 0; padding: 0; }
+		* { 
+			box-sizing: border-box; 
+			margin: 0; 
+			padding: 0; 
+		}
+		
 		body {
-			font-family: "Segoe UI", Arial, sans-serif;
-			background: linear-gradient(135deg, #0f172a 0%, #0b6b6b 100%);
+			font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 			background-attachment: fixed;
-			color: #eaf4f2;
+			color: #fff;
 			min-height: 100vh;
+			position: relative;
+			overflow-x: hidden;
 		}
+		
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: 
+				radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+				radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.3), transparent 50%),
+				radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.2), transparent 50%);
+			z-index: 0;
+			animation: gradientShift 15s ease infinite;
+		}
+		
+		@keyframes gradientShift {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.8; }
+		}
+		
 		.container {
-			max-width: 1200px;
+			max-width: 1400px;
 			margin: 0 auto;
-			padding: 28px 16px;
+			padding: 40px 20px;
+			position: relative;
+			z-index: 1;
 		}
+		
+		/* Header Section */
 		.header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 28px;
+			margin-bottom: 40px;
+			animation: fadeInDown 0.6s ease;
 		}
-		.header h1 {
-			font-size: 28px;
+		
+		@keyframes fadeInDown {
+			from {
+				opacity: 0;
+				transform: translateY(-20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		.header-content h1 {
+			font-size: 38px;
+			font-weight: 800;
+			background: linear-gradient(135deg, #fff, #e0d4ff);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 8px;
 			display: flex;
 			align-items: center;
 			gap: 12px;
 		}
+		
+		.header-content p {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 16px;
+		}
+		
 		.back-btn {
-			padding: 10px 16px;
-			background: rgba(255,255,255,0.08);
-			border: 1px solid rgba(255,255,255,0.12);
-			color: #eaf4f2;
-			border-radius: 8px;
+			padding: 12px 24px;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: #fff;
+			border-radius: 12px;
 			cursor: pointer;
-			transition: all 0.2s ease;
-			border: none;
+			transition: all 0.3s ease;
+			font-weight: 600;
+			font-size: 14px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
 		}
+		
 		.back-btn:hover {
-			background: rgba(255,255,255,0.12);
-			border-color: rgba(255,255,255,0.2);
+			background: rgba(255, 255, 255, 0.25);
+			border-color: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 		}
+		
+		/* Stats Grid */
 		.stats-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-			gap: 14px;
-			margin-bottom: 20px;
+			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+			gap: 20px;
+			margin-bottom: 40px;
+			animation: fadeInUp 0.6s ease 0.2s both;
 		}
-		.stat-card {
-			background: rgba(255,255,255,0.06);
-			border: 1px solid rgba(255,255,255,0.08);
-			border-radius: 12px;
-			padding: 16px;
-		}
-		.stat-label { color: #9fb5b9; font-size: 12px; text-transform: uppercase; }
-		.stat-value { font-size: 24px; font-weight: 700; color: #22c55e; margin-top: 6px; }
 		
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		.stat-card {
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 16px;
+			padding: 24px;
+			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.stat-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 3px;
+			background: linear-gradient(90deg, #667eea, #764ba2);
+		}
+		
+		.stat-card:hover {
+			transform: translateY(-5px);
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.3);
+			box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+		}
+		
+		.stat-label { 
+			color: rgba(255, 255, 255, 0.8); 
+			font-size: 12px; 
+			text-transform: uppercase; 
+			font-weight: 600;
+			letter-spacing: 1px;
+		}
+		
+		.stat-value { 
+			font-size: 32px; 
+			font-weight: 800; 
+			background: linear-gradient(135deg, #fff, #d4b3ff);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-top: 8px; 
+		}
+		
+		/* Course Cards */
 		.course-card {
-			background: rgba(255,255,255,0.06);
-			border: 1px solid rgba(255,255,255,0.08);
-			border-radius: 12px;
-			padding: 20px;
-			margin-bottom: 20px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(20px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 20px;
+			padding: 28px;
+			margin-bottom: 24px;
 			cursor: pointer;
-			transition: all 0.2s ease;
+			transition: all 0.4s ease;
+			animation: fadeInUp 0.6s ease both;
+			position: relative;
+			overflow: hidden;
 		}
+		
+		.course-card::before {
+			content: '';
+			position: absolute;
+			top: -2px;
+			left: -2px;
+			right: -2px;
+			bottom: -2px;
+			background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+			border-radius: 20px;
+			z-index: -1;
+			opacity: 0;
+			transition: opacity 0.4s ease;
+		}
+		
 		.course-card:hover {
-			border-color: rgba(34,197,94,0.4);
-			background: rgba(255,255,255,0.08);
+			transform: translateY(-5px);
+			background: rgba(255, 255, 255, 0.15);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 		}
+		
+		.course-card:hover::before {
+			opacity: 1;
+		}
+		
 		.course-card.expanded {
-			border-color: rgba(34,197,94,0.5);
-			background: rgba(255,255,255,0.09);
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.3);
 		}
+		
+		.course-card.expanded::before {
+			opacity: 1;
+		}
+		
 		.course-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: start;
-			gap: 16px;
+			gap: 20px;
 		}
+		
 		.course-title {
-			font-size: 18px;
+			font-size: 24px;
 			font-weight: 700;
-			color: #eaf4f2;
-			margin-bottom: 8px;
+			color: #fff;
+			margin-bottom: 12px;
+			line-height: 1.3;
 		}
+		
 		.course-meta {
 			display: flex;
 			gap: 12px;
 			flex-wrap: wrap;
-			margin-top: 8px;
+			margin-top: 12px;
 		}
+		
 		.course-badge {
-			padding: 4px 10px;
-			border-radius: 6px;
+			padding: 6px 14px;
+			border-radius: 8px;
 			font-size: 12px;
 			font-weight: 600;
+			backdrop-filter: blur(10px);
+			transition: all 0.3s ease;
 		}
+		
+		.course-badge:hover {
+			transform: scale(1.05);
+		}
+		
 		.badge-level {
-			background: rgba(6, 182, 212, 0.2);
-			color: #06b6d4;
+			background: rgba(59, 130, 246, 0.3);
+			color: #93c5fd;
+			border: 1px solid rgba(59, 130, 246, 0.4);
 		}
+		
 		.badge-progress {
-			background: rgba(34,197,94,0.2);
-			color: #22c55e;
+			background: rgba(34, 197, 94, 0.3);
+			color: #86efac;
+			border: 1px solid rgba(34, 197, 94, 0.4);
 		}
+		
+		.badge-certified {
+			background: rgba(234, 179, 8, 0.3);
+			color: #fde047;
+			border: 1px solid rgba(234, 179, 8, 0.4);
+		}
+		
 		.expand-icon {
-			font-size: 20px;
-			transition: transform 0.2s ease;
+			font-size: 24px;
+			transition: transform 0.4s ease;
+			color: rgba(255, 255, 255, 0.8);
 		}
+		
 		.course-card.expanded .expand-icon {
 			transform: rotate(180deg);
 		}
 		
-		.lessons-container {
+		/* Progress Bar */
+		.progress-bar {
+			width: 100%;
+			height: 10px;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(10px);
+			border-radius: 10px;
+			overflow: hidden;
 			margin-top: 16px;
-			padding-top: 16px;
-			border-top: 1px solid rgba(255,255,255,0.08);
-			display: none;
+			position: relative;
 		}
+		
+		.progress-bar::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			animation: shimmer 2s infinite;
+		}
+		
+		@keyframes shimmer {
+			0% { transform: translateX(-100%); }
+			100% { transform: translateX(100%); }
+		}
+		
+		.progress-fill {
+			height: 100%;
+			background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+			transition: width 0.6s ease;
+			border-radius: 10px;
+			position: relative;
+		}
+		
+		.progress-fill::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 20px;
+			height: 100%;
+			background: rgba(255, 255, 255, 0.4);
+			filter: blur(5px);
+		}
+		
+		/* Lessons Container */
+		.lessons-container {
+			margin-top: 24px;
+			padding-top: 24px;
+			border-top: 1px solid rgba(255, 255, 255, 0.2);
+			display: none;
+			animation: fadeIn 0.4s ease;
+		}
+		
+		@keyframes fadeIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+		
 		.course-card.expanded .lessons-container {
 			display: block;
 		}
+		
+		.lessons-header {
+			font-size: 18px;
+			font-weight: 700;
+			margin-bottom: 16px;
+			color: #fff;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
 		.lesson-item {
-			background: rgba(255,255,255,0.04);
-			border: 1px solid rgba(255,255,255,0.06);
-			border-radius: 8px;
-			padding: 14px;
-			margin-bottom: 10px;
+			background: rgba(255, 255, 255, 0.08);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			border-radius: 14px;
+			padding: 18px;
+			margin-bottom: 12px;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			gap: 12px;
-			transition: all 0.2s ease;
+			gap: 16px;
+			transition: all 0.3s ease;
+			animation: slideIn 0.4s ease both;
 		}
+		
+		@keyframes slideIn {
+			from {
+				opacity: 0;
+				transform: translateX(-20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateX(0);
+			}
+		}
+		
+		.lesson-item:nth-child(2) { animation-delay: 0.05s; }
+		.lesson-item:nth-child(3) { animation-delay: 0.1s; }
+		.lesson-item:nth-child(4) { animation-delay: 0.15s; }
+		.lesson-item:nth-child(5) { animation-delay: 0.2s; }
+		.lesson-item:nth-child(6) { animation-delay: 0.25s; }
+		
 		.lesson-item:hover {
-			background: rgba(255,255,255,0.08);
-			border-color: rgba(34,197,94,0.3);
+			background: rgba(255, 255, 255, 0.12);
+			border-color: rgba(255, 255, 255, 0.25);
+			transform: translateX(5px);
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 		}
+		
 		.lesson-info {
 			flex: 1;
 		}
+		
 		.lesson-title {
-			color: #eaf4f2;
+			color: #fff;
 			font-weight: 600;
-			margin-bottom: 4px;
+			margin-bottom: 6px;
+			font-size: 15px;
 		}
+		
 		.lesson-meta {
-			font-size: 12px;
-			color: #9fb5b9;
+			font-size: 13px;
+			color: rgba(255, 255, 255, 0.7);
+			display: flex;
+			align-items: center;
+			gap: 12px;
 		}
+		
 		.lesson-icon {
-			font-size: 24px;
+			font-size: 28px;
 			margin-right: 12px;
+			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 		}
+		
 		.lesson-actions {
 			display: flex;
-			gap: 8px;
+			gap: 10px;
+			flex-wrap: wrap;
 		}
+		
 		.lesson-btn {
-			padding: 8px 14px;
+			padding: 10px 18px;
 			border: none;
-			border-radius: 6px;
+			border-radius: 10px;
 			cursor: pointer;
-			font-size: 12px;
+			font-size: 13px;
 			font-weight: 600;
-			transition: all 0.2s ease;
+			transition: all 0.3s ease;
+			backdrop-filter: blur(10px);
+			display: flex;
+			align-items: center;
+			gap: 6px;
 		}
+		
 		.btn-watch {
-			background: linear-gradient(135deg, #22c55e, #16a34a);
-			color: #0f172a;
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: #fff;
+			border: 1px solid rgba(255, 255, 255, 0.2);
 		}
+		
 		.btn-watch:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 6px 16px rgba(34,197,94,0.3);
+			transform: translateY(-2px) scale(1.05);
+			box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 		}
+		
 		.btn-notes {
-			background: rgba(6, 182, 212, 0.2);
-			color: #06b6d4;
-			border: 1px solid rgba(6, 182, 212, 0.3);
+			background: rgba(59, 130, 246, 0.3);
+			color: #93c5fd;
+			border: 1px solid rgba(59, 130, 246, 0.4);
 		}
+		
 		.btn-notes:hover {
-			background: rgba(6, 182, 212, 0.3);
+			background: rgba(59, 130, 246, 0.4);
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 		}
+		
 		.btn-quiz {
-			background: rgba(249,115,22,0.2);
-			color: #f97316;
-			border: 1px solid rgba(249,115,22,0.3);
+			background: rgba(249, 115, 22, 0.3);
+			color: #fdba74;
+			border: 1px solid rgba(249, 115, 22, 0.4);
 		}
+		
 		.btn-quiz:hover {
-			background: rgba(249,115,22,0.3);
+			background: rgba(249, 115, 22, 0.4);
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
 		}
+		
 		.lesson-complete {
 			display: inline-flex;
 			align-items: center;
-			gap: 4px;
-			padding: 4px 10px;
-			border-radius: 6px;
-			background: rgba(34,197,94,0.2);
-			color: #22c55e;
-			font-size: 12px;
+			gap: 6px;
+			padding: 8px 14px;
+			border-radius: 8px;
+			background: rgba(34, 197, 94, 0.3);
+			color: #86efac;
+			font-size: 13px;
 			font-weight: 600;
+			border: 1px solid rgba(34, 197, 94, 0.4);
+			backdrop-filter: blur(10px);
 		}
-		.progress-bar {
-			width: 100%;
-			height: 8px;
-			background: rgba(255,255,255,0.08);
-			border-radius: 4px;
-			overflow: hidden;
-			margin-top: 8px;
+		
+		/* Certificate Section */
+		.certificate-section {
+			background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(217, 119, 6, 0.2));
+			backdrop-filter: blur(10px);
+			border: 2px solid rgba(234, 179, 8, 0.4);
+			border-radius: 16px;
+			padding: 20px;
+			margin-top: 20px;
+			animation: pulse 2s ease infinite;
 		}
-		.progress-fill {
-			height: 100%;
-			background: linear-gradient(90deg, #22c55e, #0ea5e9);
-			transition: width 0.3s ease;
+		
+		@keyframes pulse {
+			0%, 100% {
+				box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4);
+			}
+			50% {
+				box-shadow: 0 0 20px 10px rgba(234, 179, 8, 0);
+			}
 		}
+		
+		.certificate-section h4 {
+			color: #fde047;
+			margin-bottom: 10px;
+			font-size: 18px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.certificate-section p {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 14px;
+			line-height: 1.5;
+		}
+		
+		.btn-certificate {
+			padding: 12px 24px;
+			background: linear-gradient(135deg, #eab308, #d97706);
+			color: #fff;
+			border: none;
+			border-radius: 10px;
+			cursor: pointer;
+			font-weight: 700;
+			margin-top: 12px;
+			transition: all 0.3s ease;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+		}
+		
+		.btn-certificate:hover {
+			transform: translateY(-3px) scale(1.05);
+			box-shadow: 0 12px 25px rgba(234, 179, 8, 0.4);
+		}
+		
+		/* Empty State */
 		.empty-state {
 			text-align: center;
-			padding: 60px 20px;
-			color: #9fb5b9;
+			padding: 80px 20px;
+			color: rgba(255, 255, 255, 0.8);
+			animation: fadeIn 0.6s ease;
 		}
+		
 		.empty-state-icon {
-			font-size: 48px;
-			margin-bottom: 16px;
+			font-size: 64px;
+			margin-bottom: 20px;
+			animation: float 3s ease-in-out infinite;
 		}
-		.certificate-section {
-			background: rgba(34,197,94,0.1);
-			border: 1px solid rgba(34,197,94,0.3);
-			border-radius: 8px;
-			padding: 14px;
-			margin-top: 16px;
+		
+		@keyframes float {
+			0%, 100% { transform: translateY(0); }
+			50% { transform: translateY(-10px); }
 		}
-		.certificate-section h4 {
-			color: #22c55e;
-			margin-bottom: 8px;
+		
+		.empty-state h3 {
+			font-size: 24px;
+			margin-bottom: 12px;
+			color: #fff;
 		}
-		.btn-certificate {
-			padding: 10px 16px;
-			background: linear-gradient(135deg, #22c55e, #16a34a);
-			color: #0f172a;
+		
+		.empty-state p {
+			font-size: 16px;
+			color: rgba(255, 255, 255, 0.7);
+		}
+		
+		.empty-state .btn-browse {
+			margin-top: 24px;
+			padding: 14px 28px;
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: #fff;
 			border: none;
-			border-radius: 6px;
+			border-radius: 12px;
 			cursor: pointer;
 			font-weight: 600;
-			margin-top: 8px;
+			font-size: 15px;
+			transition: all 0.3s ease;
+			display: inline-block;
+			text-decoration: none;
 		}
-		.btn-certificate:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 20px rgba(34,197,94,0.3);
+		
+		.empty-state .btn-browse:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
 		}
+		
+		/* Loading State */
+		.loading-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: rgba(255, 255, 255, 0.8);
+		}
+		
+		.loading-spinner {
+			width: 50px;
+			height: 50px;
+			border: 4px solid rgba(255, 255, 255, 0.2);
+			border-top-color: #fff;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin: 0 auto 20px;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		/* Responsive Design */
 		@media (max-width: 768px) {
-			.header { flex-direction: column; align-items: flex-start; gap: 16px; }
-			.lesson-item { flex-direction: column; align-items: flex-start; }
-			.lesson-actions { width: 100%; }
-			.lesson-btn { flex: 1; }
+			.container {
+				padding: 20px 16px;
+			}
+			
+			.header {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 16px;
+			}
+			
+			.header-content h1 {
+				font-size: 28px;
+			}
+			
+			.stats-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+			
+			.stat-card {
+				padding: 18px;
+			}
+			
+			.stat-value {
+				font-size: 26px;
+			}
+			
+			.course-card {
+				padding: 20px;
+			}
+			
+			.course-title {
+				font-size: 20px;
+			}
+			
+			.lesson-item {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+			
+			.lesson-actions {
+				width: 100%;
+			}
+			
+			.lesson-btn {
+				flex: 1;
+				justify-content: center;
+			}
+		}
+		
+		@media (max-width: 480px) {
+			.stats-grid {
+				grid-template-columns: 1fr;
+			}
+			
+			.course-meta {
+				flex-direction: column;
+			}
 		}
 	</style>
 </head>
@@ -264,11 +688,13 @@
 <body>
 	<div class="container">
 		<div class="header">
-			<div>
+			<div class="header-content">
 				<h1>📚 My Courses & Lessons</h1>
-				<p style="color: #9fb5b9; margin-top: 4px;">Continue your learning journey</p>
+				<p>Continue your learning journey and unlock your potential</p>
 			</div>
-			<button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+			<button class="back-btn" onclick="goBack()">
+				← Back to Dashboard
+			</button>
 		</div>
 
 		<div class="stats-grid">
@@ -291,25 +717,31 @@
 		</div>
 
 		<div id="coursesContainer">
-			<div style="text-align: center; padding: 40px; color: #9fb5b9;">Loading your courses...</div>
+			<div class="loading-state">
+				<div class="loading-spinner"></div>
+				<p>Loading your courses...</p>
+			</div>
 		</div>
 
 		<div class="empty-state" id="emptyState" style="display: none;">
 			<div class="empty-state-icon">🎓</div>
-			<p>No courses enrolled yet.</p>
-			<p style="font-size: 13px; margin-top: 8px;">Browse available courses and start learning!</p>
+			<h3>No courses enrolled yet</h3>
+			<p>Browse available courses and start learning today!</p>
+			<a href="courses.html" class="btn-browse">Browse Courses</a>
 		</div>
 	</div>
 
 	<script>
-		const token = localStorage.getItem('ocms_token');
-		if (!token) window.location.href = '/login.html';
+		const token = localStorage.getItem('token');
+		if (!token) {
+			window.location.href = '../auth/login.html';
+		}
 
 		document.addEventListener('DOMContentLoaded', loadCourses);
 
 		async function loadCourses() {
 			try {
-				const res = await fetch('/api/profile/me', {
+				const res = await fetch('http://localhost:5000/api/profile/me', {
 					headers: { Authorization: `Bearer ${token}` }
 				});
 				if (res.status === 401) throw new Error('unauthorized');
@@ -333,8 +765,8 @@
 
 			} catch (err) {
 				console.error(err);
-				localStorage.removeItem('ocms_token');
-				window.location.href = '/login.html';
+				localStorage.removeItem('token');
+				window.location.href = '../auth/login.html';
 			}
 		}
 
@@ -382,9 +814,9 @@
 							<div style="flex: 1;">
 								<div class="course-title">${enrollment.courseTitle || 'Course'}</div>
 								<div class="course-meta">
-									<span class="course-badge badge-level">${enrollment.level || 'Beginner'}</span>
-									<span class="course-badge badge-progress">${courseProgress.percentage}% Complete</span>
-									${hasCertificate ? '<span class="course-badge" style="background: rgba(34,197,94,0.2); color: #22c55e;">✓ Certified</span>' : ''}
+									<span class="course-badge badge-level">📊 ${enrollment.level || 'Beginner'}</span>
+									<span class="course-badge badge-progress">⚡ ${courseProgress.percentage}% Complete</span>
+									${hasCertificate ? '<span class="course-badge badge-certified">🏆 Certified</span>' : ''}
 								</div>
 								<div class="progress-bar">
 									<div class="progress-fill" style="width: ${courseProgress.percentage}%"></div>
@@ -394,22 +826,33 @@
 						</div>
 						
 						<div class="lessons-container">
+							<div class="lessons-header">📖 Course Lessons</div>
 							${mockLessons.map(lesson => `
 								<div class="lesson-item">
 									<div style="display: flex; align-items: center; flex: 1;">
 										<span class="lesson-icon">${lesson.type === 'VIDEO' ? '🎬' : lesson.type === 'QUIZ' ? '📝' : '📄'}</span>
 										<div class="lesson-info">
 											<div class="lesson-title">${lesson.title}</div>
-											<div class="lesson-meta">${lesson.type} • ${lesson.duration} mins</div>
+											<div class="lesson-meta">
+												<span>${lesson.type}</span>
+												<span>•</span>
+												<span>⏱️ ${lesson.duration} mins</span>
+											</div>
 										</div>
 									</div>
 									<div class="lesson-actions">
 										${lesson.completed ? '<span class="lesson-complete">✓ Completed</span>' : ''}
 										${lesson.type === 'VIDEO' ? `
-											<button class="lesson-btn btn-watch" onclick="event.stopPropagation(); watchLesson(${enrollment.courseId}, ${lesson.id})">▶ Watch</button>
-											<button class="lesson-btn btn-notes" onclick="event.stopPropagation(); viewNotes(${enrollment.courseId}, ${lesson.id})">📝 Notes</button>
+											<button class="lesson-btn btn-watch" onclick="event.stopPropagation(); watchLesson(${enrollment.courseId}, ${lesson.id})">
+												▶ Watch
+											</button>
+											<button class="lesson-btn btn-notes" onclick="event.stopPropagation(); viewNotes(${enrollment.courseId}, ${lesson.id})">
+												📝 Notes
+											</button>
 										` : lesson.type === 'QUIZ' ? `
-											<button class="lesson-btn btn-quiz" onclick="event.stopPropagation(); takeQuiz(${enrollment.courseId}, ${lesson.id})">Start Quiz</button>
+											<button class="lesson-btn btn-quiz" onclick="event.stopPropagation(); takeQuiz(${enrollment.courseId}, ${lesson.id})">
+												🎯 Start Quiz
+											</button>
 										` : ''}
 									</div>
 								</div>
@@ -418,8 +861,10 @@
 							${courseProgress.percentage >= 80 && !hasCertificate ? `
 								<div class="certificate-section">
 									<h4>🎓 Certificate Available!</h4>
-									<p style="color: #9fb5b9; font-size: 13px;">You've completed this course. Click below to get your certificate.</p>
-									<button class="btn-certificate" onclick="event.stopPropagation(); getCertificate(${enrollment.courseId})">Download Certificate</button>
+									<p>Congratulations! You've completed this course. Download your certificate to showcase your achievement.</p>
+									<button class="btn-certificate" onclick="event.stopPropagation(); getCertificate(${enrollment.courseId})">
+										🏆 Download Certificate
+									</button>
 								</div>
 							` : ''}
 						</div>
@@ -434,27 +879,23 @@
 		}
 
 		function watchLesson(courseId, lessonId) {
-			// Navigate to notes.html with lesson video player
-			window.location.href = `/student/notes.html?course=${courseId}&lesson=${lessonId}`;
+			window.location.href = `notes.html?course=${courseId}&lesson=${lessonId}`;
 		}
 
 		function viewNotes(courseId, lessonId) {
-			// Navigate to notes page
-			window.location.href = `/student/notes.html?course=${courseId}&lesson=${lessonId}`;
+			window.location.href = `notes.html?course=${courseId}&lesson=${lessonId}`;
 		}
 
 		function takeQuiz(courseId, quizId) {
-			// Navigate to quiz page
-			window.location.href = `/student/quizees.html?course=${courseId}&quiz=${quizId}`;
+			window.location.href = `quizees.html?course=${courseId}&quiz=${quizId}`;
 		}
 
 		function getCertificate(courseId) {
-			// Navigate to certificate page
-			window.location.href = `/student/certificate.html?course=${courseId}`;
+			window.location.href = `certificate.html?course=${courseId}`;
 		}
 
 		function goBack() {
-			window.location.href = '/student/student-dashboard.html';
+			window.location.href = 'student-dashboard.html';
 		}
 	</script>
 </body>

@@ -3,6 +3,7 @@ import {auth} from '../middleware/auth.js';
 import {
   enrollInCourse,
   getMyEnrollments,
+  getMyEnrollmentsWithDetails,
   getEnrollment,
   getCourseEnrollments,
   getStudentProgressDetail,
@@ -13,6 +14,7 @@ const router = Router();
 
 router.post('/', auth, enrollInCourse);
 router.get('/me', auth, getMyEnrollments);
+router.get('/me/details', auth, getMyEnrollmentsWithDetails);
 router.get('/course/:courseId/students', auth, getCourseEnrollments);
 router.get('/:id/progress-detail', auth, getStudentProgressDetail);
 router.get('/:id', auth, getEnrollment);

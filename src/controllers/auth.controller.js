@@ -31,8 +31,20 @@ export const signup = async (req, res) => {
         data: { user_id: user.id, full_name: `${user.first_name} ${user.last_name}`, interests: [] },
       });
     } else if (user.role === "INSTRUCTOR") {
+      const { qualifications, experience_years, expertise_area, bio, phone, website } = req.body;
       await prisma.instructorProfile.create({
-        data: { user_id: user.id, full_name: `${user.first_name} ${user.last_name}` },
+        data: {
+          user_id: user.id,
+          full_name: `${user.first_name} ${user.last_name}`,
+          qualifications,
+          experience_years: experience_years ? parseInt(experience_years) : null,
+          expertise_area,
+          bio,
+          phone,
+          website,
+          is_pending_approval: true,
+          is_verified: false
+        },
       });
     }
 

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVerse | Manage Resources</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      background-attachment: fixed;
+      color: #fff;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .form-group select option {
+      background: #1e3c72;
+      color: #fff;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn.ghost {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn.ghost:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn.sm {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+    }
+
+    .msg {
+      margin-top: 15px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .msg.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .msg.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .resources-list {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .resources-list h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar select {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .filter-bar select option {
+      background: #1e3c72;
+      color: #fff;
+    }
+
+    .resource-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .resource-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .resource-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .resource-header h3 {
+      font-size: 1.2rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.notes {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge.questions {
+      background: rgba(251, 146, 60, 0.2);
+      color: #fb923c;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+    }
+
+    .badge.preboard {
+      background: rgba(168, 85, 247, 0.2);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .badge.board {
+      background: rgba(248, 180, 0, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(248, 180, 0, 0.32);
+    }
+
+    .resource-card p {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .resource-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .resource-meta small {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      header h1 {
+        font-size: 2rem;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+      }
+
+      .filter-bar select {
+        width: 100%;
+      }
+
+      .resource-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📚 Course & Lesson Resources</h1>
+      <p>Add notes, questions, preboard, and board materials for your students</p>
+      <button class="btn" onclick="window.location.href='instructor-dashboard.html'">← Back to Dashboard</button>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="course">Course Resources</button>
+      <button class="tab-btn" data-tab="lesson">Lesson Resources</button>
+    </div>
+
+    <!-- Course Resources Section -->
+    <section id="course-tab" class="tab-content active">
+      <div class="form-card">
+        <h2>Add Course Resource</h2>
+        <form id="courseResourceForm">
+          <div class="form-group">
+            <label for="courseSelect">Select Course *</label>
+            <select id="courseSelect" required>
+              <option value="">Loading courses...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="courseResourceType">Resource Type *</label>
+            <select id="courseResourceType" required>
+              <option value="">Select type</option>
+              <option value="notes">📝 Notes</option>
+              <option value="questions">❓ Questions</option>
+              <option value="preboard">📋 Preboard Materials</option>
+              <option value="board">🏁 Board Materials</option>
+              <option value="zoom">📹 Zoom Meeting</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="courseResourceTitle">Title *</label>
+            <input type="text" id="courseResourceTitle" placeholder="e.g., Chapter 1 Notes" required>
+          </div>
+
+          <div class="form-group">
+            <label for="courseResourceContent">Content *</label>
+            <textarea id="courseResourceContent" rows="8" placeholder="Enter resource content here..." required></textarea>
+          </div>
+
+          <div class="form-group" id="zoomLinkGroup" style="display: none;">
+            <label for="courseZoomLink">Zoom Meeting Link</label>
+            <input type="url" id="courseZoomLink" placeholder="https://zoom.us/j/...">
+          </div>
+
+          <button type="submit" class="btn primary">Add Resource</button>
+          <p id="courseResourceMsg" class="msg"></p>
+        </form>
+      </div>
+
+      <div class="resources-list">
+        <h2>Your Course Resources</h2>
+        <div class="filter-bar">
+          <select id="courseFilterSelect">
+            <option value="">All Courses</option>
+          </select>
+          <select id="courseFilterType">
+            <option value="">All Types</option>
+            <option value="notes">Notes</option>
+            <option value="questions">Questions</option>
+            <option value="preboard">Preboard</option>
+            <option value="board">Board</option>
+          </select>
+          <button class="btn ghost" onclick="loadCourseResources()">Filter</button>
+        </div>
+        <div id="courseResourcesList"></div>
+      </div>
+    </section>
+
+    <!-- Lesson Resources Section -->
+    <section id="lesson-tab" class="tab-content">
+      <div class="form-card">
+        <h2>Add Lesson Resource</h2>
+        <form id="lessonResourceForm">
+          <div class="form-group">
+            <label for="lessonCourseSelect">Select Course *</label>
+            <select id="lessonCourseSelect" required>
+              <option value="">Loading courses...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lessonSelect">Select Lesson *</label>
+            <select id="lessonSelect" required>
+              <option value="">Select course first</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lessonResourceType">Resource Type *</label>
+            <select id="lessonResourceType" required>
+              <option value="">Select type</option>
+              <option value="notes">📝 Notes</option>
+              <option value="questions">❓ Questions</option>
+              <option value="preboard">📋 Preboard Materials</option>
+              <option value="zoom">📹 Zoom Meeting</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lessonResourceTitle">Title *</label>
+            <input type="text" id="lessonResourceTitle" placeholder="e.g., Lesson 1 Notes" required>
+          </div>
+
+          <div class="form-group">
+            <label for="lessonResourceContent">Content *</label>
+            <textarea id="lessonResourceContent" rows="8" placeholder="Enter resource content here..." required></textarea>
+          </div>
+
+          <div class="form-group" id="lessonZoomLinkGroup" style="display: none;">
+            <label for="lessonZoomLink">Zoom Meeting Link</label>
+            <input type="url" id="lessonZoomLink" placeholder="https://zoom.us/j/...">
+          </div>
+
+          <button type="submit" class="btn primary">Add Resource</button>
+          <p id="lessonResourceMsg" class="msg"></p>
+        </form>
+      </div>
+
+      <div class="resources-list">
+        <h2>Your Lesson Resources</h2>
+        <div class="filter-bar">
+          <select id="lessonFilterCourse">
+            <option value="">All Courses</option>
+          </select>
+          <select id="lessonFilterLesson">
+            <option value="">All Lessons</option>
+          </select>
+          <select id="lessonFilterType">
+            <option value="">All Types</option>
+            <option value="notes">Notes</option>
+            <option value="questions">Questions</option>
+            <option value="preboard">Preboard</option>
+          </select>
+          <button class="btn ghost" onclick="loadLessonResources()">Filter</button>
+        </div>
+        <div id="lessonResourcesList"></div>
+      </div>
+    </section>
+  </div>
+
+  <script defer src="js/instructor-resources.js"></script>
+</body>
+</html>

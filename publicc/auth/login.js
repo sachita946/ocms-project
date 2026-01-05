@@ -3,6 +3,7 @@
    Handles: login, signup, forgot, reset, social redirects, token handling, and page guard.
 */
 
+const API_URL = 'http://localhost:5500/api';
 const qs = id => document.getElementById(id);
 const isValidEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e||'').toLowerCase());
 const isNameValid = n => /^.{2,60}$/.test(String(n||'').trim());
@@ -11,6 +12,248 @@ const isNameValid = n => /^.{2,60}$/.test(String(n||'').trim());
 function show(el){ if (!el) return; el.style.display = ''; }
 function hide(el){ if (!el) return; el.style.display = 'none'; }
 function setText(id, text = '') { const el = qs(id); if (el) el.textContent = text; }
+
+// Inline message functions
+function showInlineMessage(message, type = 'info') {
+  let messageContainer = qs('inlineMessage');
+  
+  // Create inline message container if it doesn't exist
+  if (!messageContainer) {
+    messageContainer = document.createElement('div');
+    messageContainer.id = 'inlineMessage';
+    messageContainer.className = 'inline-message';
+    messageContainer.innerHTML = `
+      <div class="message-content">
+        <span id="messageText"></span>
+        <button class="close-message" onclick="hideInlineMessage()">&times;</button>
+      </div>
+    `;
+    document.body.appendChild(messageContainer);
+    
+    // Add styles if not present
+    if (!document.getElementById('inlineMessageStyles')) {
+      const style = document.createElement('style');
+      style.id = 'inlineMessageStyles';
+      style.textContent = `
+        .inline-message {
+          display: none;
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 10000;
+          max-width: 400px;
+          padding: 16px 20px;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          animation: slideInRight 0.3s ease-out;
+          font-weight: 500;
+        }
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .inline-message.success {
+          background: linear-gradient(135deg, #10b981, #059669);
+          color: #fff;
+          border-left: 4px solid #10b981;
+        }
+        .inline-message.error {
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          color: #fff;
+          border-left: 4px solid #ef4444;
+        }
+        .inline-message.info {
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: #fff;
+          border-left: 4px solid #3b82f6;
+        }
+        .inline-message .close-message {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: none;
+          border: none;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 20px;
+          cursor: pointer;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+        }
+        .inline-message .close-message:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: #fff;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  const messageText = qs('messageText');
+  if (messageText) messageText.textContent = message;
+  messageContainer.className = `inline-message ${type}`;
+  messageContainer.style.display = 'block';
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    hideInlineMessage();
+  }, 5000);
+}
+
+function hideInlineMessage() {
+  const messageContainer = qs('inlineMessage');
+  if (messageContainer) {
+    messageContainer.style.display = 'none';
+  }
+}
+
+// Confirmation dialog function
+function showConfirmDialog(message, onConfirm, onCancel) {
+  let confirmDialog = qs('confirmDialog');
+  
+  if (!confirmDialog) {
+    confirmDialog = document.createElement('div');
+    confirmDialog.id = 'confirmDialog';
+    confirmDialog.className = 'confirm-dialog-overlay';
+    confirmDialog.innerHTML = `
+      <div class="confirm-dialog-content">
+        <div class="confirm-dialog-header">
+          <h3>Confirm Action</h3>
+        </div>
+        <div class="confirm-dialog-body">
+          <p id="confirmMessage"></p>
+        </div>
+        <div class="confirm-dialog-footer">
+          <button class="btn-confirm-cancel">Cancel</button>
+          <button class="btn-confirm-yes">Yes, Continue</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(confirmDialog);
+    
+    // Add styles
+    if (!document.getElementById('confirmDialogStyles')) {
+      const style = document.createElement('style');
+      style.id = 'confirmDialogStyles';
+      style.textContent = `
+        .confirm-dialog-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(5px);
+          z-index: 10001;
+          align-items: center;
+          justify-content: center;
+        }
+        .confirm-dialog-content {
+          background: linear-gradient(135deg, #1a1a2e, #16213e);
+          border-radius: 16px;
+          max-width: 450px;
+          width: 90%;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          animation: modalFadeIn 0.3s ease-out;
+        }
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .confirm-dialog-header {
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .confirm-dialog-header h3 {
+          margin: 0;
+          color: #fff;
+          font-size: 20px;
+          font-weight: 600;
+        }
+        .confirm-dialog-body {
+          padding: 24px;
+        }
+        .confirm-dialog-body p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.9);
+          line-height: 1.6;
+          font-size: 16px;
+        }
+        .confirm-dialog-footer {
+          padding: 20px 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+        .btn-confirm-cancel,
+        .btn-confirm-yes {
+          padding: 10px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: none;
+          font-size: 14px;
+        }
+        .btn-confirm-cancel {
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-confirm-cancel:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-confirm-yes {
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+          color: #fff;
+        }
+        .btn-confirm-yes:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  const messageEl = qs('confirmMessage');
+  if (messageEl) messageEl.textContent = message;
+  
+  confirmDialog.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  
+  const yesBtn = confirmDialog.querySelector('.btn-confirm-yes');
+  const cancelBtn = confirmDialog.querySelector('.btn-confirm-cancel');
+  
+  const closeDialog = () => {
+    confirmDialog.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+  
+  // Remove old listeners
+  const newYesBtn = yesBtn.cloneNode(true);
+  const newCancelBtn = cancelBtn.cloneNode(true);
+  yesBtn.replaceWith(newYesBtn);
+  cancelBtn.replaceWith(newCancelBtn);
+  
+  newYesBtn.addEventListener('click', () => {
+    closeDialog();
+    if (onConfirm) onConfirm();
+  });
+  
+  newCancelBtn.addEventListener('click', () => {
+    closeDialog();
+    if (onCancel) onCancel();
+  });
+}
 
 // Decide dashboard path by role
 function getDashboardPath(role) {
@@ -119,21 +362,88 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = qs('loginEmail').value.trim().toLowerCase();
       const password = qs('loginPassword').value;
 
-      if (!isValidEmail(email)) return setText('loginEmailError', 'Enter a valid email');
-      if (!password) return setText('loginPasswordError', 'Enter your password');
-
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ email, password })
-        });
-        const body = await res.json().catch(()=>null);
-        if (res.ok && body?.token) return saveTokenAndRedirect(body.token, body?.user?.role || body?.role);
-        setText('loginServerError', (body && (body.message || body.error)) || 'Login failed');
-      } catch (err) {
-        setText('loginServerError', 'Network error');
+      // Client-side validation
+      if (!isValidEmail(email)) {
+        setText('loginEmailError', 'Enter a valid email');
+        showInlineMessage('Please enter a valid email address', 'error');
+        return;
       }
+      if (!password) {
+        setText('loginPasswordError', 'Enter your password');
+        showInlineMessage('Please enter your password', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        setText('loginPasswordError', 'Password must be at least 6 characters');
+        showInlineMessage('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      // Show confirmation dialog
+      showConfirmDialog('Are you sure you want to login?', async () => {
+        // Disable submit button
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+
+        try {
+          const res = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email, password })
+          });
+          
+          const body = await res.json().catch(()=>null);
+          
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          
+          if (res.ok && body?.token) {
+            showInlineMessage('Login successful! Redirecting...', 'success');
+            setTimeout(() => {
+              localStorage.setItem('token', body.token);
+              localStorage.setItem('ocms_token', body.token);
+              localStorage.setItem('user', JSON.stringify(body.user || {}));
+              
+              // Redirect based on role
+              const role = body?.user?.role || body?.role;
+              if (role === 'INSTRUCTOR') {
+                window.location.href = '../instructor/instructor-dashboard.html';
+              } else if (role === 'ADMIN') {
+                window.location.href = '../admin/dashboard.html';
+              } else {
+                window.location.href = '../student/courses.html';
+              }
+            }, 1500);
+            return;
+          }
+          
+          // Handle login errors
+          const errorMsg = (body && (body.message || body.error)) || 'Login failed';
+          
+          if (res.status === 401 || errorMsg.toLowerCase().includes('invalid') || errorMsg.toLowerCase().includes('incorrect')) {
+            setText('loginServerError', 'Email or password is incorrect');
+            showInlineMessage('Email or password is incorrect. Please try again.', 'error');
+          } else if (res.status === 404 || errorMsg.toLowerCase().includes('not found')) {
+            setText('loginServerError', 'Account not found');
+            showInlineMessage('No account found with this email address.', 'error');
+          } else {
+            setText('loginServerError', errorMsg);
+            showInlineMessage(errorMsg, 'error');
+          }
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          setText('loginServerError', 'Network error - please check your connection');
+          showInlineMessage('Network error. Please check your connection and try again.', 'error');
+          console.error('Login error:', err);
+        }
+      }, () => {
+        // Cancelled
+        showInlineMessage('Login cancelled', 'info');
+      });
     });
   }
 

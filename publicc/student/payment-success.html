@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Success | EduVerse</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #0d1c42, #0b6b6b);
+      color: #eaf4f2;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .success-container {
+      max-width:500px;
+      background:rgba(255,255,255,0.08);
+      backdrop-filter:blur(20px);
+      border-radius:16px;
+      padding:40px;
+      text-align:center;
+      border:1px solid rgba(255,255,255,0.15);
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .success-icon {
+      width:80px;
+      height:80px;
+      margin:0 auto 20px;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:40px;
+    }
+
+    h1 {
+      color:#22c55e;
+      margin-bottom:10px;
+      font-size:2rem;
+    }
+
+    p {
+      margin-bottom:20px;
+      opacity:0.9;
+    }
+
+    .loader {
+      border:4px solid rgba(255,255,255,0.1);
+      border-top:4px solid #22c55e;
+      border-radius:50%;
+      width:40px;
+      height:40px;
+      animation:spin 1s linear infinite;
+      margin:20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .btn {
+      display:inline-block;
+      padding:12px 30px;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      color:#0f172a;
+      text-decoration:none;
+      border-radius:10px;
+      font-weight:700;
+      margin-top:20px;
+      transition:all 0.3s;
+    }
+
+    .btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 10px 20px rgba(34,197,94,0.4);
+    }
+
+    .error {
+      color:#ef4444;
+    }
+  </style>
+</head>
+<body>
+
+<div class="success-container">
+  <div class="success-icon">✓</div>
+  <h1 id="statusTitle">Verifying Payment...</h1>
+  <p id="statusMessage">Please wait while we confirm your payment.</p>
+  <div class="loader" id="loader"></div>
+  <div id="actionButtons"></div>
+</div>
+
+<script>
+const API_URL = "http://localhost:5000/api";
+
+async function verifyEsewaPayment() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const method = urlParams.get('method');
+  const courseId = urlParams.get('courseId');
+  const amount = urlParams.get('amount');
+  const txId = urlParams.get('txId');
+  const oid = urlParams.get('oid'); // eSewa order ID
+  const refId = urlParams.get('refId'); // eSewa reference ID
+
+  const loader = document.getElementById('loader');
+  const statusTitle = document.getElementById('statusTitle');
+  const statusMessage = document.getElementById('statusMessage');
+  const actionButtons = document.getElementById('actionButtons');
+
+  if (!oid || !refId) {
+    loader.style.display = 'none';
+    statusTitle.textContent = 'Payment Verification Failed';
+    statusTitle.className = 'error';
+    statusMessage.textContent = 'Invalid payment parameters. Please contact support.';
+    actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    
+    // Save payment to database
+    const response = await fetch(`${API_URL}/payments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        course_id: courseId,
+        amount: parseFloat(amount),
+        payment_method: 'ESEWA',
+        transaction_id: refId,
+        status: 'COMPLETED'
+      })
+    });
+
+    const data = await response.json();
+
+    loader.style.display = 'none';
+
+    if (response.ok) {
+      // Create enrollment record for advanced courses
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseType = urlParams.get('type');
+      
+      if (courseType === 'advanced') {
+        try {
+          const enrollResponse = await fetch(`${API_URL}/enrollments`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              course_id: courseId
+            })
+          });
+          
+          if (enrollResponse.ok) {
+            console.log('Successfully enrolled in advanced course');
+          } else {
+            console.error('Failed to enroll in course');
+          }
+        } catch (enrollError) {
+          console.error('Enrollment error:', enrollError);
+        }
+      }
+      
+      statusTitle.textContent = 'Payment Successful!';
+      statusMessage.textContent = 'Your payment has been confirmed. You now have access to the course.';
+      actionButtons.innerHTML = '<a href="courses.html?enrolled=true" class="btn">Go to My Courses</a>';
+    } else {
+      statusTitle.textContent = 'Payment Recording Failed';
+      statusTitle.className = 'error';
+      statusMessage.textContent = data.message || 'Failed to record payment. Please contact support with reference ID: ' + refId;
+      actionButtons.innerHTML = '<a href="student-dashboard.html" class="btn">Go to Dashboard</a>';
+    }
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    loader.style.display = 'none';
+    statusTitle.textContent = 'Verification Error';
+    statusTitle.className = 'error';
+    statusMessage.textContent = 'An error occurred while verifying your payment. Please contact support.';
+    actionButtons.innerHTML = '<a href="student-dashboard.html" class="btn">Go to Dashboard</a>';
+  }
+}
+
+// Run verification on page load
+verifyEsewaPayment();
+</script>
+
+</body>
+</html>

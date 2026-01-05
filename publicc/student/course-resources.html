@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduVerse | Course Resources</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #0b6b6b 50%, #10b981 100%);
+      color: #e5f7f6;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      margin-bottom: 28px;
+      backdrop-filter: blur(10px);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: rgba(229, 247, 246, 0.85);
+      margin-bottom: 12px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      padding: 8px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(229,247,246,0.8);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      color: #0b1220;
+      box-shadow: 0 6px 20px rgba(34,197,94,0.35);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filter-bar select {
+      flex: 1;
+      min-width: 160px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: #e5f7f6;
+    }
+
+    .filter-bar select option {
+      background: #0f172a;
+      color: #e5f7f6;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn.ghost {
+      background: rgba(255,255,255,0.08);
+      color: #e5f7f6;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    /* Resources */
+    .resources-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .resource-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .resource-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.notes { color:#93c5fd; border:1px solid rgba(59,130,246,.4); }
+    .badge.questions { color:#fdba74; border:1px solid rgba(251,146,60,.4); }
+    .badge.preboard { color:#6ee7b7; border:1px solid rgba(16,185,129,.4); }
+    .badge.board { color:#fcd34d; border:1px solid rgba(248,180,0,.4); }
+    .badge.zoom { color:#a78bfa; border:1px solid rgba(167,139,250,.4); }
+
+    .zoom-link {
+      color: #22c55e;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 12px;
+      border: 1px solid #22c55e;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .zoom-link:hover {
+      background: #22c55e;
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px;
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: rgba(229,247,246,0.7);
+    }
+
+    @media (max-width: 768px) {
+      .tabs { flex-direction: column; }
+      .filter-bar { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>📚 Course Resources</h1>
+      <p>Access notes, questions, preboard, and board materials</p>
+      <button class="btn" onclick="window.location.href='student-dashboard.html'">
+        ← Back to Dashboard
+      </button>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="course">Course Resources</button>
+      <button class="tab-btn" data-tab="lesson">Lesson Resources</button>
+    </div>
+
+    <!-- Course Resources -->
+    <section id="course-tab" class="tab-content active">
+      <div class="filter-bar">
+        <select id="courseSelect">
+          <option value="">All Courses</option>
+        </select>
+        <select id="courseTypeFilter">
+          <option value="">All Types</option>
+          <option value="notes">Notes</option>
+          <option value="questions">Questions</option>
+          <option value="preboard">Preboard</option>
+          <option value="board">Board</option>
+          <option value="zoom">Zoom Meetings</option>
+        </select>
+        <button class="btn ghost" onclick="loadCourseResources()">Filter</button>
+      </div>
+
+      <div id="courseResourcesList" class="resources-list"></div>
+    </section>
+
+    <!-- Lesson Resources -->
+    <section id="lesson-tab" class="tab-content">
+      <div class="filter-bar">
+        <select id="lessonCourseSelect">
+          <option value="">All Courses</option>
+        </select>
+        <select id="lessonSelect">
+          <option value="">All Lessons</option>
+        </select>
+        <select id="lessonTypeFilter">
+          <option value="">All Types</option>
+          <option value="notes">Notes</option>
+          <option value="questions">Questions</option>
+          <option value="preboard">Preboard</option>
+          <option value="zoom">Zoom Meetings</option>
+        </select>
+        <button class="btn ghost" onclick="loadLessonResources()">Filter</button>
+      </div>
+
+      <div id="lessonResourcesList" class="resources-list"></div>
+    </section>
+  </div>
+
+  <script defer src="js/student-resources.js"></script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Course Payment | EduVerse</title>
 
   <style>
@@ -9,6 +11,8 @@
       --accent:#22c55e;
       --text:#eaf4f2;
       --bg-card:rgba(255,255,255,0.08);
+      --khalti:#5C2D91;
+      --esewa:#60BB46;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -24,9 +28,13 @@
     .navbar {
       display:flex;
       justify-content:space-between;
+      align-items:center;
       padding:16px 40px;
       background:rgba(255,255,255,0.05);
       backdrop-filter:blur(15px);
+      position:sticky;
+      top:0;
+      z-index:100;
     }
 
     .logo {
@@ -41,55 +49,201 @@
       margin-left:20px;
       text-decoration:none;
       color:var(--text);
+      transition:color 0.3s;
+    }
+
+    .navbar a:hover {
+      color:var(--accent);
     }
 
     /* MAIN */
     .payment-container {
-      max-width:700px;
+      max-width:800px;
       margin:40px auto;
       padding:20px;
     }
 
+    h1 {
+      text-align:center;
+      margin-bottom:30px;
+      font-size:2rem;
+    }
+
     .card {
       background: var(--bg-card);
-      border-radius:14px;
-      padding:24px;
+      backdrop-filter:blur(20px);
+      border-radius:16px;
+      padding:28px;
       margin-bottom:24px;
-      border:1px solid rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.15);
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
     }
 
     .card h2 {
-      margin-bottom:12px;
+      margin-bottom:16px;
+      font-size:1.5rem;
+      color:#fff;
+    }
+
+    .course-info {
+      display:grid;
+      gap:12px;
+    }
+
+    .info-row {
+      display:flex;
+      justify-content:space-between;
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+
+    .info-row:last-child {
+      border-bottom:none;
+      font-weight:700;
+      font-size:1.2rem;
+      color:var(--accent);
     }
 
     .form-group {
-      margin-bottom:16px;
+      margin-bottom:20px;
     }
 
     label {
       display:block;
-      margin-bottom:6px;
+      margin-bottom:8px;
       font-weight:600;
+      color:var(--text);
     }
 
     input, select {
       width:100%;
-      padding:12px;
+      padding:14px;
       border-radius:10px;
-      border:1px solid rgba(54, 134, 180, 0.2);
-      background:rgba(182, 109, 109, 0.05);
-      color:rgb(152, 122, 122);
+      border:2px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.05);
+      color:var(--text);
+      font-size:15px;
+      transition:all 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline:none;
+      border-color:var(--accent);
+      background:rgba(255,255,255,0.08);
+    }
+
+    input::placeholder {
+      color:rgba(234,244,242,0.5);
+    }
+
+    /* Payment Method Buttons */
+    .payment-methods {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    .payment-method-btn {
+      padding:20px;
+      border:3px solid rgba(255,255,255,0.2);
+      border-radius:12px;
+      background:rgba(255,255,255,0.05);
+      cursor:pointer;
+      transition:all 0.3s;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+    }
+
+    .payment-method-btn:hover {
+      transform:translateY(-3px);
+      box-shadow:0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    .payment-method-btn.active {
+      border-color:var(--accent);
+      background:rgba(34,197,94,0.1);
+    }
+
+    .payment-method-btn img {
+      height:50px;
+      object-fit:contain;
+    }
+
+    .payment-method-btn span {
+      font-weight:700;
+      font-size:16px;
+    }
+
+    .khalti-btn.active {
+      border-color:var(--khalti);
+      background:rgba(92,45,145,0.1);
+    }
+
+    .esewa-btn.active {
+      border-color:var(--esewa);
+      background:rgba(96,187,70,0.1);
     }
 
     .pay-btn {
       width:100%;
-      padding:14px;
+      padding:16px;
       border:none;
       border-radius:12px;
       font-weight:700;
+      font-size:16px;
       background: linear-gradient(135deg, #22c55e, #0ea5e9);
       color:#0f172a;
       cursor:pointer;
+      transition:all 0.3s;
+      box-shadow:0 6px 20px rgba(34,197,94,0.4);
+    }
+
+    .pay-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 10px 30px rgba(34,197,94,0.5);
+    }
+
+    .pay-btn:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .message {
+      padding:12px;
+      border-radius:8px;
+      margin-top:16px;
+      text-align:center;
+      font-weight:600;
+    }
+
+    .message.success {
+      background:rgba(34,197,94,0.2);
+      color:#22c55e;
+      border:1px solid #22c55e;
+    }
+
+    .message.error {
+      background:rgba(239,68,68,0.2);
+      color:#ef4444;
+      border:1px solid #ef4444;
+    }
+
+    .hidden {
+      display:none;
+    }
+
+    @media (max-width:768px) {
+      .payment-methods {
+        grid-template-columns:1fr;
+      }
+      
+      .navbar {
+        padding:16px 20px;
+      }
     }
   </style>
 </head>
@@ -111,34 +265,68 @@
 
   <!-- COURSE INFO -->
   <div class="card">
-    <h2>Course Information</h2>
-    <p><strong>Course:</strong> Web Development</p>
-    <p><strong>Instructor:</strong> Dr. Sharma</p>
-    <p><strong>Price:</strong> NPR 1500</p>
+    <h2>📚 Course Information</h2>
+    <div class="course-info">
+      <div class="info-row">
+        <span>Course:</span>
+        <strong id="courseName">Web Development Bootcamp</strong>
+      </div>
+      <div class="info-row">
+        <span>Instructor:</span>
+        <strong id="instructorName">Dr. Sharma</strong>
+      </div>
+      <div class="info-row">
+        <span>Duration:</span>
+        <strong>3 Months</strong>
+      </div>
+      <div class="info-row">
+        <span>Total Amount:</span>
+        <strong id="coursePrice">NPR 15,000</strong>
+      </div>
+    </div>
   </div>
 
-  <!-- PAYMENT -->
-  <form class="card">
-    <h2>Payment Method</h2>
-
-    <div class="form-group">
-      <label>Choose Method</label>
-      <select>
-        <option>Khalti</option>
-        <option>Esewa</option>
-        <option>Bank Transfer</option>
-      </select>
+  <!-- PAYMENT METHOD -->
+  <div class="card">
+    <h2>💳 Select Payment Method</h2>
+    
+    <div class="payment-methods">
+      <div class="payment-method-btn khalti-btn" data-method="khalti">
+        <img src="https://web.khalti.com/static/img/logo1.png" alt="Khalti">
+        <span>Khalti</span>
+      </div>
+      
+      <div class="payment-method-btn esewa-btn" data-method="esewa">
+        <img src="https://esewa.com.np/common/images/esewa_logo.png" alt="eSewa">
+        <span>eSewa</span>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Transaction ID</label>
-      <input type="text" placeholder="Enter Transaction ID">
-    </div>
+    <form id="paymentForm">
+      <div class="form-group">
+        <label for="phoneNumber">Phone/Email</label>
+        <input type="text" id="phoneNumber" placeholder="Enter your Khalti/eSewa phone or email" required>
+      </div>
 
-    <button class="pay-btn">Pay Now</button>
-  </form>
+      <div class="form-group">
+        <label for="amount">Amount (NPR)</label>
+        <input type="number" id="amount" value="15000" readonly>
+      </div>
+
+      <button type="submit" class="pay-btn" id="payBtn">
+        Proceed to Payment
+      </button>
+    </form>
+
+    <div id="paymentMessage" class="message hidden"></div>
+  </div>
 
 </main>
+
+<!-- Khalti Checkout SDK -->
+<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+
+<script src="payment.js"></script>
 
 </body>
 </html>

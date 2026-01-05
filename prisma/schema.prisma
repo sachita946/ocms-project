@@ -71,12 +71,14 @@ model User {
 
   courses_created Course[] @relation("CourseInstructor")
 
-  notes         VideoNote[]
-  reviews       Review[]
-  certificates  Certificate[]
-  payments      Payment[]
-  activities    Activity[]
-  notifications Notification[]
+  notes           VideoNote[]
+  reviews         Review[]
+  certificates    Certificate[]
+  payments        Payment[]
+  activities      Activity[]
+  notifications   Notification[]
+  courseResources CourseResource[]
+  lessonResources LessonResource[]
 }
 
 model StudentProfile {
@@ -107,9 +109,38 @@ model InstructorProfile {
   bio             String?
   expertise_area  String?
   website         String?
+  qualifications  String?
+  experience_years Int?
   is_verified     Boolean @default(false)
+  is_pending_approval Boolean @default(false)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Semester {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique // "Semester 1", "Semester 2", etc.
+  semester_num Int       @unique // 1-8
+  description  String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  subjects Subject[]
+}
+
+model Subject {
+  id          Int       @id @default(autoincrement())
+  semester_id Int
+  title       String    // Course subject title
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  semester Semester @relation(fields: [semester_id], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+
+  @@unique([semester_id, title])
+  @@index([semester_id])
 }
 
 model Course {
@@ -130,30 +161,37 @@ model Course {
   requirements      String[]
   learning_outcomes String[]
 
-  instructor   User          @relation("CourseInstructor", fields: [instructor_id], references: [id], onDelete: Cascade)
+  instructor   User             @relation("CourseInstructor", fields: [instructor_id], references: [id], onDelete: Cascade)
   lessons      Lesson[]
-  enrollments  Enrollment[]  @relation("CourseEnrollments")
-  certificates Certificate[] @relation("CourseCertificates")
-  payments     Payment[]     @relation("CoursePayments")
-  reviews      Review[]      @relation("CourseReviews")
+  enrollments  Enrollment[]     @relation("CourseEnrollments")
+  certificates Certificate[]    @relation("CourseCertificates")
+  payments     Payment[]        @relation("CoursePayments")
+  reviews      Review[]         @relation("CourseReviews")
   activities   Activity[]
+  resources    CourseResource[]
 }
 
 model Lesson {
   id           Int         @id @default(autoincrement())
   course_id    Int
+  subject_id   Int
   title        String
   content_type ContentType
   content_url  String?
   duration     Int?
   updated_at   DateTime    @updatedAt
 
-  course     Course      @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course     Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  subject    Subject        @relation(fields: [subject_id], references: [id], onDelete: Cascade)
   resources  Resource[]
   notes      VideoNote[]
   quiz       Quiz?
   progress   Progress[]
   activities Activity[]
+  lessonResources LessonResource[]
+
+  @@index([course_id])
+  @@index([subject_id])
 }
 
 model VideoNote {
@@ -316,4 +354,40 @@ model Payment {
   course  Course         @relation("CoursePayments", fields: [course_id], references: [id], onDelete: Cascade)
   User    User?          @relation(fields: [userId], references: [id])
   userId  String?
+}
+
+model CourseResource {
+  id          Int       @id @default(autoincrement())
+  course_id   Int
+  type        String    // notes, questions, preboard, zoom
+  title       String
+  content     String    @db.Text
+  zoom_link   String?
+  user_id     String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([course_id, type])
+  @@index([user_id])
+}
+
+model LessonResource {
+  id        Int       @id @default(autoincrement())
+  lesson_id Int
+  type      String    // notes, questions, preboard, zoom
+  title     String
+  content   String    @db.Text
+  zoom_link String?
+  user_id   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lesson_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([lesson_id, type])
+  @@index([user_id])
 }

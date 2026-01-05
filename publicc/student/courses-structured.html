@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVerse | Courses by Semester</title>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --accent: #22c55e;
+      --text: #fff;
+      --muted: rgba(255, 255, 255, 0.8);
+      --bg-card: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, #e0d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .navbar nav ul {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .navbar nav a {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .navbar nav a:hover,
+    .navbar nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .page-title h1 {
+      font-size: 36px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff, #d4b3ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-title p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+    }
+
+    .semester-section {
+      margin-bottom: 48px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .semester-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .subject-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .subject-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .subject-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .subject-desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .resources-preview {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .resource-tag {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .resource-tag:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .resource-tag.notes {
+      background: rgba(34, 197, 94, 0.3);
+      color: #7ee0a3;
+    }
+
+    .resource-tag.preboard {
+      background: rgba(168, 85, 247, 0.3);
+      color: #d8b4fe;
+    }
+
+    .resource-tag.board {
+      background: rgba(248, 180, 0, 0.3);
+      color: #fde047;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 32px;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      width: 100%;
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(40px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal h3 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .resource-item {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .resource-item-title {
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .resource-item-type {
+      display: inline-block;
+      font-size: 11px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .resource-item-content {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 14px;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      color: #fff;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      margin-top: 60px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px;
+      }
+
+      .navbar nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .page-title h1 {
+        font-size: 24px;
+      }
+
+      .subjects-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">EduVerse</div>
+    <nav>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="courses.html" class="active">Courses</a></li>
+        <li><a href="student-dashboard.html">Dashboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="page-title">
+      <h1>📚 Courses by Semester</h1>
+      <p>Browse courses organized by semester, subject, and faculty</p>
+    </div>
+
+    <div id="semesters-container"></div>
+  </main>
+
+  <div id="resourceModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeResourceModal()">×</button>
+      <h3 id="modalTitle">Resources</h3>
+      <div id="modalResources"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 EduVerse. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem('ocms_token');
+    const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
+    let allSemesters = [];
+    let allSubjects = [];
+    let allResources = {};
+    let allLessons = {};
+
+    async function loadData() {
+      try {
+        // Load semesters
+        const semRes = await fetch('/api/semesters', { headers });
+        const semData = await semRes.json();
+        allSemesters = semData.semesters || [];
+        if (!Array.isArray(allSemesters)) allSemesters = [];
+
+        // Load subjects (with semester relation)
+        const subRes = await fetch('/api/subjects', { headers });
+        const subData = await subRes.json();
+        allSubjects = subData.subjects || subData;
+        if (!Array.isArray(allSubjects)) allSubjects = [];
+
+        // Load lesson resources (notes, preboard, board)
+        const resRes = await fetch('/api/lesson-resources', { headers });
+        const resData = await resRes.json();
+        const resources = resData.resources || resData;
+        if (Array.isArray(resources)) {
+          resources.forEach(r => {
+            if (!allResources[r.lesson_id]) allResources[r.lesson_id] = [];
+            allResources[r.lesson_id].push(r);
+          });
+        }
+
+        // Load lessons for each subject
+        for (const subject of allSubjects) {
+          try {
+            const lessonRes = await fetch(`/api/lessons?subject_id=${subject.id}`, { headers });
+            const lessonData = await lessonRes.json();
+            const lessons = lessonData.lessons || lessonData;
+            if (Array.isArray(lessons)) {
+              allLessons[subject.id] = lessons;
+            }
+          } catch (err) {
+            console.error(`Error loading lessons for subject ${subject.id}:`, err);
+            allLessons[subject.id] = [];
+          }
+        }
+
+        renderSemesters();
+      } catch (err) {
+        console.error('Load error:', err);
+      }
+    }
+
+    function renderSemesters() {
+      const container = document.getElementById('semesters-container');
+      if (!allSemesters.length) {
+        container.innerHTML = '<div class="empty-state"><h3>No semesters available</h3></div>';
+        return;
+      }
+
+      container.innerHTML = allSemesters.map(sem => {
+        const semSubjects = allSubjects.filter(s => s.semester_id === sem.id);
+        if (!semSubjects.length) return '';
+
+        return `
+          <section class="semester-section">
+            <h2 class="semester-title">${sem.name}</h2>
+            <div class="subjects-grid">
+              ${semSubjects.map(subj => renderSubject(subj)).join('')}
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    function renderSubject(subject) {
+      // Get all lessons for this subject
+      const subjectLessons = allLessons[subject.id] || [];
+      
+      // Collect resources from all lessons in this subject
+      const subjectResources = [];
+      subjectLessons.forEach(lesson => {
+        const lessonRes = allResources[lesson.id] || [];
+        subjectResources.push(...lessonRes);
+      });
+
+      const noteCount = subjectResources.filter(r => r.type === 'notes').length;
+      const pbCount = subjectResources.filter(r => r.type === 'preboard').length;
+      const bCount = subjectResources.filter(r => r.type === 'board').length;
+
+      return `
+        <div class="subject-card">
+          <h3 class="subject-title">${subject.title}</h3>
+          <p class="subject-desc">${subject.description || 'Subject materials and resources'}</p>
+          <div class="resources-preview">
+            ${noteCount > 0 ? `<span class="resource-tag notes" onclick="viewResources(${subject.id}, 'notes')">📝 ${noteCount} Notes</span>` : ''}
+            ${pbCount > 0 ? `<span class="resource-tag preboard" onclick="viewResources(${subject.id}, 'preboard')">📋 ${pbCount} Preboard</span>` : ''}
+            ${bCount > 0 ? `<span class="resource-tag board" onclick="viewResources(${subject.id}, 'board')">🏁 ${bCount} Board</span>` : ''}
+            ${!noteCount && !pbCount && !bCount ? '<p style="color:rgba(255,255,255,0.6);font-size:13px;">No resources yet</p>' : ''}
+          </div>
+          <a href="lesson.html?subject_id=${subject.id}" style="margin-top:12px;display:inline-block;padding:10px 16px;background:rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;cursor:pointer;">
+            View Lessons →
+          </a>
+        </div>
+      `;
+    }
+
+    window.viewResources = function(subjectId, type) {
+      // Get all lessons for this subject
+      const subjectLessons = allLessons[subjectId] || [];
+      
+      // Collect resources from all lessons in this subject
+      const subjectResources = [];
+      subjectLessons.forEach(lesson => {
+        const lessonRes = allResources[lesson.id] || [];
+        subjectResources.push(...lessonRes);
+      });
+
+      const filtered = subjectResources.filter(r => r.type === type);
+      const modal = document.getElementById('resourceModal');
+      const title = document.getElementById('modalTitle');
+      const content = document.getElementById('modalResources');
+
+      const typeLabel = { notes: 'Notes', preboard: 'Preboard Questions', board: 'Board Questions' }[type] || type;
+      title.textContent = `${typeLabel}`;
+
+      if (!filtered.length) {
+        content.innerHTML = '<p style="color:rgba(255,255,255,0.7);">No resources found</p>';
+      } else {
+        content.innerHTML = filtered.map(r => `
+          <div class="resource-item">
+            <div class="resource-item-title">${r.title}</div>
+            <div class="resource-item-type">${r.type}</div>
+            <div class="resource-item-content">${r.content}</div>
+          </div>
+        `).join('');
+      }
+
+      modal.classList.add('open');
+    };
+
+    window.closeResourceModal = function() {
+      document.getElementById('resourceModal').classList.remove('open');
+    };
+
+    document.getElementById('resourceModal').addEventListener('click', (e) => {
+      if (e.target.id === 'resourceModal') closeResourceModal();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>

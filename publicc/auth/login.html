@@ -6,37 +6,315 @@
 <title>EduVerse — Login</title>
 
 <style>
-:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--muted:#9fb5b9;--bg-card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.15)}
+:root{
+  --primary:#0f172a;
+  --accent:#22c55e;
+  --text:#eaf4f2;
+  --muted:#9fb5b9;
+  --bg-card:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.15);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);background-attachment:fixed;color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
-.container{width:100%;max-width:460px}
-.login-card{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px 28px;box-shadow:0 10px 40px rgba(0,0,0,0.25);transition:all 0.3s}
-.login-card:hover{border-color:rgba(255,255,255,0.12);box-shadow:0 16px 55px rgba(0,0,0,0.3)}
-.title{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;background:linear-gradient(135deg,var(--accent),#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.form input{width:100%;padding:14px 16px;margin-bottom:14px;font-size:15px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--text);transition:all 0.2s}
+
+body{
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);
+  background-attachment:fixed;
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  overflow:hidden;
+}
+
+/* Split Screen Container */
+.split-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  width:100%;
+  height:100vh;
+  max-width:100%;
+}
+
+/* Left Side - Image */
+.left-section{
+  position:relative;
+  background:linear-gradient(135deg, rgba(34,197,94,0.3), rgba(14,165,233,0.3)), url('../background/login.png') center center / cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:60px;
+  overflow:hidden;
+}
+
+.left-section::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(15,23,42,0.4);
+  z-index:1;
+}
+
+.left-content{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  max-width:500px;
+}
+
+.left-content h1{
+  font-size:48px;
+  font-weight:900;
+  margin-bottom:20px;
+  background:linear-gradient(135deg,#22c55e,#0ea5e9);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+
+.left-content p{
+  font-size:20px;
+  color:#e2e8f0;
+  line-height:1.6;
+  text-shadow:0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* Right Side - Login Form */
+.right-section{
+  background:rgba(15,23,42,0.95);
+  backdrop-filter:blur(20px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:60px;
+  overflow-y:auto;
+}
+
+.container{
+  width:100%;
+  max-width:460px;
+}
+
+.login-card{
+  background:transparent;
+  padding:0;
+}
+
+.title{
+  font-size:32px;
+  font-weight:900;
+  text-align:center;
+  margin-bottom:30px;
+  color:#fff;
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:30px;
+  font-size:15px;
+}
+
+.form input{
+  width:100%;
+  padding:16px 18px;
+  margin-bottom:14px;
+  font-size:15px;
+  border-radius:12px;
+  border:2px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);
+  color:var(--text);
+  transition:all 0.3s;
+}
+
 .form input::placeholder{color:var(--muted)}
-.form input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.1);box-shadow:0 0 0 3px rgba(34,197,94,0.15)}
-.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a;margin-top:6px;box-shadow:0 6px 20px rgba(34,197,94,0.35)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(34,197,94,0.45)}
-.btn-secondary{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,0.2);margin-top:10px}
-.btn-secondary:hover{background:rgba(255,255,255,0.08);border-color:var(--accent);color:var(--accent)}
-.social-login{margin-top:16px;display:flex;flex-direction:column;gap:10px}
-.btn-google{background:#fff;border:1px solid #e5e7eb;color:#000}
-.btn-google:hover{background:#f8fafc}
-.btn-facebook{background:#1877F2;color:#fff}
-.btn-facebook:hover{background:#166fe5}
-hr{margin:20px 0;border:none;border-top:1px solid rgba(255,255,255,0.15)}
-.signup-link{text-align:center;margin-top:18px;font-size:14px}
-.signup-link a{color:#22c55e;font-weight:700;text-decoration:none}
-.signup-link a:hover{text-decoration:underline}
-.error{color:#ef4444;font-size:13px;margin:-8px 0 10px}
-.server-error{color:#ef4444;font-size:13px;margin-top:10px}
-.muted{color:var(--muted);font-size:13px;margin-top:8px}
+
+.form input:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 0 0 4px rgba(34,197,94,0.15);
+  transform:translateY(-2px);
+}
+
+.btn{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#0ea5e9);
+  color:#0f172a;
+  margin-top:10px;
+  box-shadow:0 8px 25px rgba(34,197,94,0.4);
+}
+
+.btn-primary:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 35px rgba(34,197,94,0.5);
+}
+
+.btn-secondary{
+  background:transparent;
+  color:var(--text);
+  border:2px solid rgba(255,255,255,0.15);
+  margin-top:12px;
+}
+
+.btn-secondary:hover{
+  background:rgba(255,255,255,0.08);
+  border-color:var(--accent);
+  color:var(--accent);
+  transform:translateY(-2px);
+}
+
+.social-login{
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.btn-google{
+  background:#fff;
+  border:2px solid #e5e7eb;
+  color:#000;
+}
+
+.btn-google:hover{
+  background:#f8fafc;
+  transform:translateY(-2px);
+}
+
+.btn-facebook{
+  background:#1877F2;
+  color:#fff;
+}
+
+.btn-facebook:hover{
+  background:#166fe5;
+  transform:translateY(-2px);
+}
+
+hr{
+  margin:25px 0;
+  border:none;
+  border-top:1px solid rgba(255,255,255,0.15);
+}
+
+.signup-link{
+  text-align:center;
+  margin-top:24px;
+  font-size:15px;
+}
+
+.signup-link a{
+  color:#22c55e;
+  font-weight:700;
+  text-decoration:none;
+}
+
+.signup-link a:hover{
+  text-decoration:underline;
+}
+
+.error{
+  color:#ef4444;
+  font-size:13px;
+  margin:-8px 0 10px;
+}
+
+.server-error{
+  color:#ef4444;
+  font-size:13px;
+  margin-top:10px;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:10px;
+}
+
 .hidden{display:none}
-.back-btn{position:fixed;bottom:20px;left:20px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.12);padding:10px 14px;border-radius:10px;cursor:pointer;color:var(--text)}
-.back-btn:hover{border-color:var(--accent);color:var(--accent)}
-@media (max-width:480px){.container{max-width:100%}.login-card{padding:24px}}
+
+.back-btn{
+  position:fixed;
+  top:30px;
+  left:30px;
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.2);
+  padding:12px 20px;
+  border-radius:12px;
+  cursor:pointer;
+  color:var(--text);
+  font-weight:600;
+  transition:all 0.3s;
+  z-index:1000;
+}
+
+.back-btn:hover{
+  background:rgba(255,255,255,0.15);
+  border-color:var(--accent);
+  color:var(--accent);
+  transform:translateX(-5px);
+}
+
+/* Responsive Design */
+@media (max-width:968px){
+  .split-container{
+    grid-template-columns:1fr;
+  }
+  
+  .left-section{
+    display:none;
+  }
+  
+  .right-section{
+    padding:40px 20px;
+  }
+  
+  .container{
+    max-width:100%;
+  }
+  
+  .back-btn{
+    top:20px;
+    left:20px;
+  }
+}
+
+@media (max-width:480px){
+  .right-section{
+    padding:30px 20px;
+  }
+  
+  .title{
+    font-size:26px;
+  }
+  
+  .left-content h1{
+    font-size:36px;
+  }
+  
+  .left-content p{
+    font-size:16px;
+  }
+}
 </style>
 
 <script type="module" defer src="js/login.js"></script>
@@ -45,14 +323,31 @@ hr{margin:20px 0;border:none;border-top:1px solid rgba(255,255,255,0.15)}
 
 <body>
 
-<div class="container">
-  <div class="login-card">
+<button class="back-btn" onclick="window.location.href='../index.html'">
+  ← Back to Home
+</button>
 
-    <h2 class="title">Log in to EduVerse</h2>
+<div class="split-container">
+  
+  <!-- LEFT SECTION - Image & Branding -->
+  <div class="left-section">
+    <div class="left-content">
+      <h1>Welcome Back to EduVerse</h1>
+      <p>Continue your learning journey and unlock your full potential with our comprehensive course management system.</p>
+    </div>
+  </div>
 
-    <!-- LOGIN -->
-    <form id="loginForm" class="form" novalidate>
-      <input id="loginEmail" type="email" placeholder="Email address" required>
+  <!-- RIGHT SECTION - Login Form -->
+  <div class="right-section">
+    <div class="container">
+      <div class="login-card">
+
+        <h2 class="title">Log in to Your Account</h2>
+        <p class="subtitle">Enter your credentials to access your dashboard</p>
+
+        <!-- LOGIN -->
+        <form id="loginForm" class="form" novalidate>
+          <input id="loginEmail" type="email" placeholder="Email address" required>
       <div class="error" id="loginEmailError"></div>
 
       <input id="loginPassword" type="password" placeholder="Password" required>
@@ -72,54 +367,53 @@ hr{margin:20px 0;border:none;border-top:1px solid rgba(255,255,255,0.15)}
 
       <div class="server-error" id="loginServerError"></div>
 
-      <div class="signup-link">
-        Don’t have an account? <a href="signup.html">Sign up</a>
+          <div class="signup-link">
+            Don't have an account? <a href="signup.html">Sign up</a>
+          </div>
+        </form>
+
+        <!-- FORGOT -->
+        <div id="forgot" class="hidden">
+          <hr>
+          <h3>Find your account</h3>
+
+          <form id="forgotForm" class="form" novalidate>
+            <input id="forgotEmail" type="email" placeholder="Email address" required>
+            <div class="error" id="forgotEmailError"></div>
+
+            <button type="submit" class="btn btn-primary">Send reset link</button>
+            <button type="button" id="cancelForgot" class="btn btn-secondary">Cancel</button>
+
+            <div class="server-error" id="forgotServerError"></div>
+            <div class="muted" id="forgotSuccess"></div>
+          </form>
+        </div>
+
+        <!-- RESET -->
+        <div id="reset" class="hidden">
+          <hr>
+          <h3>Reset your password</h3>
+
+          <form id="resetForm" class="form" novalidate>
+            <input id="resetToken" type="text" placeholder="Reset token" required>
+            <div class="error" id="resetTokenError"></div>
+
+            <input id="newPassword" type="password" placeholder="New password" required>
+            <div class="error" id="newPasswordError"></div>
+
+            <button type="submit" class="btn btn-primary">Reset Password</button>
+            <button type="button" id="cancelReset" class="btn btn-secondary">Cancel</button>
+
+            <div class="server-error" id="resetServerError"></div>
+            <div class="muted" id="resetSuccess"></div>
+          </form>
+        </div>
+
       </div>
-    </form>
-
-    <!-- FORGOT -->
-    <div id="forgot" class="hidden">
-      <hr>
-      <h3>Find your account</h3>
-
-      <form id="forgotForm" class="form" novalidate>
-        <input id="forgotEmail" type="email" placeholder="Email address" required>
-        <div class="error" id="forgotEmailError"></div>
-
-        <button type="submit" class="btn btn-primary">Send reset link</button>
-        <button type="button" id="cancelForgot" class="btn btn-secondary">Cancel</button>
-
-        <div class="server-error" id="forgotServerError"></div>
-        <div class="muted" id="forgotSuccess"></div>
-      </form>
     </div>
-
-    <!-- RESET -->
-    <div id="reset" class="hidden">
-      <hr>
-      <h3>Reset your password</h3>
-
-      <form id="resetForm" class="form" novalidate>
-        <input id="resetToken" type="text" placeholder="Reset token" required>
-        <div class="error" id="resetTokenError"></div>
-
-        <input id="newPassword" type="password" placeholder="New password" required>
-        <div class="error" id="newPasswordError"></div>
-
-        <button type="submit" class="btn btn-primary">Reset Password</button>
-        <button type="button" id="cancelReset" class="btn btn-secondary">Cancel</button>
-
-        <div class="server-error" id="resetServerError"></div>
-        <div class="muted" id="resetSuccess"></div>
-      </form>
-    </div>
-
   </div>
-</div>
 
-<button class="back-btn" onclick="window.location.href='../index.html'">
-  ← Back to Home
-</button>
+</div>
 
 </body>
 </html>

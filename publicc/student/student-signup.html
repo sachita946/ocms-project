@@ -17,6 +17,8 @@ h2{font-size:2rem;font-weight:800;margin-bottom:12px;background:linear-gradient(
 .lead{color:var(--muted);margin-bottom:32px;font-size:1rem;line-height:1.6}
 form{display:flex;flex-direction:column;gap:20px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.input-group{margin-bottom:20px}
+.half{grid-column:span 1}
 .label{display:block;margin-bottom:8px;font-weight:600;font-size:0.9rem;color:var(--text);letter-spacing:0.3px}
 .input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-size:1rem;font-family:inherit;transition:all 0.2s;appearance:none}
 .input:focus{outline:0;border-color:var(--accent);background:rgba(255,255,255,0.08);box-shadow:0 0 0 3px rgba(34,197,94,0.15)}
@@ -54,115 +56,135 @@ input[type="file"]::file-selector-button:hover{transform:translateY(-2px);box-sh
       <p class="lead">Fill in your details to create your student account.</p>
       <form id="studentForm">
         <div class="row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Full Name *</label>
             <input class="input" type="text" id="studentName" placeholder="Your full name">
             <small class="error" id="errName"></small>
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Date of Birth</label>
             <input class="input" type="date" id="studentDob">
-            <small class ="error" id="errDob"></small>
+            <small class="error" id="errDob"></small>
           </div>
         </div>
 
         <div class="row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Father's Name</label>
             <input class="input" type="text" id="studentFatherName">
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Mother's Name</label>
             <input class="input" type="text" id="studentMotherName">
           </div>
         </div>
 
         <div class="row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Gender</label>
             <select class="input" id="studentGender">
+              <option value="">Select Gender</option>
               <option>Male</option>
               <option>Female</option>
               <option>Other</option>
             </select>
             <small class="error" id="errGender"></small>
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Phone Number</label>
             <input class="input" type="tel" id="studentPhone">
             <small class="error" id="errPhone"></small>
           </div>
         </div>
 
-        <label class="label">Email *</label>
-        <input class="input" type="email" id="studentEmail" placeholder="you@example.com">
-        <small class="error" id="errEmail"></small>
+        <div class="input-group">
+          <label class="label">Email *</label>
+          <input class="input" type="email" id="studentEmail" placeholder="you@example.com">
+          <small class="error" id="errEmail"></small>
+        </div>
 
-        <label class="label">Address</label>
-        <input class="input" type="text" id="studentAddress">
+        <div class="input-group">
+          <label class="label">Address</label>
+          <input class="input" type="text" id="studentAddress">
+        </div>
 
         <div class="row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Country</label>
             <input class="input" type="text" id="studentCountry">
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">City</label>
             <input class="input" type="text" id="studentCity">
           </div>
         </div>
 
-        <label class="label">Postal Code</label>
-        <input class="input" type="text" id="studentPostal">
-        <small class="error" id="errPostal"></small>
+        <div class="input-group">
+          <label class="label">Postal Code</label>
+          <input class="input" type="text" id="studentPostal">
+          <small class="error" id="errPostal"></small>
+        </div>
 
         <div class="row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Password *</label>
             <input class="input" type="password" id="studentPassword">
             <small class="error" id="errPassword"></small>
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Confirm Password *</label>
             <input class="input" type="password" id="studentConfirmPassword">
             <small class="error" id="errConfirmPassword"></small>
           </div>
         </div>
 
-        <label class="label">Education Level</label>
-        <select class="input" id="studentEducation">
-          <option>High School</option>
-          <option>Bachelor</option>
-          <option>Master</option>
-          <option>Other</option>
-        </select>
-        <small class="error" id="errEducation"></small>
+        <div class="input-group">
+          <label class="label">Education Level</label>
+          <select class="input" id="studentEducation">
+            <option value="">Select Education Level</option>
+            <option>High School</option>
+            <option>Bachelor</option>
+            <option>Master</option>
+            <option>Other</option>
+          </select>
+          <small class="error" id="errEducation"></small>
+        </div>
 
-        <label class="label">Skills (comma separated)</label>
-        <input class="input" type="text" id="studentSkills" placeholder="Python, Excel, SQL">
-        <small class="error" id="errSkills"></small>
+        <div class="input-group">
+          <label class="label">Skills (comma separated)</label>
+          <input class="input" type="text" id="studentSkills" placeholder="Python, Excel, SQL">
+          <small class="error" id="errSkills"></small>
+        </div>
 
-        <label class="label">Hobbies</label>
-        <input class="input" type="text" id="studentHobbies" placeholder="Reading, Music">
+        <div class="input-group">
+          <label class="label">Hobbies</label>
+          <input class="input" type="text" id="studentHobbies" placeholder="Reading, Music">
+        </div>
 
-        <label class="label">LinkedIn Profile</label>
-        <input class="input" type="url" id="studentLinkedIn" placeholder="https://linkedin.com/...">
-        <small class="error" id="errLinkedIn"></small>
+        <div class="input-group">
+          <label class="label">LinkedIn Profile</label>
+          <input class="input" type="url" id="studentLinkedIn" placeholder="https://linkedin.com/...">
+          <small class="error" id="errLinkedIn"></small>
+        </div>
 
-        <label class="label">GitHub / Portfolio</label>
-        <input class="input" type="url" id="studentGitHub" placeholder="https://github.com/...">
-        <small class="error" id="errGitHub"></small>
+        <div class="input-group">
+          <label class="label">GitHub / Portfolio</label>
+          <input class="input" type="url" id="studentGitHub" placeholder="https://github.com/...">
+          <small class="error" id="errGitHub"></small>
+        </div>
 
-        <label class="label">Short Bio / Interests</label>
-        <textarea class="input" id="studentBio" placeholder="Tell us about yourself"></textarea>
+        <div class="input-group">
+          <label class="label">Short Bio / Interests</label>
+          <textarea class="input" id="studentBio" placeholder="Tell us about yourself"></textarea>
+        </div>
 
         <div class="row file-row">
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Profile Image</label>
             <input type="file" id="studentProfileFile" accept="image/*">
             <small class="error" id="errProfileFile"></small>
           </div>
-          <div class="half">
+          <div class="input-group half">
             <label class="label">Resume</label>
             <input type="file" id="studentResumeFile" accept=".pdf,.doc,.docx">
             <small class="error" id="errResumeFile"></small>

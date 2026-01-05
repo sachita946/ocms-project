@@ -9,7 +9,7 @@
    ============================================ */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; min-height: 100vh; display: flex; overflow: hidden; }
+body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, rgba(16, 30, 95, 0.6), rgba(210, 203, 216, 0.6)), url("../background/admin.png") no-repeat center center fixed; background-size: cover; background-attachment: fixed; color: #e0e0e0; min-height: 100vh; display: flex; overflow: hidden; }
 a { color: inherit; text-decoration: none; }
 /* ============================================
    LAYOUT
@@ -33,7 +33,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================
    MAIN CONTENT
    ============================================ */
-main { padding: 28px; overflow-y: auto; background: linear-gradient(180deg, rgba(30,30,50,1) 0%, rgba(25,25,45,1) 100%); }
+main { padding: 28px; overflow-y: auto; background: transparent; }
 /* ============================================
    HERO SECTION
    ============================================ */
@@ -60,14 +60,16 @@ main { padding: 28px; overflow-y: auto; background: linear-gradient(180deg, rgba
 .search-bar button, .filters button { padding: 12px 20px; border-radius: 10px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
 .search-bar button:hover, .filters button:hover { transform: translateY(-2px); }
 .filters { display: flex; gap: 12px; margin-bottom: 20px; }
+/* Improve dropdown option contrast */
+select option { color: #111; background: #ffffff; }
 /* ============================================
    TABLES
    ============================================ */
 .table-container { background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,107,107,0.02)); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; overflow: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 table { width: 100%; border-collapse: collapse; color: #e0e0e0; }
-th { background: rgba(255,255,255,0.08); padding: 14px; text-align: left; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255,107,107,0.2); }
-td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-tr:hover { background: rgba(255,107,107,0.05); }
+th { background: rgba(187, 99, 99, 0.08); padding: 14px; text-align: left; font-weight: 600; color: #60bcd6; border-bottom: 2px solid rgba(255,107,107,0.2); }
+td { padding: 14px; border-bottom: 1px solid rgba(45, 96, 147, 0.08); }
+tr:hover { background: rgba(77, 164, 211, 0.05); }
 /* ============================================
    CARDS & LISTS
    ============================================ */
@@ -91,9 +93,34 @@ tr:hover { background: rgba(255,107,107,0.05); }
 /* ============================================
    BUTTONS & ACTIONS
    ============================================ */
-.action-btn { padding: 6px 12px; border-radius: 6px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 6px; transition: all 0.3s ease; }
+.action-btn { padding: 6px 12px; border-radius: 6px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: rgb(180, 196, 60); border: none; cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 6px; transition: all 0.3s ease; }
 .action-btn:hover { transform: translateY(-2px); }
 .action-btn-danger { background: linear-gradient(135deg, #ff7675, #d63031); }
+/* ============================================
+   RESOURCE PANE=]'
+   ============================================ */
+.resource-panel { background: linear-gradient(135deg, rgba(255,107,107,0.06), rgba(255,107,107,0.03)); border: 1px solid rgba(255,107,107,0.18); border-radius: 16px; padding: 20px; margin-bottom: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.panel-header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 16px; }
+.panel-header h2 { color: #ffffff; font-size: 20px; margin: 6px 0; }
+.panel-header .subtext { color: #b5b5b5; font-size: 13px; }
+.panel-header .eyebrow { color: #ff9f9f; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
+.resource-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.resource-form .full { grid-column: 1 / -1; }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { color: #dcdcdc; font-size: 13px; font-weight: 600; }
+.form-field input, .form-field select, .form-field textarea { padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff; }
+.form-field textarea { resize: vertical; min-height: 100px; }
+.form-field input::placeholder, .form-field textarea::placeholder { color: #a0a0a0; }
+.form-actions { display: flex; align-items: center; gap: 12px; }
+.form-actions .helper { color: #a0f0c0; font-size: 13px; }
+.resource-filters { display: flex; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+.resource-filters select { padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(111, 29, 131, 0.15); background: rgba(165, 27, 27, 0.06); color: #ffffff; min-width: 180px; }
+.resource-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.resource-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,107,107,0.18); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.resource-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.resource-header h3 { color: #ffffff; font-size: 15px; }
+.resource-meta { display: flex; justify-content: space-between; align-items: center; color: #b0b0b0; font-size: 12px; }
+.badge.board { background: rgba(248,180,0,0.2); color: #fcd34d; border: 1px solid rgba(248,180,0,0.35); }
 /* ============================================
    EMPTY STATE
    ============================================ */
@@ -139,6 +166,65 @@ tr:hover { background: rgba(255,107,107,0.05); }
         <input type="text" id="searchInput" placeholder="Search by course title or instructor...">
         <button onclick="filterCourses()">Search</button>
       </div>
+
+         <section class="resource-panel">
+            <div class="panel-header">
+               <div>
+                  <p class="eyebrow">Resources</p>
+                  <h2>Attach notes, questions, preboard questions, and board questions</h2>
+                  <p class="subtext">Admins can push study materials directly to any course.</p>
+               </div>
+               <div class="badge">New</div>
+            </div>
+
+            <form id="resourceForm" class="resource-form">
+               <div class="form-field">
+                  <label for="resourceCourseSelect">Course *</label>
+                  <select id="resourceCourseSelect" required>
+                     <option value="">Loading courses...</option>
+                  </select>
+               </div>
+               <div class="form-field">
+                  <label for="resourceTypeSelect">Type *</label>
+                  <select id="resourceTypeSelect" required>
+                     <option value="">Select type</option>
+                     <option value="notes">📝 Notes</option>
+                     <option value="preboard">📋 Preboard Questions</option>
+                     <option value="board">🏁 Board Questions</option>
+                  </select>
+               </div>
+               <div class="form-field">
+                  <label for="resourceTitle">Title *</label>
+                  <input id="resourceTitle" type="text" placeholder="e.g., Physics Mock Board Set" required>
+               </div>
+               <div class="form-field full">
+                  <label for="resourceContent">Content *</label>
+                  <textarea id="resourceContent" rows="4" placeholder="Paste the material or link here" required></textarea>
+               </div>
+               <div class="form-actions full">
+                  <button type="submit" class="action-btn">Add Resource</button>
+                  <span id="resourceMsg" class="helper"></span>
+               </div>
+            </form>
+
+            <div class="resource-filters">
+               <select id="resourceCourseFilter">
+                  <option value="">All courses</option>
+               </select>
+               <select id="resourceTypeFilter">
+                  <option value="">All types</option>
+                  <option value="notes">Notes</option
+                  <option value="preboard">Preboard Questions</option>
+                  <option value="board">Board Questions</option>
+               </select>
+               <button class="action-btn" type="button" onclick="loadCourseResources()">Filter</button>
+            </div>
+
+            <div id="resourceList" class="resource-list"></div>
+            <div id="resourceEmpty" class="empty-state" style="display:none;">
+               <p>No resources found for the current filters.</p>
+            </div>
+         </section>
 
       <div id="courses-list"></div>
 
