@@ -260,10 +260,10 @@ function showConfirmDialog(message, onConfirm, onCancel) {
 
 // Decide dashboard path by role
 function getDashboardPath(role) {
-  if (role === 'INSTRUCTOR') return './instructor/instructor-dashboard.html';
-  if (role === 'ADMIN') return './admin/dashboard.html';
-  if (role === 'STUDENT') return './student/student-dashboard.html';
-  return './student/courses.html';
+  if (role === 'INSTRUCTOR') return '../instructor/instructor-dashboard.html';
+  if (role === 'ADMIN') return '../admin/dashboard.html';
+  if (role === 'STUDENT') return '../student/student-dashboard.html';
+  return '../student/courses.html';
 }
 
 // Save token and optionally redirect to dashboard
@@ -279,7 +279,7 @@ async function saveTokenAndRedirect(token, role) {
       const instructorProfile = body?.user?.instructorProfile;
       if (instructorProfile && !instructorProfile.is_verified) {
         // Redirect to a pending approval page or show message
-        window.location.href = '/auth/pending-approval.html';
+        window.location.href = '/publicc/auth/pending-approval.html';
         return;
       }
     } catch (error) {
@@ -303,7 +303,7 @@ async function fetchRoleFromToken(token) {
 // requireLogin: to protect pages (use in protected pages)
 export function requireLogin() {
   const token = localStorage.getItem('ocms_token');
-  if (!token) window.location.href = '/auth/login.html';
+  if (!token) window.location.href = '/publicc/auth/login.html';
 }
 
 // Parse OAuth token from query param ?token=...
@@ -336,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Common: social buttons
   const socialGoogle = qs('socialGoogleBtn');
   const socialFacebook = qs('socialFacebookBtn');
-  if (socialGoogle) socialGoogle.addEventListener('click', () => window.location.href = '/auth/google');
-  if (socialFacebook) socialFacebook.addEventListener('click', () => window.location.href = '/auth/facebook');
+  if (socialGoogle) socialGoogle.addEventListener('click', () => window.location.href = `${BACKEND_ORIGIN}/auth/google`);
+  if (socialFacebook) socialFacebook.addEventListener('click', () => window.location.href = `${BACKEND_ORIGIN}/auth/facebook`);
 
   // Toggle UI functions (for embedded/signup card UI)
   const signupEmbedded = qs('signupEmbedded');
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showInlineMessage('Login successful! Redirecting...', 'success');
             
             // Store auth data
-            localStorage.setItem('token', body.token);
+            // localStorage.setItem('token', body.token);
             localStorage.setItem('ocms_token', body.token);
             localStorage.setItem('user', JSON.stringify(body.user || {}));
             localStorage.setItem('user_role', body.user?.role || body.role);
@@ -443,26 +443,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('User role from response:', body.user?.role || body.role);
             console.log('Stored user_role:', localStorage.getItem('user_role'));
             
-            // Redirect based on role immediately
+            // Redirect based on role with verification check
             const role = body?.user?.role || body?.role;
             console.log('Login successful, role:', role);
             
-            // Redirect immediately
-            console.log('Executing redirect for role:', role);
-            try {
-              if (role === 'INSTRUCTOR') {
-                console.log('Redirecting to instructor dashboard...');
-                window.location.href = '/instructor/instructor-dashboard.html';
-              } else if (role === 'ADMIN') {
-                console.log('Redirecting to admin dashboard...');
-                window.location.href = './admin/dashboard.html';
-              } else {
-                console.log('Redirecting to student dashboard...');
-                window.location.href = './student/student-dashboard.html';
-              }
-            } catch (redirectError) {
-              console.error('Redirect failed:', redirectError);
-            }
+            // Use saveTokenAndRedirect for proper verification handling
+            await saveTokenAndRedirect(body.token, role);
             
             return;
           }

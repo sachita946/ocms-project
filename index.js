@@ -42,8 +42,7 @@ app.use(fileUpload());
 app.use('/api', apiRouter);
 
 // Serve static files
-app.use('/publicc', express.static(path.join(__dirname, 'publicc')));
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/', express.static(path.join(__dirname, 'publicc')));
 app.use('/uploads', express.static(path.join(__dirname, 'publicc/uploads')));
 app.use('/background', express.static(path.join(__dirname, 'publicc/background')));
 

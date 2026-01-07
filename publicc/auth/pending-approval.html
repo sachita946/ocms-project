@@ -134,6 +134,9 @@
   </div>
 
   <script>
+    const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN) || 'http://localhost:3000';
+    const API_URL = `${BACKEND_ORIGIN}/api`;
+
     function logout() {
       localStorage.clear();
       window.location.href = 'login.html';
@@ -147,7 +150,7 @@
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch(`${API_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
