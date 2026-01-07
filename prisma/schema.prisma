@@ -54,7 +54,7 @@ enum QuestionType {
 model User {
   id              String   @id @default(uuid())
   email           String   @unique
-  password        String
+  password        String?
   first_name      String
   last_name       String
   profile_picture String?
@@ -276,11 +276,13 @@ model Enrollment {
   completion_status CompletionStatus @default(ACTIVE)
   last_accessed     DateTime?
   updated_at        DateTime         @updatedAt
-  enrollment_code   String           @unique
+  enrollment_code   String           @unique @default(uuid())
 
   student  StudentProfile @relation("StudentEnrollments", fields: [student_id], references: [id], onDelete: Cascade)
   course   Course         @relation("CourseEnrollments", fields: [course_id], references: [id], onDelete: Cascade)
   progress Progress[]
+
+  @@unique([student_id, course_id])
 }
 
 model Progress {

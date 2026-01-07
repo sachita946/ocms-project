@@ -1,8 +1,15 @@
 const token = localStorage.getItem('ocms_token');
-const userRole = localStorage.getItem('user_role');
+
+const userData = localStorage.getItem('user');
+let userRole;
+try {
+  userRole = userData ? JSON.parse(userData).role : localStorage.getItem('user_role');
+} catch (e) {
+  userRole = localStorage.getItem('user_role');
+}
 
 if (!token || userRole !== 'ADMIN') {
-  window.location.href = '/login.html';
+  window.location.href = '../auth/login.html';
 }
 
 const $ = (id) => document.getElementById(id);
@@ -14,14 +21,67 @@ const navButtons = document.querySelectorAll('[data-section]');
 let statsChart = null;
 let revenueChart = null;
 
+// Clear authentication data
+function clearAuth() {
+  localStorage.removeItem('ocms_token');
+  localStorage.removeItem('token');
+  localStorage.removeItem('user_role');
+  localStorage.removeItem('role');
+  localStorage.removeItem('ocms_role');
+  localStorage.removeItem('ocms_user_role');
+  localStorage.removeItem('user');
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+    `;
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toast.style.cssText = `
+    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6'};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 navButtons.forEach(btn => {
   btn.addEventListener('click', () => switchSection(btn.dataset.section));
 });
 
 $('logoutBtn').addEventListener('click', () => {
-  localStorage.removeItem('ocms_token');
-  localStorage.removeItem('user_role');
-  window.location.href = '/login.html';
+  // Clear auth data immediately
+  clearAuth();
+
+  // Show success message
+  showToast('Logged out successfully', 'success');
+
+  // Redirect immediately
+  window.location.href = '/publicc/index.html';
 });
 
 function switchSection(section) {
@@ -333,7 +393,7 @@ function renderActivities(activities = []) {
 
 async function bootstrap() {
   try {
-    const res = await fetch('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch('http://localhost:3000/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
     if (res.status === 401) throw new Error('unauthorized');
     const data = await res.json();
     
@@ -349,7 +409,7 @@ async function bootstrap() {
     console.error(err);
     localStorage.removeItem('ocms_token');
     localStorage.removeItem('user_role');
-    window.location.href = '/login.html';
+    window.location.href = '/publicc/auth/login.html';
   }
 }
 

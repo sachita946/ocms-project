@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | OCMS</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="dashboard.js"></script>
   <style>/* ============================================
    GLOBAL STYLES
    ============================================ */
@@ -51,7 +53,21 @@ a { color: inherit; text-decoration: none; }
 .nav button { background: transparent; color:#b0b0b0; border:1px solid transparent; padding:11px 14px; border-radius:10px; text-align:left; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.3s ease; }
 .nav button:hover { background: rgba(255,255,255,0.12); color:#f0f0f0; border-color: rgba(255,255,255,0.15); }
 .nav button.active { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color:white; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(255,107,107,0.4);}
-.logout { margin-top: auto; background: transparent; border-color: rgba(255,107,107,0.3); color: #ff8787;}
+.logout { 
+  margin-top: auto; 
+  background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(239,68,68,0.1)); 
+  border-color: rgba(255,107,107,0.4); 
+  color: #ff8787;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.logout:hover { 
+  background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(239,68,68,0.2)); 
+  border-color: rgba(255,107,107,0.6); 
+  color: #ff6b6b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+}
 
 /* ============================================
    MAIN CONTENT
@@ -90,9 +106,7 @@ th { background: rgba(255,255,255,0.08); padding:12px; text-align:left; font-wei
 td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.08);}
 tr:hover { background: rgba(255,107,107,0.05); }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+
 @media (max-width: 980px) { 
     .layout { grid-template-columns: 1fr; } 
     .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); } 
@@ -103,6 +117,25 @@ tr:hover { background: rgba(255,107,107,0.05); }
     .review-header { flex-direction: column; }
 }
 
+    /* Toast animations */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Utility buttons */
+    .nav button, .logout {
+      width: 100%;
+      display: block;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -110,7 +143,7 @@ tr:hover { background: rgba(255,107,107,0.05); }
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="logo">
-        <div class="logo-icon">⚙️</div>
+        <div class="logo-icon">EV</div>
         <div class="logo-text">ADMIN PANEL</div>
       </div>
       <nav class="nav">
@@ -126,7 +159,7 @@ tr:hover { background: rgba(255,107,107,0.05); }
         <button data-section="messages" onclick="window.location.href='messages.html'">✉️ Messages</button>
         <button data-section="settings" onclick="window.location.href='dashboard.html#settings'">⚙️ Settings</button>
       </nav>
-      <button class="nav logout" id="logoutBtn">🚪 Logout</button>
+      <button class="logout" id="logoutBtn">🚪 Logout</button>
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -160,8 +193,5 @@ tr:hover { background: rgba(255,107,107,0.05); }
       <section id="section-settings" class="panel"></section>
     </main>
   </div>
-
-  <script src="js/admin.js"></script>
-  <script src="js/dashboard.js"></script>
 </body>
 </html>

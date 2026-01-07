@@ -15,19 +15,23 @@ export const getAllLessons = async (req, res) => {
 
 // Create lesson
 export const createLesson = async (req, res) => {
-  try {
-    const { course_id, title, content_type, content_url, duration } = req.body;
-    if(!course_id || !title || !content_type) return res.status(400).json({ message: "Required fields missing" });
-
-    const lesson = await prisma.lesson.create({
-      data: { course_id, title, content_type, content_url, duration }
-    });
-    res.status(201).json(lesson);
-  } catch(err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+  const { course_id, subject_id, title, content_type, content_url, duration } = req.body;
+  
+  if (!course_id || !subject_id || !title || !content_type) {
+    return res.status(400).json({ message: "Required fields missing" });
   }
-};
+  
+  const lesson = await prisma.lesson.create({
+    data: { 
+      course_id: parseInt(course_id), 
+      subject_id: parseInt(subject_id),
+      title, 
+      content_type, 
+      content_url, 
+      duration: duration ? parseInt(duration) : null
+    }
+  });
+}
 
 // Read all lessons by course
 export const getLessonsByCourse = async (req, res) => {
@@ -56,11 +60,22 @@ export const getLesson = async (req, res) => {
 // Update lesson
 export const updateLesson = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = req.body;
-    const lesson = await prisma.lesson.update({ where: { id: parseInt(id) }, data });
-    res.json(lesson);
-  } catch(err) {
+    const id = parseInt(req.params.id);
+
+    const lesson = await prisma.lesson.findUnique({
+      where: { id },
+      include: { course: { select: { instructor_id: true } } }
+    });
+
+    if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
+
+    if (lesson.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const updated = await prisma.lesson.update({ where: { id }, data: req.body });
+    res.json(updated);
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -69,8 +84,20 @@ export const updateLesson = async (req, res) => {
 // Delete lesson
 export const deleteLesson = async (req, res) => {
   try {
-    const { id } = req.params;
-    await prisma.lesson.delete({ where: { id: parseInt(id) } });
+    const id = parseInt(req.params.id);
+
+    const lesson = await prisma.lesson.findUnique({
+      where: { id },
+      include: { course: { select: { instructor_id: true } } }
+    });
+
+    if (!lesson) return res.status(404).json({ message: 'Lesson not found' });
+
+    if (lesson.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    await prisma.lesson.delete({ where: { id } });
     res.json({ message: "Lesson deleted" });
   } catch(err) {
     console.error(err);

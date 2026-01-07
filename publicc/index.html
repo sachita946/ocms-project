@@ -5,19 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EduVerse | Online Course Management System</title>
   <style>
-    /* Enhanced Modern Styles */
+    :root {
+      --page-bg: #050b18;
+      --page-bg-2: #0a1226;
+      --surface: rgba(255, 255, 255, 0.06);
+      --glass: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+      --text-main: #e2e8f0;
+      --text-muted: #cbd5e1;
+      --ink: #0b1224;
+      --primary: #22d3ee;
+      --primary-strong: #06b6d4;
+      --accent: #a855f7;
+      --accent-strong: #7c3aed;
+      --warm: #f59e0b;
+      --success: #22c55e;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: 
-        linear-gradient(135deg, rgba(16, 30, 95, 0.6), rgba(118, 75, 162, 0.6)), 
-        url("background/instructor.png");
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
-      background-attachment: fixed;
-      color: #333;
-      line-height: 1;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.08), transparent 35%),
+        radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.12), transparent 40%),
+        linear-gradient(135deg, rgba(5, 11, 24, 0.95), rgba(10, 18, 38, 0.92)),
+        url("background/admin.png") center/cover no-repeat fixed;
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
     }
 
     /* Top Navigation Bar */
@@ -26,9 +43,10 @@
       justify-content: space-between;
       align-items: center;
       padding: 16px 40px;
-      background: rgba(255, 255, 255, 0.95);
+      background: linear-gradient(90deg, rgba(10, 18, 38, 0.85), rgba(6, 15, 28, 0.85));
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
       position: sticky;
       top: 0;
       z-index: 1000;
@@ -43,25 +61,32 @@
     .logo {
       font-size: 1.8rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: 0.02em;
     }
 
     .search-field {
       padding: 10px 16px;
-      border-radius: 25px;
-      border: 2px solid #e0e7ff;
+      border-radius: 14px;
+      border: 1px solid var(--border);
       width: 280px;
-      background: #f8fafc;
-      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      transition: all 0.25s ease;
+    }
+
+    .search-field::placeholder {
+      color: rgba(226, 232, 240, 0.7);
     }
 
     .search-field:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+      background: rgba(255, 255, 255, 0.07);
     }
 
     .top-right {
@@ -71,91 +96,198 @@
 
     .btn-login, .btn-signup {
       padding: 10px 24px;
-      border-radius: 25px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: all 0.25s ease;
       text-decoration: none;
+      border: 1px solid transparent;
+      letter-spacing: 0.01em;
     }
 
     .btn-login {
       background: transparent;
-      color: #667eea;
-      border: 2px solid #667eea;
+      color: var(--primary);
+      border-color: rgba(34, 211, 238, 0.6);
     }
 
     .btn-login:hover {
-      background: #667eea;
-      color: white;
+      background: rgba(34, 211, 238, 0.1);
+      color: #e0f7ff;
       transform: translateY(-2px);
     }
 
     .btn-signup {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #050b18;
+      box-shadow: 0 10px 26px rgba(168, 85, 247, 0.35);
     }
 
     .btn-signup:hover {
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(168, 85, 247, 0.45);
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      padding: 100px 20px 80px;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-      color: white;
+      padding: 110px 20px 90px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(168, 85, 247, 0.14));
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border);
+      box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .hero h1 {
-      font-size: 3.5rem;
+      font-size: 3.6rem;
       margin-bottom: 20px;
       font-weight: 800;
-      text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+      letter-spacing: -0.02em;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     }
 
     .hero p {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       margin-bottom: 40px;
-      opacity: 0.95;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .hero-buttons {
       display: flex;
-      gap: 20px;
+      gap: 16px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .hero-buttons a {
       padding: 14px 32px;
-      border-radius: 30px;
-      font-weight: 600;
-      font-size: 1.1rem;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1.05rem;
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
+      border: 1px solid transparent;
+      letter-spacing: 0.01em;
     }
 
     .hero-buttons a:first-child {
-      background: white;
-      color: #667eea;
+      background: #0f172a;
+      color: var(--text-main);
+      border-color: var(--border);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
     }
 
     .hero-buttons a:first-child:hover {
-      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
-      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 32px rgba(34, 211, 238, 0.25);
+      transform: translateY(-2px);
     }
 
     .hero-buttons a:last-child {
-      background: linear-gradient(135deg, #f093fb, #f5576c);
-      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      color: #050b18;
+      box-shadow: 0 12px 32px rgba(168, 85, 247, 0.38);
     }
 
     .hero-buttons a:last-child:hover {
-      box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
-      transform: translateY(-3px);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px rgba(168, 85, 247, 0.5);
     }
+
+    /* Dual CTA Section */
+    .cta-duo {
+      max-width: 1200px;
+      margin: -30px auto 70px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .cta-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      min-height: 220px;
+      padding: 26px;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      background: linear-gradient(150deg, rgba(5, 11, 24, 0.7), rgba(6, 13, 26, 0.6));
+      isolation: isolate;
+    }
+
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--image-url);
+      background-size: cover;
+      background-position: center;
+      opacity: 0.42;
+      transform: scale(1.08);
+      transition: transform 0.8s ease, opacity 0.5s ease;
+      z-index: -1;
+    }
+
+    .cta-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.18), transparent 35%),
+                  radial-gradient(circle at 80% 40%, rgba(168, 85, 247, 0.22), transparent 40%);
+      z-index: -1;
+    }
+
+    .cta-card:hover::before {
+      transform: scale(1.12);
+      opacity: 0.5;
+    }
+
+    .cta-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 14px 0 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .cta-text {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      max-width: 360px;
+    }
+
+    .cta-card .role-button {
+      width: auto;
+      padding: 12px 18px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    @keyframes floatPulse {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0); }
+    }
+
+    .cta-card:hover .role-button { animation: floatPulse 1.6s ease infinite; }
 
     /* Stats Section */
     .stats-section {
@@ -170,39 +302,46 @@
     }
 
     .stat-card {
-      background: white;
-      padding: 30px 20px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+      padding: 28px 20px;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow);
       text-align: center;
-      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      transition: all 0.25s ease;
     }
 
     .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(34, 211, 238, 0.6);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
     }
 
     .stat-number {
-      font-size: 2.5rem;
+      font-size: 2.4rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 8px;
+      letter-spacing: -0.01em;
     }
 
     .stat-label {
-      color: #64748b;
+      color: var(--text-muted);
       font-weight: 600;
     }
 
     /* Dashboard Roles Section */
     .roles-section {
       max-width: 1200px;
-      margin: 60px auto;
+      margin: 70px auto;
       padding: 0 20px;
+      background: linear-gradient(145deg, rgba(5, 11, 24, 0.72), rgba(10, 18, 38, 0.78));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
     .section-header {
@@ -211,31 +350,48 @@
     }
 
     .section-header h2 {
-      font-size: 2.5rem;
+      font-size: 2.6rem;
       font-weight: 800;
-      color: white;
+      color: var(--text-main);
       margin-bottom: 12px;
+      letter-spacing: -0.01em;
     }
 
     .section-header p {
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
     }
 
     .roles-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
+      gap: 26px;
     }
 
     .role-card {
-      background: white;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
       border-radius: 20px;
-      padding: 40px 30px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
+      padding: 36px 28px;
+      box-shadow: var(--shadow);
+      transition: all 0.25s ease;
       position: relative;
       overflow: hidden;
+      border: 1px solid var(--border);
     }
 
     .role-card::before {
@@ -244,56 +400,63 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 5px;
+      height: 6px;
       background: linear-gradient(90deg, var(--role-color-1), var(--role-color-2));
     }
 
-    .role-card.student-card {
-      --role-color-1: #22c55e;
-      --role-color-2: #0ea5e9;
-    }
-
-    .role-card.instructor-card {
-      --role-color-1: #06b6d4;
-      --role-color-2: #8b5cf6;
-    }
-
-    .role-card.admin-card {
-      --role-color-1: #f59e0b;
-      --role-color-2: #ef4444;
-    }
+    .role-card.student-card { --role-color-1: var(--success); --role-color-2: var(--primary-strong); }
+    .role-card.instructor-card { --role-color-1: var(--primary); --role-color-2: var(--accent); }
+    .role-card.admin-card { --role-color-1: var(--warm); --role-color-2: #ef4444; }
 
     .role-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      transform: translateY(-6px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.4);
     }
 
     .role-icon {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
+      font-size: 3.4rem;
+      margin-bottom: 18px;
     }
 
     .role-title {
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 700;
       margin-bottom: 12px;
-      color: #1e293b;
+      color: #e5e7eb;
     }
 
     .role-description {
-      color: #64748b;
-      margin-bottom: 24px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
       line-height: 1.6;
+    }
+
+    .role-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .role-chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      font-size: 0.88rem;
+      letter-spacing: 0.01em;
     }
 
     .role-features {
       list-style: none;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
 
     .role-features li {
-      padding: 10px 0;
-      color: #475569;
+      padding: 9px 0;
+      color: #d6dde8;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -304,35 +467,37 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--role-color-1), var(--role-color-2));
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
+      color: #050b18;
+      font-weight: 800;
+      font-size: 13px;
       flex-shrink: 0;
     }
 
     .role-button {
       display: block;
       width: 100%;
-      padding: 14px 24px;
+      padding: 14px 22px;
       border-radius: 12px;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       background: linear-gradient(135deg, var(--role-color-1), var(--role-color-2));
-      color: white;
+      color: #050b18;
       text-align: center;
       text-decoration: none;
+      letter-spacing: 0.01em;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     }
 
     .role-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
     }
 
     /* Features Section */
@@ -340,43 +505,49 @@
       max-width: 1200px;
       margin: 80px auto;
       padding: 0 20px;
+      background: linear-gradient(135deg, rgba(8, 14, 28, 0.8), rgba(9, 17, 33, 0.82));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
+      gap: 26px;
       margin-top: 50px;
     }
 
     .feature-card {
-      background: white;
-      padding: 30px;
+      background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+      padding: 28px;
       border-radius: 16px;
       text-align: center;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: all 0.25s ease;
     }
 
     .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
+      border-color: rgba(168, 85, 247, 0.5);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
     }
 
     .feature-icon {
       font-size: 3rem;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .feature-title {
-      font-size: 1.3rem;
+      font-size: 1.28rem;
       font-weight: 700;
-      margin-bottom: 10px;
-      color: #1e293b;
+      margin-bottom: 8px;
+      color: #e5e7eb;
     }
 
     .feature-text {
-      color: #64748b;
+      color: var(--text-muted);
       line-height: 1.6;
     }
 
@@ -391,22 +562,23 @@
     .team h2 {
       font-size: 2.5rem;
       font-weight: 800;
-      color: white;
+      color: var(--text-main);
       margin-bottom: 50px;
     }
 
     .team-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
+      gap: 26px;
     }
 
     .team-member {
-      background: white;
-      padding: 30px;
+      background: linear-gradient(155deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      padding: 28px;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      transition: all 0.25s ease;
+      border: 1px solid var(--border);
     }
 
     .team-member img {
@@ -414,41 +586,42 @@
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 20px;
-      border: 4px solid #667eea;
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      margin-bottom: 18px;
+      border: 4px solid var(--primary);
+      box-shadow: 0 10px 26px rgba(34, 211, 238, 0.35);
+      transition: transform 0.25s ease, border-color 0.25s ease;
     }
 
     .team-member:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
     .team-member:hover img {
       transform: scale(1.05);
-      border-color: #764ba2;
+      border-color: var(--accent);
     }
 
     .team-member h4 {
-      font-size: 1.3rem;
-
-      
-      color: #1e293b;
-      margin-bottom: 8px;
+      font-size: 1.25rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
     }
 
     .team-member p {
-      color: #667eea;
+      color: var(--primary);
       font-weight: 600;
     }
 
     /* Footer */
     footer {
-      background: rgba(30, 41, 59, 0.95);
+      background: linear-gradient(180deg, rgba(6, 13, 26, 0.9), rgba(5, 11, 24, 0.95));
       backdrop-filter: blur(10px);
-      color: white;
+      color: var(--text-main);
       padding: 50px 20px 30px;
       margin-top: 80px;
+      border-top: 1px solid var(--border);
     }
 
     .footer-links {
@@ -456,73 +629,70 @@
       margin: 0 auto 40px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 40px;
+      gap: 30px;
     }
 
     .footer-column h3 {
-      font-size: 1.2rem;
-      margin-bottom: 16px;
-      color: #667eea;
+      font-size: 1.12rem;
+      margin-bottom: 14px;
+      color: var(--primary);
     }
 
-    .footer-column ul {
-      list-style: none;
-    }
+    .footer-column ul { list-style: none; }
 
-    .footer-column ul li {
-      margin-bottom: 10px;
-    }
+    .footer-column ul li { margin-bottom: 10px; }
 
     .footer-column ul li a {
-      color: rgba(255, 255, 255, 0.8);
-      transition: color 0.3s ease;
+      color: rgba(226, 232, 240, 0.78);
+      transition: color 0.25s ease;
     }
 
-    .footer-column ul li a:hover {
-      color: white;
-    }
+    .footer-column ul li a:hover { color: #fff; }
 
     .footer-buttons {
       max-width: 1200px;
       margin: 0 auto 30px;
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
     .footer-buttons button {
-      padding: 10px 20px;
-      border-radius: 25px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      background: transparent;
-      color: white;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
+      letter-spacing: 0.01em;
     }
 
     .footer-buttons button:hover {
       background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(34, 211, 238, 0.5);
       transform: translateY(-2px);
     }
 
     footer > p {
       text-align: center;
-      color: rgba(255, 255, 255, 0.7);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding-top: 30px;
+      color: rgba(226, 232, 240, 0.75);
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
       margin-top: 30px;
+      line-height: 1.5;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.5rem; }
-      .hero p { font-size: 1.1rem; }
-      .top-bar { flex-direction: column; gap: 16px; padding: 16px 20px; }
+      .hero h1 { font-size: 2.6rem; }
+      .hero p { font-size: 1.05rem; }
+      .top-bar { flex-direction: column; gap: 12px; padding: 14px 18px; }
       .top-left { width: 100%; justify-content: space-between; }
-      .search-field { width: 100%; max-width: 300px; }
+      .search-field { width: 100%; max-width: 320px; }
       .roles-grid, .features-grid, .team-cards { grid-template-columns: 1fr; }
+      .hero { padding: 90px 16px 70px; }
     }
   </style>
 </head>
@@ -531,7 +701,7 @@
 <!-- TOP BAR -->
 <header class="top-bar">
   <div class="top-left">
-    <div class="logo">🎓 EduVerse</div>
+    <div class="logo">🎓</div>
     <input type="text" placeholder="Search courses..." class="search-field" onclick="window.location.href='student/courses.html'">
   </div>
   <div class="top-right">
@@ -547,6 +717,22 @@
   <div class="hero-buttons">
     <a href="student/student-signup.html">Join as Student</a>
     <a href="instructor/instructor-signup.html">Join as Instructor</a>
+  </div>
+</section>
+
+<!-- Dual CTA Section -->
+<section class="cta-duo">
+  <div class="cta-card" style="--image-url:url('background/image1.png')">
+    <span class="cta-label">Student Track</span>
+    <div class="cta-title">Start learning with tailored paths</div>
+    <p class="cta-text">Interactive lessons, adaptive quizzes, offline-friendly resources, and certificate-ready progress.</p>
+    <a href="student/student-signup.html" class="role-button" aria-label="Join as Student">Join as Student</a>
+  </div>
+  <div class="cta-card" style="--image-url:url('background/instructor.png')">
+    <span class="cta-label">Instructor Track</span>
+    <div class="cta-title">Launch your courses with ease</div>
+    <p class="cta-text">Drag-and-drop content uploads, revenue insights, and cohort tools with instant announcements.</p>
+    <a href="instructor/instructor-signup.html" class="role-button" aria-label="Join as Instructor">Join as Instructor</a>
   </div>
 </section>
 
@@ -573,6 +759,7 @@
 <!-- DASHBOARD ROLES SECTION -->
 <section class="roles-section">
   <div class="section-header">
+    <div class="section-eyebrow">Path selector</div>
     <h2>Choose Your Learning Path</h2>
     <p>Access powerful dashboards tailored to your role</p>
   </div>
@@ -583,10 +770,15 @@
       <div class="role-icon">👨‍🎓</div>
       <h3 class="role-title">Student Dashboard</h3>
       <p class="role-description">Your personalized learning hub with everything you need to succeed</p>
+      <div class="role-meta">
+        <span class="role-chip">Self-paced</span>
+        <span class="role-chip">Projects</span>
+        <span class="role-chip">Mentorship</span>
+      </div>
       <ul class="role-features">
         <li>Browse & enroll in courses</li>
-        <li>Watch video lessons</li>
-        <li>Take notes while learning</li>
+        <li>Watch adaptive video lessons</li>
+        <li>Take synced notes while learning</li>
         <li>Attempt quizzes & assessments</li>
         <li>Track progress & completion</li>
         <li>Earn verified certificates</li>
@@ -600,14 +792,19 @@
       <div class="role-icon">👨‍🏫</div>
       <h3 class="role-title">Instructor Dashboard</h3>
       <p class="role-description">Comprehensive tools to create, manage, and monetize your courses</p>
+      <div class="role-meta">
+        <span class="role-chip">Cohort tools</span>
+        <span class="role-chip">Revenue share</span>
+        <span class="role-chip">Automation</span>
+      </div>
       <ul class="role-features">
         <li>Create & publish courses</li>
         <li>Upload lessons & content</li>
         <li>Manage students & enrollments</li>
-        <li>Create quizzes & assessments</li>
+        <li>Auto-grade quizzes & assessments</li>
         <li>Track earnings & revenue</li>
         <li>Issue certificates</li>
-        <li>View analytics & insights</li>
+        <li>Live analytics & cohort insights</li>
       </ul>
       <a href="instructor/instructor-dashboard.html" class="role-button">Access Instructor Dashboard</a>
     </div>
@@ -617,6 +814,11 @@
       <div class="role-icon">⚙️</div>
       <h3 class="role-title">Admin Dashboard</h3>
       <p class="role-description">Complete platform control and management capabilities</p>
+      <div class="role-meta">
+        <span class="role-chip">Compliance</span>
+        <span class="role-chip">Audit trails</span>
+        <span class="role-chip">SLA uptime</span>
+      </div>
       <ul class="role-features">
         <li>Manage all users & roles</li>
         <li>Oversee courses & content</li>
@@ -641,38 +843,38 @@
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">📹</div>
-      <h4 class="feature-title">HD Video Lessons</h4>
-      <p class="feature-text">High-quality video content with interactive player and speed controls</p>
+      <h4 class="feature-title">Adaptive HD Streaming</h4>
+      <p class="feature-text">Bandwidth-aware delivery with transcripts, picture-in-picture, and smart bookmarks.</p>
     </div>
     
     <div class="feature-card">
       <div class="feature-icon">📝</div>
-      <h4 class="feature-title">Smart Note Taking</h4>
-      <p class="feature-text">Take timestamped notes while watching lessons for better retention</p>
+      <h4 class="feature-title">Synced Notes & Clips</h4>
+      <p class="feature-text">Capture timestamped highlights, AI summaries, and quick clip exports per lesson.</p>
     </div>
     
     <div class="feature-card">
       <div class="feature-icon">🎯</div>
-      <h4 class="feature-title">Quizzes & Tests</h4>
-      <p class="feature-text">Assess your knowledge with interactive quizzes and instant feedback</p>
+      <h4 class="feature-title">Adaptive Assessments</h4>
+      <p class="feature-text">Skill-based routing, instant feedback, and item banks with anti-cheat timers.</p>
     </div>
     
     <div class="feature-card">
       <div class="feature-icon">📊</div>
-      <h4 class="feature-title">Progress Tracking</h4>
-      <p class="feature-text">Monitor your learning journey with detailed analytics and insights</p>
+      <h4 class="feature-title">Deep Progress Insights</h4>
+      <p class="feature-text">Cohort heatmaps, streaks, and completion forecasts to keep learners on track.</p>
     </div>
     
     <div class="feature-card">
       <div class="feature-icon">🏆</div>
-      <h4 class="feature-title">Verified Certificates</h4>
-      <p class="feature-text">Earn industry-recognized certificates upon course completion</p>
+      <h4 class="feature-title">Verifiable Credentials</h4>
+      <p class="feature-text">Issue shareable certificates with QR verification and LinkedIn-ready metadata.</p>
     </div>
     
     <div class="feature-card">
       <div class="feature-icon">💳</div>
-      <h4 class="feature-title">Secure Payments</h4>
-      <p class="feature-text">Safe and flexible payment options for all course purchases</p>
+      <h4 class="feature-title">Flexible Commerce</h4>
+      <p class="feature-text">Global payments, discounts, bundles, and payout schedules with fraud checks.</p>
     </div>
   </div>
 </section>

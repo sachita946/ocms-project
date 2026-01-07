@@ -3,7 +3,10 @@
    Handles: login, signup, forgot, reset, social redirects, token handling, and page guard.
 */
 
-const API_URL = 'http://localhost:5500/api';
+// Resolve backend API base to avoid 405 when page is served from a different origin (e.g., Live Server)
+const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API_URL = `${BACKEND_ORIGIN}/api`;
 const qs = id => document.getElementById(id);
 const isValidEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e||'').toLowerCase());
 const isNameValid = n => /^.{2,60}$/.test(String(n||'').trim());
@@ -257,14 +260,33 @@ function showConfirmDialog(message, onConfirm, onCancel) {
 
 // Decide dashboard path by role
 function getDashboardPath(role) {
-  if (role === 'INSTRUCTOR') return '/dashboards/instructor-dashboard.html';
-  return '/dashboards/student-dashboard.html';
+  if (role === 'INSTRUCTOR') return '/instructor/instructor-dashboard.html';
+  if (role === 'ADMIN') return '/admin/dashboard.html';
+  if (role === 'STUDENT') return '/student/student-dashboard.html';
+  return '/student/courses.html';
 }
 
 // Save token and optionally redirect to dashboard
 async function saveTokenAndRedirect(token, role) {
   try { localStorage.setItem('ocms_token', token); } catch (e) {}
   const targetRole = role || (await fetchRoleFromToken(token));
+  
+  // For instructors, check if they're verified
+  if (targetRole === 'INSTRUCTOR') {
+    try {
+      const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+      const body = await res.json().catch(() => null);
+      const instructorProfile = body?.user?.instructorProfile;
+      if (instructorProfile && !instructorProfile.is_verified) {
+        // Redirect to a pending approval page or show message
+        window.location.href = '/auth/pending-approval.html';
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to check instructor verification:', error);
+    }
+  }
+  
   window.location.href = getDashboardPath(targetRole);
 }
 
@@ -281,7 +303,7 @@ async function fetchRoleFromToken(token) {
 // requireLogin: to protect pages (use in protected pages)
 export function requireLogin() {
   const token = localStorage.getItem('ocms_token');
-  if (!token) window.location.href = '/login.html';
+  if (!token) window.location.href = '/auth/login.html';
 }
 
 // Parse OAuth token from query param ?token=...
@@ -355,7 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ------------------ LOGIN ------------------ */
   if (loginForm) {
+    console.log('Login form found, attaching event listener');
     loginForm.addEventListener('submit', async (e) => {
+      console.log('Login form submitted');
       e.preventDefault();
       setText('loginEmailError'); setText('loginPasswordError'); setText('loginServerError');
 
@@ -380,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Show confirmation dialog
-      showConfirmDialog('Are you sure you want to login?', async () => {
+      // showConfirmDialog('Are you sure you want to login?', async () => {
         // Disable submit button
         const submitBtn = loginForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -388,13 +412,18 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Logging in...';
 
         try {
+          console.log('Sending login request to:', `${API_URL}/auth/login`);
+          console.log('Login payload:', { email, password });
+          
           const res = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ email, password })
           });
           
+          console.log('Login response status:', res.status);
           const body = await res.json().catch(()=>null);
+          console.log('Login response body:', body);
           
           // Re-enable button
           submitBtn.disabled = false;
@@ -402,21 +431,39 @@ document.addEventListener('DOMContentLoaded', () => {
           
           if (res.ok && body?.token) {
             showInlineMessage('Login successful! Redirecting...', 'success');
-            setTimeout(() => {
-              localStorage.setItem('token', body.token);
-              localStorage.setItem('ocms_token', body.token);
-              localStorage.setItem('user', JSON.stringify(body.user || {}));
-              
-              // Redirect based on role
-              const role = body?.user?.role || body?.role;
+            
+            // Store auth data
+            localStorage.setItem('token', body.token);
+            localStorage.setItem('ocms_token', body.token);
+            localStorage.setItem('user', JSON.stringify(body.user || {}));
+            localStorage.setItem('user_role', body.user?.role || body.role);
+            
+            // Debug logging
+            console.log('Login response body:', body);
+            console.log('User role from response:', body.user?.role || body.role);
+            console.log('Stored user_role:', localStorage.getItem('user_role'));
+            
+            // Redirect based on role immediately
+            const role = body?.user?.role || body?.role;
+            console.log('Login successful, role:', role);
+            
+            // Redirect immediately
+            console.log('Executing redirect for role:', role);
+            try {
               if (role === 'INSTRUCTOR') {
-                window.location.href = '../instructor/instructor-dashboard.html';
+                console.log('Redirecting to instructor dashboard...');
+                window.location.href = '/instructor/instructor-dashboard.html';
               } else if (role === 'ADMIN') {
-                window.location.href = '../admin/dashboard.html';
+                console.log('Redirecting to admin dashboard...');
+                window.location.href = '/admin/dashboard.html';
               } else {
-                window.location.href = '../student/courses.html';
+                console.log('Redirecting to student dashboard...');
+                window.location.href = '/student/student-dashboard.html';
               }
-            }, 1500);
+            } catch (redirectError) {
+              console.error('Redirect failed:', redirectError);
+            }
+            
             return;
           }
           
@@ -440,10 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
           showInlineMessage('Network error. Please check your connection and try again.', 'error');
           console.error('Login error:', err);
         }
-      }, () => {
-        // Cancelled
-        showInlineMessage('Login cancelled', 'info');
-      });
+      // }, () => {
+      //   // Cancelled
+      //   showInlineMessage('Login cancelled', 'info');
+      // });
     });
   }
 
@@ -478,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = await res.json().catch(()=>null);
         if (res.ok && body?.token) return saveTokenAndRedirect(body.token, body?.user?.role || role);
         // some backends return 201 created without token -> redirect to login
-        if (res.status === 201 || res.status === 200) return window.location.href = '/login.html';
+        if (res.status === 201 || res.status === 200) return window.location.href = '/auth/login.html';
         setText('signupServerError', (body && (body.message || body.error)) || 'Registration failed');
       } catch (err) {
         setText('signupServerError','Network error');

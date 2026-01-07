@@ -4,7 +4,7 @@ const courseId = urlParams.get("course");
 
 async function fetchLessons() {
   try {
-    const res = await fetch(`http://localhost:5000/lessons?course_id=${courseId}`);
+    const res = await fetch(`/api/lessons?course=${courseId}`);
     const lessons = await res.json();
     displayLessons(lessons);
   } catch (err) {
@@ -31,7 +31,7 @@ async function addVideoNote(lessonId) {
   const text = prompt("Enter your note:");
   if (!text) return;
   try {
-    const res = await fetch("http://localhost:5000/videonotes", {
+    const res = await fetch("/api/notes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -49,7 +49,7 @@ async function addVideoNote(lessonId) {
 }
 
 async function showActivities(lessonId) {
-  const res = await fetch(`http://localhost:5000/activities?lesson_id=${lessonId}`);
+  const res = await fetch(`/api/activities?lesson_id=${lessonId}`);
   const activities = await res.json();
   let msg = "Activities:\n";
   activities.forEach(a => {

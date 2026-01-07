@@ -1,96 +1,209 @@
-// instructor-signup.js
-(function(){
-  const form = document.getElementById('instructorForm');
-  const msgBox = document.getElementById('instructorFormMsg');
-  const by = id => document.getElementById(id);
-  const emailRe = /^[A-Za-z][A-Za-z0-9._%+-]*@[^\s@]+\.[^\s@]+$/;
-  const nameRe = /^[A-Za-z\s.'-]{2,}$/;
+import { authService } from '../js/api-service.js';
 
-  function setErr(id,text){ if(by(id)) by(id).textContent = text || ''; }
+// Constants
+const SUCCESS_MESSAGES = {
+  SIGNUP_SUCCESS: 'Instructor account created successfully! Redirecting to login...'
+};
 
-  function validateFiles(fileInput, allowed, maxMB=5){
-    const f = fileInput.files[0];
-    if(!f) return {ok:true};
-    const extOk = allowed.some(t => f.type === t || f.name.toLowerCase().endsWith(t.replace('image/','.')));
-    const sizeOk = f.size <= maxMB * 1024 * 1024;
-    if(!extOk) return {ok:false, msg:'Invalid file type'};
-    if(!sizeOk) return {ok:false, msg:`File must be <= ${maxMB} MB`};
-    return {ok:true};
+const ERROR_MESSAGES = {
+  INTERNAL_ERROR: 'An internal server error occurred.',
+  NETWORK_ERROR: 'Cannot connect to server. Please check your connection.'
+};
+
+// Form elements
+const form = document.getElementById('instructorForm');
+const instructorName = document.getElementById('instructorName');
+const instructorLastName = document.getElementById('instructorLastName');
+const instructorEmail = document.getElementById('instructorEmail');
+const instructorPassword = document.getElementById('instructorPassword');
+const instructorConfirmPassword = document.getElementById('instructorConfirmPassword');
+const instructorPhone = document.getElementById('instructorPhone');
+const instructorBio = document.getElementById('instructorBio');
+const instructorExperience = document.getElementById('instructorExperience');
+const instructorSubjects = document.getElementById('instructorSubjects');
+const instructorEducation = document.getElementById('instructorEducation');
+const instructorWebsite = document.getElementById('instructorWebsite');
+
+function showError(inputId, errorId, message) {
+  const input = document.getElementById(inputId);
+  const error = document.getElementById(errorId);
+
+  if (input) {
+    input.classList.add("error-input");
+    input.classList.remove("success-input");
   }
 
-  form.addEventListener('submit', async e=>{
-    e.preventDefault();
-    msgBox.textContent=''; msgBox.className='form-msg';
+  if (error) {
+    error.textContent = message;
+    error.style.opacity = "1";
+  }
+}
 
-    const name = by('instructorName').value.trim();
-    const experience = by('instructorExperience').value;
-    const father = by('instructorFatherName').value.trim();
-    const country = by('instructorCountry').value.trim();
-    const city = by('instructorCity').value.trim();
-    const address = by('instructorAddress').value.trim();
-    const email = by('instructorEmail').value.trim();
-    const phone = by('instructorPhone').value.trim();
-    const postal = by('instructorPostal').value.trim();
-    const password = by('instructorPassword').value;
-    const confirm = by('instructorConfirm').value;
-    const subject = by('instructorSubject').value.trim();
-    const website = by('instructorWebsite').value.trim();
-    const skills = by('instructorSkills').value.trim();
-    const bio = by('instructorBio').value.trim();
+function showSuccess(inputId, errorId) {
+  const input = document.getElementById(inputId);
+  const error = document.getElementById(errorId);
 
-    // clear errors
-    ['instructorNameError','instructorFatherNameError','instructorAddressError','instructorEmailError','instructorPostalError',
-     'instructorPasswordError','instructorConfirmError','instructorSubjectError','instructorWebsiteError','instructorProfileError','instructorResumeError','instructorSkillsError','instructorBioError']
-     .forEach(id=>setErr(id,''));
+  if (input) {
+    input.classList.remove("error-input");
+    input.classList.add("success-input");
+  }
 
-    let ok = true;
-    if(!name || !nameRe.test(name)){ setErr('instructorNameError','Enter valid name (no numbers)'); ok=false; }
-    if(!email || !emailRe.test(email)){ setErr('instructorEmailError','Enter valid email (cannot start with number)'); ok=false; }
-    if(!password || password.length < 6){ setErr('instructorPasswordError','Password min 6 chars'); ok=false; }
-    if(confirm !== password){ setErr('instructorConfirmError','Passwords do not match'); ok=false; }
-    if(postal && !/^[\dA-Za-z\- ]{2,10}$/.test(postal)){ setErr('instructorPostalError','Invalid postal code'); ok=false; }
-    if(website && !/^(https?:\/\/)/i.test(website)){ setErr('instructorWebsiteError','Enter full url starting with http(s)'); ok=false; }
-    if(skills && skills.length > 300){ setErr('instructorSkillsError','Keep skills shorter'); ok=false; }
+  if (error) {
+    error.textContent = "";
+    error.style.opacity = "0";
+  }
+}
 
-    // files
-    const pcheck = validateFiles(by('instructorProfileFile'), ['image/jpeg','image/png']);
-    if(!pcheck.ok){ setErr('instructorProfileError', pcheck.msg); ok=false; }
-    const rcheck = validateFiles(by('instructorResumeFile'), ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
-    if(!rcheck.ok){ setErr('instructorResumeError', rcheck.msg); ok=false; }
+// Global message display functions
+function showSuccessMessage(message) {
+  const msgDiv = document.getElementById('signupMessage') || createMessageDiv();
+  msgDiv.textContent = message;
+  msgDiv.className = 'message success-message';
+  msgDiv.style.display = 'block';
+}
 
-    if(!ok){ msgBox.textContent='Fix errors above'; msgBox.classList.add('error'); return; }
+function showErrorMessage(message) {
+  const msgDiv = document.getElementById('signupMessage') || createMessageDiv();
+  msgDiv.textContent = message;
+  msgDiv.className = 'message error-message';
+  msgDiv.style.display = 'block';
+}
 
-    const fd = new FormData();
-    fd.append('role','instructor');
-    fd.append('name', name);
-    if(experience) fd.append('experience', experience);
-    if(father) fd.append('fatherName', father);
-    if(country) fd.append('country', country);
-    if(city) fd.append('city', city);
-    if(address) fd.append('address', address);
-    fd.append('email', email);
-    if(phone) fd.append('phone', phone);
-    if(postal) fd.append('postal', postal);
-    fd.append('password', password);
-    if(subject) fd.append('subject', subject);
-    if(website) fd.append('website', website);
-    if(skills) fd.append('skills', skills);
-    if(bio) fd.append('bio', bio);
+function createMessageDiv() {
+  const msgDiv = document.createElement('div');
+  msgDiv.id = 'signupMessage';
+  msgDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 1000;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  `;
+  document.body.appendChild(msgDiv);
+  return msgDiv;
+}
 
-    const pfile = by('instructorProfileFile').files[0];
-    if(pfile) fd.append('profile', pfile);
-    const rfile = by('instructorResumeFile').files[0];
-    if(rfile) fd.append('resume', rfile);
+function clearAllErrors() {
+  // Clear all error messages
+  const errorElements = document.querySelectorAll('.error-message');
+  errorElements.forEach(el => el.textContent = '');
 
-    try{
-      msgBox.textContent = 'Sending...';
-      const res = await fetch('/api/auth/signup', { method:'POST', body: fd });
-      const data = await res.json();
-      if(!res.ok){ msgBox.textContent = data.message || 'Signup failed'; msgBox.classList.add('error'); }
-      else { msgBox.textContent = data.message || 'Account created'; msgBox.classList.add('success'); setTimeout(()=> location.href='login.html',1000); }
-    }catch(err){
-      console.error(err);
-      msgBox.textContent = 'Network/server error'; msgBox.classList.add('error');
-    }
+  // Reset input styles
+  const inputs = document.querySelectorAll('input, textarea, select');
+  inputs.forEach(input => {
+    input.classList.remove('error-input');
+    input.classList.remove('success-input');
   });
-})();
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  let valid = true;
+
+  const firstName = instructorName.value.trim();
+  const lastName = instructorLastName.value.trim();
+  const email = instructorEmail.value.trim();
+  const password = instructorPassword.value.trim();
+  const confirmPassword = instructorConfirmPassword.value.trim();
+
+  // First Name Validation
+  if (!firstName) {
+    valid = false;
+    showError("instructorName", "errName", "First name is required.");
+  } else {
+    showSuccess("instructorName", "errName");
+  }
+
+  // Last Name Validation
+  if (!lastName) {
+    valid = false;
+    showError("instructorLastName", "errLastName", "Last name is required.");
+  } else {
+    showSuccess("instructorLastName", "errLastName");
+  }
+
+  // Email Validation
+  if (!email) {
+    valid = false;
+    showError("instructorEmail", "errEmail", "Email is required.");
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    valid = false;
+    showError("instructorEmail", "errEmail", "Please enter a valid email.");
+  } else {
+    showSuccess("instructorEmail", "errEmail");
+  }
+
+  // Password Validation
+  if (password.length < 6) {
+    valid = false;
+    showError("instructorPassword", "errPassword", "Password must be at least 6 characters.");
+  } else {
+    showSuccess("instructorPassword", "errPassword");
+  }
+
+  // Confirm Password Validation
+  if (password !== confirmPassword) {
+    valid = false;
+    showError("instructorConfirmPassword", "errConfirmPassword", "Passwords do not match.");
+  } else {
+    showSuccess("instructorConfirmPassword", "errConfirmPassword");
+  }
+
+  if (!valid) return;
+
+  // Prepare payload
+  const payload = {
+    first_name: firstName,
+    last_name: lastName,
+    email,
+    password,
+    role: 'INSTRUCTOR',
+    phone: instructorPhone.value || undefined,
+    bio: instructorBio.value || undefined,
+    experience_years: instructorExperience.value ? parseInt(instructorExperience.value) : undefined,
+    expertise_area: instructorSubjects.value || undefined,
+    qualifications: instructorEducation.value || undefined,
+    website: instructorWebsite.value || undefined
+  };
+
+  // Remove undefined values
+  Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+  try {
+    // Show loading state
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating Account...';
+
+    // Clear previous errors
+    clearAllErrors();
+
+    // Use the auth service
+    console.log('Sending signup request with payload:', payload);
+    const data = await authService.signup(payload);
+    console.log('Signup response:', data);
+
+    // Show success message
+    showSuccessMessage(SUCCESS_MESSAGES.SIGNUP_SUCCESS);
+
+    // Redirect to login page for manual login
+    setTimeout(() => {
+      window.location.href = window.location.origin + '/publicc/auth/login.html';
+    }, 1500);
+
+  } catch (error) {
+    // Show inline error message
+    showErrorMessage(error.message || ERROR_MESSAGES.INTERNAL_ERROR);
+
+    // Re-enable button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create Account';
+  }
+});

@@ -42,11 +42,11 @@ export const createCourseResource = async (req, res) => {
       resource
     });
   } catch (error) {
-    console.error('Error creating course resource:', error);
-    res.status(500).json({
-      message: 'Failed to create resource',
-      error: error.message
-    });
+    console.error('[courseResources.createCourseResource]', error);
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'Resource already exists' });
+    }
+    res.status(500).json({ message: 'Failed to create resource' });
   }
 };
 
@@ -79,11 +79,8 @@ export const getCourseResources = async (req, res) => {
 
     res.json(resources);
   } catch (error) {
-    console.error('Error fetching course resources:', error);
-    res.status(500).json({
-      message: 'Failed to fetch resources',
-      error: error.message
-    });
+    console.error('[courseResources.getCourseResources]', error);
+    res.status(500).json({ message: 'Failed to fetch resources' });
   }
 };
 
@@ -114,11 +111,8 @@ export const getCourseResourceById = async (req, res) => {
 
     res.json(resource);
   } catch (error) {
-    console.error('Error fetching course resource:', error);
-    res.status(500).json({
-      message: 'Failed to fetch resource',
-      error: error.message
-    });
+    console.error('[courseResources.getCourseResourceById]', error);
+    res.status(500).json({ message: 'Failed to fetch resource' });
   }
 };
 
@@ -170,11 +164,8 @@ export const updateCourseResource = async (req, res) => {
       resource: updatedResource
     });
   } catch (error) {
-    console.error('Error updating course resource:', error);
-    res.status(500).json({
-      message: 'Failed to update resource',
-      error: error.message
-    });
+    console.error('[courseResources.updateCourseResource]', error);
+    res.status(500).json({ message: 'Failed to update resource' });
   }
 };
 
@@ -209,10 +200,7 @@ export const deleteCourseResource = async (req, res) => {
       message: 'Resource deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting course resource:', error);
-    res.status(500).json({
-      message: 'Failed to delete resource',
-      error: error.message
-    });
+    console.error('[courseResources.deleteCourseResource]', error);
+    res.status(500).json({ message: 'Failed to delete resource' });
   }
 };

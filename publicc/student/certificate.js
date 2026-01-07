@@ -3,7 +3,7 @@ const token = localStorage.getItem("token");
 
 // Optionally fetch courses for selection
 async function loadCourses() {
-  const res = await fetch("http://localhost:3000/api/courses", {
+  const res = await fetch("/api/courses", {
     headers: { Authorization: `Bearer ${token}` }
   });
   const courses = await res.json();
@@ -13,7 +13,7 @@ async function loadCourses() {
 loadCourses();
 
 async function loadCertificates() {
-  const res = await fetch("http://localhost:3000/api/certificates", {
+  const res = await fetch("/api/certificates", {
     headers: { Authorization: `Bearer ${token}` }
   });
   const certificates = await res.json();
@@ -32,7 +32,7 @@ async function loadCertificates() {
 }
 
 async function deleteCertificate(id) {
-  await fetch(`http://localhost:3000/api/certificates/${id}`, {
+  await fetch(`/api/certificates/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
   });

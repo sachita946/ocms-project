@@ -71,23 +71,21 @@ export const payCourse = async (req, res) => {
       },
     });
 
-    // If payment is completed, create enrollment
+    // If payment is completed, create enrollment (idempotent)
     if (status === 'COMPLETED') {
-      await prisma.enrollment.upsert({
-        where: {
-          student_id_course_id: {
-            student_id: studentId,
-            course_id: parseInt(course_id)
-          }
-        },
-        update: {},
-        create: {
-          student_id: studentId,
-          course_id: parseInt(course_id),
-          status: 'ACTIVE',
-          progress: 0
-        }
+      const existingEnrollment = await prisma.enrollment.findFirst({
+        where: { student_id: studentId, course_id: parseInt(course_id) }
       });
+
+      if (!existingEnrollment) {
+        await prisma.enrollment.create({
+          data: {
+            student_id: studentId,
+            course_id: parseInt(course_id),
+            completion_status: 'ACTIVE'
+          }
+        });
+      }
     }
 
     return res.status(201).json({
@@ -103,8 +101,8 @@ export const payCourse = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('payCourse error:', err);
-    return res.status(500).json({ message: 'Internal server error', error: err.message });
+    console.error('[payments.payCourse]', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -169,21 +167,19 @@ export const updatePaymentStatus = async (req, res) => {
       data: { status },
     });
     if (status === 'COMPLETED' && payment.status !== 'COMPLETED') {
-      await prisma.enrollment.upsert({
-        where: {
-          student_id_course_id: {
-            student_id: payment.student_id,
-            course_id: payment.course_id
-          }
-        },
-        update: {},
-        create: {
-          student_id: payment.student_id,
-          course_id: payment.course_id,
-          status: 'ACTIVE',
-          progress: 0
-        }
+      const existingEnrollment = await prisma.enrollment.findFirst({
+        where: { student_id: payment.student_id, course_id: payment.course_id }
       });
+
+      if (!existingEnrollment) {
+        await prisma.enrollment.create({
+          data: {
+            student_id: payment.student_id,
+            course_id: payment.course_id,
+            completion_status: 'ACTIVE'
+          }
+        });
+      }
     }
 
     res.json({

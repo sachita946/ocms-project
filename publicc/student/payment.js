@@ -1,5 +1,5 @@
 // Payment Integration with Khalti and eSewa
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 // Configuration
 const KHALTI_PUBLIC_KEY = "test_public_key_dc74e0fd57cb46cd93832aee0a390234"; // Replace with your Khalti test/live key

@@ -1,4 +1,4 @@
-const apiBaseUrl = 'http://localhost:3000/api/quiz';
+const apiBaseUrl = '/api/quizzes';
 document.addEventListener('DOMContentLoaded', () => {
   const quizForm = document.getElementById('quizForm');
   if (!quizForm) return;

@@ -1,6 +1,3 @@
-// ============================================
-// COURSES MANAGEMENT PAGE
-// ============================================
 
 initAdminPage();
 
@@ -114,9 +111,7 @@ function deleteCourse(courseId) {
   }
 }
 
-// ============================================
 // Resource handling
-// ============================================
 function setupResourceHandlers() {
   const form = document.getElementById('resourceForm');
   if (form) {

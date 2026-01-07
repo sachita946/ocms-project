@@ -216,8 +216,30 @@ export const getMyProfile = async (req, res) => {
       dashboard = await buildStudentDashboard(userId, user.studentProfile.id);
     }
 
-    if (user.role === "INSTRUCTOR" && user.instructorProfile) {
+    if (user.role === "INSTRUCTOR" && user.instructorProfile && user.instructorProfile.id) {
       dashboard = await buildInstructorDashboard(userId, user.instructorProfile.id);
+    } else if (user.role === "INSTRUCTOR") {
+      // Handle case where instructor profile doesn't exist yet
+      dashboard = {
+        role: "INSTRUCTOR",
+        stats: {
+          courses: 0,
+          published: 0,
+          drafts: 0,
+          students: 0,
+          revenue: 0,
+          reviews: 0,
+        },
+        lists: {
+          courses: [],
+          notifications: [],
+          activities: [],
+        },
+        charts: {
+          enrollments: [],
+          revenue: [],
+        },
+      };
     }
 
     return res.json({ user, dashboard });

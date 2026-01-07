@@ -19,7 +19,7 @@ export const googleAuthSuccess = async (req, res) => {
           first_name: profile.name?.givenName || 'User',
           last_name: profile.name?.familyName || '',
           role: 'STUDENT',
-          password: ''
+          password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10)
         }
       });
 

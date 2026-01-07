@@ -1,5 +1,5 @@
 // Courses Page with BIM, CSIT, BCA Programs (static TU syllabus data)
-const API_URL = 'http://localhost:5500/api';
+const API_URL = '/api';
 let allCourses = [];
 let enrolledCourseIds = new Set();
 let currentEnrollmentCourse = null;
@@ -901,71 +901,6 @@ function openCourseResource(courseId, courseName, resourceType) {
   // Redirect to course resources page
   window.location.href = `course-resources.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&type=${resourceType}`;
 }
-					: `<button class="btn btn-primary" data-course-id="${course.id}">Enroll</button>`;
-
-				card.innerHTML = `
-					<h3 style="margin-bottom:8px;display:flex;align-items:center;">${escapeHtml(course.title)} ${badge}</h3>
-					<p style="color:#9fb5b9;margin-bottom:12px;">${escapeHtml(course.description).slice(0, 140)}${course.description && course.description.length > 140 ? '…' : ''}</p>
-					<div style="display:flex;gap:12px;margin-bottom:12px;color:#9fb5b9;">
-						<span>Category: ${escapeHtml(course.category || '—')}</span>
-						<span>Level: ${escapeHtml(course.level || '—')}</span>
-					</div>
-					<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-						<strong style="color:#22c55e;">$${Number(course.price || 0).toFixed(2)}</strong>
-						${actions}
-					</div>
-				`;
-				el.appendChild(card);
-			});
-		});
-
-		// Attach enroll handlers (skip for already enrolled)
-		grid.addEventListener('click', async (e) => {
-			const btn = e.target.closest('button[data-course-id]');
-			if (!btn) return;
-			const courseId = parseInt(btn.getAttribute('data-course-id'));
-
-			// If already enrolled, ignore
-			if (enrollmentByCourse.has(courseId)) return;
-
-			const token2 = localStorage.getItem('ocms_token');
-			const role = localStorage.getItem('ocms_role');
-
-			if (!token2) return window.location.href = '/auth/login.html';
-			if (role !== 'STUDENT' && role !== 'ADMIN') {
-				return alert('Only students can enroll. Please use a student account.');
-			}
-
-			btn.disabled = true;
-			btn.textContent = 'Enrolling…';
-			try {
-				const resEnroll = await fetch('/api/enrollments', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token2}`
-					},
-					body: JSON.stringify({ course_id: courseId })
-				});
-				const data = await resEnroll.json().catch(() => null);
-				if (!resEnroll.ok) {
-					btn.disabled = false;
-					btn.textContent = 'Enroll';
-					return alert(data?.message || 'Failed to enroll');
-				}
-
-				// Redirect to lessons after successful enrollment
-				window.location.href = '/student/courses-lessons.html';
-			} catch (err) {
-				btn.disabled = false;
-				btn.textContent = 'Enroll';
-				alert('Network error. Please try again.');
-			}
-		});
-	} catch (err) {
-		console.error('Failed to load courses', err);
-	}
-});
 
 function escapeHtml(str) {
 	if (!str) return '';

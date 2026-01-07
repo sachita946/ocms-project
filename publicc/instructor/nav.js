@@ -76,12 +76,18 @@ const instructorNav = `
   }
   .instructor-nav-logout {
     margin-top: auto;
-    background: transparent;
-    border-color: rgba(255,107,107,0.3);
+    background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(239,68,68,0.1));
+    border-color: rgba(255,107,107,0.4);
     color: #ff8787;
+    font-weight: 600;
+    transition: all 0.3s ease;
   }
   .instructor-nav-logout:hover {
-    background: rgba(255,107,107,0.1);
+    background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(239,68,68,0.2));
+    border-color: rgba(255,107,107,0.6);
+    color: #ff6b6b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255,107,107,0.3);
   }
   .instructor-page-wrapper {
     margin-left: 260px;
@@ -92,6 +98,16 @@ const instructorNav = `
     .instructor-page-wrapper { margin-left: 0; }
     .instructor-nav-menu { flex-direction: row; overflow-x: auto; gap: 8px; }
   }
+
+  /* Toast animations */
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
 </style>
 <aside class="instructor-nav-sidebar">
   <div class="instructor-nav-brand">
@@ -99,12 +115,12 @@ const instructorNav = `
     <div class="instructor-nav-brand-text">INSTRUCTOR</div>
   </div>
   <nav class="instructor-nav-menu" id="instructorNavMenu">
-    <a href="/instructor/instructor-dashboard.html" class="instructor-nav-item" data-page="dashboard">📊 Dashboard</a>
-    <a href="/instructor/create-course.html" class="instructor-nav-item" data-page="create">📖 Create Course</a>
-    <a href="/instructor/earnings.html" class="instructor-nav-item" data-page="earnings">💰 Earnings</a>
-    <a href="/instructor/students.html" class="instructor-nav-item" data-page="students">👥 Students</a>
-    <a href="/instructor/quizzes.html" class="instructor-nav-item" data-page="quizzes">📝 Quizzes</a>
-    <a href="/instructor/profile.html" class="instructor-nav-item" data-page="profile">👤 Profile</a>
+    <a href="instructor-dashboard.html" class="instructor-nav-item" data-page="dashboard">📊 Dashboard</a>
+    <a href="create-course.html" class="instructor-nav-item" data-page="create">📖 Create Course</a>
+    <a href="earnings.html" class="instructor-nav-item" data-page="earnings">💰 Earnings</a>
+    <a href="students.html" class="instructor-nav-item" data-page="students">👥 Students</a>
+    <a href="quizzes.html" class="instructor-nav-item" data-page="quizzes">📝 Quizzes</a>
+    <a href="profile.html" class="instructor-nav-item" data-page="profile">👤 Profile</a>
   </nav>
   <button class="instructor-nav-item instructor-nav-logout" id="instructorLogoutBtn" onclick="instructorLogout()">🚪 Logout</button>
 </aside>
@@ -134,8 +150,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function instructorLogout() {
-  localStorage.removeItem('ocms_token');
-  localStorage.removeItem('user_role');
-  localStorage.removeItem('user_id');
-  window.location.href = '/auth/login.html';
+  const logoutBtn = document.getElementById('instructorLogoutBtn');
+  const originalText = logoutBtn.textContent;
+
+  // Show loading state
+  logoutBtn.disabled = true;
+  logoutBtn.textContent = '🚪 Logging out...';
+
+  try {
+    // Import the clearAuth function dynamically
+    import('../js/api-service.js').then(({ clearAuth }) => {
+      clearAuth();
+      showToast('Logged out successfully', 'success');
+
+      // Redirect after short delay
+      setTimeout(() => {
+        window.location.href = '/auth/login.html';
+      }, 1000);
+    }).catch(() => {
+      // Fallback if import fails
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('ocms_token');
+      localStorage.removeItem('ocms_user_role');
+      window.location.href = '/auth/login.html';
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Force logout even if there's an error
+    window.location.href = '/auth/login.html';
+  }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+    `;
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toast.style.cssText = `
+    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6'};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }

@@ -1,10 +1,10 @@
 // Authentication & Authorization
 const checkAuth = () => {
-  const token = localStorage.getItem('ocms_token');
-  const userRole = localStorage.getItem('user_role');
-  
+  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
+  const userRole = localStorage.getItem('user_role') || localStorage.getItem('role') || localStorage.getItem('ocms_role');
+
   if (!token || userRole !== 'ADMIN') {
-    window.location.href = '/auth/login.html';
+    window.location.replace(window.location.origin + '/publicc/auth/login.html');
     return false;
   }
   return token;
@@ -34,7 +34,7 @@ const stars = (n) => {
 const setupNavigation = () => {
   document.querySelectorAll('[data-section]').forEach(btn => {
     btn.addEventListener('click', () => {
-      window.location.href = 'dashboard.html';
+      window.location.href = '../dashboard.html';
     });
   });
 };
@@ -42,13 +42,21 @@ const setupNavigation = () => {
 // Logout Handler
 const setupLogout = () => {
   const logoutBtn = $('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+  if (!logoutBtn) return;
+  logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    try {
       localStorage.removeItem('ocms_token');
+      localStorage.removeItem('token');
       localStorage.removeItem('user_role');
-      window.location.href = '/auth/login.html';
-    });
-  }
+      localStorage.removeItem('role');
+      localStorage.removeItem('ocms_role');
+      localStorage.removeItem('ocms_user_role');
+      localStorage.removeItem('user');
+    } finally {
+      window.location.replace(window.location.origin + '/publicc/auth/login.html');
+    }
+  });
 };
 
 // API Fetch with Auth
@@ -59,7 +67,7 @@ const fetchAPI = async (url) => {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.status === 401) {
-      window.location.href = '/auth/login.html';
+      window.location.replace(window.location.origin + '/publicc/auth/login.html');
       return null;
     }
     return await res.json();
@@ -75,3 +83,6 @@ const initAdminPage = () => {
   setupNavigation();
   setupLogout();
 };
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initAdminPage);

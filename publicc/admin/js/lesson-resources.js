@@ -4,7 +4,7 @@
 
 initAdminPage();
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 const token = localStorage.getItem('ocms_token');
 
 let semesters = [];

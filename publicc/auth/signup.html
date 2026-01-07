@@ -2,18 +2,30 @@
 <html>  
 <head>
   <title>EduVerse | Signup</title>
-  <style>:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--bg-card:rgba(255,255,255,0.06)}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 50%,#0b6b6b 100%);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}.signup-section{width:100%;padding:20px}.form-box{background:var(--bg-card);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:40px;max-width:600px;margin:0 auto;box-shadow:0 4px 16px rgba(0,0,0,0.15)}h2{font-size:28px;font-weight:800;margin-bottom:32px;text-align:center}.signup-options{display:flex;flex-direction:column;gap:16px}.btn{display:flex;align-items:center;justify-content:center;padding:16px;border-radius:10px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;font-size:16px}.student-btn{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a}.instructor-btn{background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:#fff}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(34,197,94,0.4)}</style>
-  <script defer src="js/signup.js"></script>
+  <style>:root{--primary:#0f172a;--accent:#22c55e;--text:#eaf4f2;--bg-card:rgba(255,255,255,0.06)}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,var(--primary) 0%,#0d1c42 45%,#0b6b6b 100%);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}.signup-section{width:100%;max-width:1100px}.signup-wrapper{display:grid;grid-template-columns:1.1fr 1fr;background:var(--bg-card);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;box-shadow:0 12px 38px rgba(0,0,0,0.22)}.form-box{padding:48px 44px;display:flex;flex-direction:column;gap:24px}.eyebrow{font-size:14px;letter-spacing:0.12em;color:rgba(234,244,242,0.7);text-transform:uppercase;font-weight:700}.headline{font-size:32px;font-weight:800;line-height:1.1}.subhead{font-size:15px;color:rgba(234,244,242,0.78);max-width:480px}.signup-options{display:flex;flex-direction:column;gap:14px;margin-top:8px}.btn{display:flex;align-items:center;justify-content:center;padding:15px 18px;border-radius:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;font-size:16px;width:100%}.student-btn{background:linear-gradient(135deg,var(--accent),#0ea5e9);color:#0f172a}.instructor-btn{background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:#fff}.back-btn{background:transparent;color:var(--text);border:1px solid rgba(234,244,242,0.2)}.btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,0,0,0.2)}.visual-panel{position:relative;min-height:360px;background:linear-gradient(180deg,rgba(15,23,42,0.65),rgba(11,107,107,0.55)),url('../background/signup.png') center no-repeat;isolation:isolate}.visual-overlay{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(34,197,94,0.25),transparent 35%),radial-gradient(circle at 80% 40%,rgba(14,165,233,0.2),transparent 40%)}.visual-copy{position:absolute;bottom:32px;left:32px;right:32px;display:flex;flex-direction:column;gap:10px;z-index:1}.visual-copy h3{font-size:22px;font-weight:800}.visual-copy p{font-size:14px;color:rgba(234,244,242,0.8);line-height:1.5}@media(max-width:900px){body{padding:14px}.signup-wrapper{grid-template-columns:1fr}.visual-panel{order:-1;height:220px}.form-box{padding:32px 26px}.headline{font-size:28px}}</style>
 </head>
 <body>
   <section class="signup-section">
-    <div class="form-box">
-      <h2>Signup</h2>
-      <div class="signup-options">
-        <a href="student-signup.html" class="btn student-btn zoom">Sign Up as Student</a>
-        <a href="instructor-signup.html" class="btn instructor-btn zoom">Sign Up as Instructor</a>
+    <div class="signup-wrapper">
+      <div class="form-box">
+        <span class="eyebrow">Choose Your Path</span>
+        <div>
+          <div class="headline">Create your EduVerse account</div>
+          <p class="subhead">Pick the experience tailored to you. Start learning as a student or share knowledge as an instructor.</p>
+        </div>
+        <div class="signup-options">
+          <a href="../student/student-signup.html" class="btn student-btn zoom">Sign Up as Student</a>
+          <a href="../instructor/instructor-signup.html" class="btn instructor-btn zoom">Sign Up as Instructor</a>
+          <button type="button" class="btn back-btn zoom" onclick="window.location.href='../auth/login.html'">Back to Login</button>
+        </div>
       </div>
-      <button type="button" class="btn back-btn zoom" onclick="window.location.href='login.html'">Back to Login</button>
+      <div class="visual-panel" aria-hidden="true">
+        <div class="visual-overlay"></div>
+        <div class="visual-copy">
+          <h3>Join a thriving learning community</h3>
+          <p>Access curated courses, hands-on resources, and real-time support—all in one place.</p>
+        </div>
+      </div>
     </div>
   </section>
 </body>

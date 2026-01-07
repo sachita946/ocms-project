@@ -6,7 +6,7 @@ export const enrollInCourse = async (req, res) => {
     const { course_id } = req.body;
     const enrollment = await prisma.enrollment.create({
       data: {
-        student_id: req.user.id,
+        student_id: req.studentProfileId,
         course_id,
         enrollment_code: `ENR-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
       }
@@ -137,14 +137,26 @@ export const getStudentProgressDetail = async (req, res) => {
 
 export const unenroll = async (req, res) => {
   try {
-    const { id } = req.params;
-    const enrollment = await prisma.enrollment.findUnique({ where: { id: parseInt(id) } });
-    if (!enrollment) return res.status(404).json({ message: 'Enrollment not found' });
-    if (req.user.role !== 'ADMIN' && enrollment.student_id !== req.user.id) return res.status(403).json({ message: 'Forbidden' });
-    await prisma.enrollment.delete({ where: { id: parseInt(id) } });
-    res.json({ message: 'Unenrolled' });
+    const id = parseInt(req.params.id);
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { id },
+      include: { student: true }  // Include to get user_id
+    });
+
+    if (!enrollment) {
+      return res.status(404).json({ message: 'Enrollment not found' });
+    }
+
+    // Compare correct IDs - enrollment.student_id is integer, req.user.id is UUID
+    if (req.user.role !== 'ADMIN' && enrollment.student.user_id !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    await prisma.enrollment.delete({ where: { id } });
+    res.json({ message: 'Unenrolled successfully' });
   } catch (err) {
-    console.error('unenroll', err);
+    console.error('[enrollments.unenroll]', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

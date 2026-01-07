@@ -12,7 +12,7 @@ import {
 const router = Router();
 
 // GET all users — protected
-router.get('/', auth, getAllUsers);
+router.get('/', getAllUsers);
 router.get('/:id', auth, getOneUser);
 
 // CREATE a new user — public

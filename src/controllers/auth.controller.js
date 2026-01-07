@@ -1,17 +1,16 @@
 import { prisma } from "../utils/prisma-client.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
-import { success, error } from "../utils/json.js";
 
 // SIGNUP
 export const signup = async (req, res) => {
   try {
     const { first_name, last_name, full_name, email, password, role } = req.body;
     if (!email || !password || (!first_name && !full_name))
-      return error(res, "Missing fields", 400);
+      return res.status(400).json({ message: "Missing fields" });
 
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) return error(res, "Email already exists", 409);
+    if (existing) return res.status(409).json({ message: "Email already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -27,33 +26,47 @@ export const signup = async (req, res) => {
 
     // Create profile based on role
     if (user.role === "STUDENT") {
+      const { phone, bio, current_education_level, interests } = req.body;
       await prisma.studentProfile.create({
-        data: { user_id: user.id, full_name: `${user.first_name} ${user.last_name}`, interests: [] },
-      });
-    } else if (user.role === "INSTRUCTOR") {
-      const { qualifications, experience_years, expertise_area, bio, phone, website } = req.body;
-      await prisma.instructorProfile.create({
-        data: {
-          user_id: user.id,
-          full_name: `${user.first_name} ${user.last_name}`,
-          qualifications,
-          experience_years: experience_years ? parseInt(experience_years) : null,
-          expertise_area,
-          bio,
+        data: { 
+          user_id: user.id, 
+          full_name: `${user.first_name} ${user.last_name}`, 
           phone,
-          website,
-          is_pending_approval: true,
-          is_verified: false
+          bio,
+          current_education_level,
+          interests: interests || []
         },
       });
+    } else if (user.role === "INSTRUCTOR") {
+      try {
+        const { qualifications, experience_years, expertise_area, bio, phone, website } = req.body;
+        await prisma.instructorProfile.create({
+          data: {
+            user_id: user.id,
+            full_name: `${user.first_name} ${user.last_name}`,
+            qualifications,
+            experience_years: experience_years ? parseInt(experience_years) : null,
+            expertise_area,
+            bio,
+            phone,
+            website,
+            is_pending_approval: true,
+            is_verified: false
+          },
+        });
+        console.log('Instructor profile created successfully for user:', user.id);
+      } catch (profileError) {
+        console.error('Failed to create instructor profile:', profileError);
+        // Don't fail the signup, just log the error
+      }
     }
 
     const token = generateToken(user);
 
-    return success(res, { token, user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name } }, "Signup successful");
+    return res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name } });
   } catch (err) {
-    console.error("signup", err);
-    return error(res, "Server error", 500);
+    console.error("[auth.signup]", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -61,20 +74,39 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return error(res, "Missing fields", 400);
+    console.log('[auth.login] Login attempt for email:', email);
+    
+    if (!email || !password) {
+      console.log('[auth.login] Missing fields');
+      return res.status(400).json({ message: "Missing fields" });
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.password) return error(res, "Invalid credentials", 400);
+    console.log('[auth.login] User found:', !!user);
+    if (user) {
+      console.log('[auth.login] User role:', user.role);
+    }
+    
+    if (!user || !user.password) {
+      console.log('[auth.login] Invalid credentials - user not found or no password');
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return error(res, "Invalid credentials", 400);
+    console.log('[auth.login] Password match:', match);
+    
+    if (!match) {
+      console.log('[auth.login] Invalid credentials - password mismatch');
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     const token = generateToken(user);
+    console.log('[auth.login] Login successful for user:', user.email, 'role:', user.role);
 
-    return success(res, { token, user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name } }, "Login successful");
+    return res.json({ token, user: { id: user.id, email: user.email, role: user.role, first_name: user.first_name, last_name: user.last_name } });
   } catch (err) {
-    console.error("login", err);
-    return error(res, "Server error", 500);
+    console.error("[auth.login] Error:", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -97,9 +129,9 @@ export const oauthLogin = async (req, res) => {
     }
 
     const token = generateToken(user);
-    return success(res, { token, role: user.role }, "OAuth login successful");
+    return res.json({ token, role: user.role });
   } catch (err) {
-    console.error("oauthLogin", err);
-    return error(res, "Server error", 500);
+    console.error("[auth.oauthLogin]", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

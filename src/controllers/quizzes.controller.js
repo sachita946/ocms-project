@@ -11,10 +11,14 @@ export const getQuizByLesson = async (req, res) => {
     if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
     const safeQuestions = (quiz.questions || []).map(q => ({
       id: q.id,
-      question_text: q.question_text || q.text || '',
-      question_type: q.question_type || q.type || 'MULTIPLE_CHOICE',
-      points: q.points ?? q.marks ?? 1,
-      answers: (q.answers || []).map(a => ({ id: a.id, answer_text: a.answer_text || a.text || '' }))
+      question_text: q.question_text,
+      question_type: q.question_type,
+      points: q.points,
+      answers: (q.answers || []).map(a => ({
+        id: a.id,
+        answer_text: a.answer_text,
+        is_correct: false  // Never expose correct answers before submission
+      }))
     }));
     return res.json({ id: quiz.id, title: quiz.title, passing_score: quiz.passing_score ?? 70, questions: safeQuestions });
   } catch (err) {
@@ -47,29 +51,66 @@ export const getQuiz = async (req, res) => {
 
 export const createQuiz = async (req, res) => {
   try {
-    const p = req.body;
+    const { lesson_id, title, passing_score, duration } = req.body;
+
+    if (!lesson_id || !title) {
+      return res.status(400).json({ message: 'lesson_id and title required' });
+    }
+
+    // Verify the lesson exists and user owns it
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: parseInt(lesson_id) },
+      include: { course: true }
+    });
+
+    if (!lesson) {
+      return res.status(404).json({ message: 'Lesson not found' });
+    }
+
+    if (lesson.course.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
     const quiz = await prisma.quiz.create({
       data: {
-        title: p.title,
-        course_id: p.course_id,
-        passing_score: p.passing_score ?? null,
-        total_marks: p.total_marks ?? null
+        lesson_id: parseInt(lesson_id),
+        title,
+        passing_score: passing_score || 70,
+        duration: duration || null
       }
     });
     res.status(201).json(quiz);
   } catch (err) {
-    console.error('createQuiz', err);
+    console.error('[quizzes.createQuiz]', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 export const updateQuiz = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const p = req.body;
+
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+      include: {
+        lesson: { include: { course: { select: { instructor_id: true } } } }
+      }
+    });
+
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    if (quiz.lesson?.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
     const updated = await prisma.quiz.update({
       where: { id },
-      data: { title: p.title ?? undefined, passing_score: p.passing_score ?? undefined, total_marks: p.total_marks ?? undefined }
+      data: {
+        title: p.title ?? undefined,
+        passing_score: p.passing_score ?? undefined,
+        total_marks: p.total_marks ?? undefined
+      }
     });
     res.json(updated);
   } catch (err) {
@@ -80,7 +121,21 @@ export const updateQuiz = async (req, res) => {
 
 export const deleteQuiz = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
+
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+      include: {
+        lesson: { include: { course: { select: { instructor_id: true } } } }
+      }
+    });
+
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    if (quiz.lesson?.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
     await prisma.quiz.delete({ where: { id } });
     res.json({ message: 'Quiz deleted' });
   } catch (err) {

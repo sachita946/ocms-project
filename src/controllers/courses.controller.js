@@ -88,24 +88,37 @@ export const getCourse = async (req, res) => {
 // Update
 export const updateCourse = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = req.body;
-    const course = await prisma.course.update({
-      where: { id: parseInt(id) },
-      data
-    });
-    res.json(course);
+    const id = parseInt(req.params.id);
+    
+    // Verify ownership
+    const course = await prisma.course.findUnique({ where: { id } });
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    
+    if (course.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    
+    const updated = await prisma.course.update({ where: { id }, data: req.body });
+    res.json(updated);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
-};
+}
 
 // Delete
 export const deleteCourse = async (req, res) => {
   try {
-    const { id } = req.params;
-    await prisma.course.delete({ where: { id: parseInt(id) } });
+    const id = parseInt(req.params.id);
+
+    const course = await prisma.course.findUnique({ where: { id } });
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    if (course.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    await prisma.course.delete({ where: { id } });
     res.json({ message: "Course deleted" });
   } catch (err) {
     console.error(err);

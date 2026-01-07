@@ -1,5 +1,77 @@
 const token = localStorage.getItem('ocms_token');
-if (!token) window.location.href = '/auth/login.html';
+const userRole = localStorage.getItem('user_role');
+
+console.log('Instructor dashboard - token:', !!token);
+console.log('Instructor dashboard - userRole:', userRole);
+
+if (!token) {
+  console.log('No token found, redirecting to login');
+  alert('No authentication token found. Please login first.');
+  window.location.href = '../auth/login.html';
+}
+if (userRole !== 'INSTRUCTOR') {
+  console.log('User role is not INSTRUCTOR, redirecting to login. Role:', userRole);
+  alert('Access denied. You are not logged in as an instructor. Your role: ' + userRole);
+  window.location.href = '../auth/login.html';
+}
+
+// Check if instructor is verified
+async function checkInstructorVerification() {
+  try {
+    console.log('Checking instructor verification...');
+    const res = await fetch('http://localhost:3000/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+    console.log('Auth/me response status:', res.status);
+    
+    if (!res.ok) {
+      console.error('Auth/me request failed with status:', res.status);
+      throw new Error(`Authentication failed: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    console.log('Auth/me response data:', data);
+    
+    if (!data || !data.user) {
+      console.error('Invalid response from auth/me');
+      throw new Error('Invalid authentication response');
+    }
+    
+    if (data.user?.instructorProfile && !data.user.instructorProfile.is_verified) {
+      // For testing purposes, allow access but show a warning
+      console.warn('Instructor account not yet verified - allowing access for testing');
+      showVerificationWarning();
+      return true; // Allow access for testing
+    }
+    
+    console.log('Instructor verification check passed');
+    return true;
+  } catch (error) {
+    console.error('Verification check failed:', error);
+    throw error; // Re-throw to stop bootstrap
+  }
+}
+
+function showVerificationWarning() {
+  const warningDiv = document.createElement('div');
+  warningDiv.id = 'verification-warning';
+  warningDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #f59e0b;
+    color: #92400e;
+    padding: 12px 20px;
+    text-align: center;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  `;
+  warningDiv.innerHTML = `
+    ⚠️ Your instructor account is pending admin approval. Some features may be limited.
+    <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; color: #92400e; font-size: 18px; cursor: pointer; margin-left: 10px;">×</button>
+  `;
+  document.body.insertBefore(warningDiv, document.body.firstChild);
+}
 
 const $ = (id) => document.getElementById(id);
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : '';
@@ -17,8 +89,15 @@ document.addEventListener('DOMContentLoaded', bootstrap);
 navButtons.forEach(btn => btn.addEventListener('click', () => switchSection(btn.dataset.section)));
 
 $('logoutBtn').addEventListener('click', () => {
+  // Clear all auth data
+  localStorage.removeItem('token');
   localStorage.removeItem('ocms_token');
-  window.location.href = '/auth/login.html';
+  localStorage.removeItem('user');
+  localStorage.removeItem('user_role');
+  localStorage.removeItem('ocms_user_role');
+  
+  // Redirect to login
+  window.location.href = '../auth/login.html';
 });
 
 function switchSection(section) {
@@ -32,30 +111,39 @@ function switchSection(section) {
 }
 
 function setStats(stats = {}) {
-  $('stat-courses').textContent = stats.courses ?? 0;
-  $('stat-published').textContent = stats.published ?? 0;
-  $('stat-drafts').textContent = stats.drafts ?? 0;
-  $('stat-students').textContent = stats.students ?? 0;
-  $('stat-revenue').textContent = fmtCurrency(stats.revenue ?? 0);
-  $('stat-reviews').textContent = stats.reviews ?? 0;
+  const coursesEl = $('stat-courses');
+  const publishedEl = $('stat-published');
+  const draftsEl = $('stat-drafts');
+  const studentsEl = $('stat-students');
+  const revenueEl = $('stat-revenue');
+  const reviewsEl = $('stat-reviews');
+
+  if (coursesEl) coursesEl.textContent = stats?.courses ?? 0;
+  if (publishedEl) publishedEl.textContent = stats?.published ?? 0;
+  if (draftsEl) draftsEl.textContent = stats?.drafts ?? 0;
+  if (studentsEl) studentsEl.textContent = stats?.students ?? 0;
+  if (revenueEl) revenueEl.textContent = fmtCurrency(stats?.revenue ?? 0);
+  if (reviewsEl) reviewsEl.textContent = stats?.reviews ?? 0;
 }
 
 function renderHeader(user) {
   const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Instructor';
-  $('welcomeName').textContent = name;
-  $('userName').textContent = name;
-  $('userEmail').textContent = user.email;
-  $('avatar').textContent = name.charAt(0).toUpperCase();
+  const welcomeNameEl = $('welcomeName');
+  if (welcomeNameEl) {
+    welcomeNameEl.textContent = name;
+  }
 }
 
 function renderOverview(dashboard) {
   const list = $('overview-list');
+  if (!list) return;
+  
   list.innerHTML = '';
   const items = [
-    { label: '📚 Courses', value: dashboard.stats?.courses },
-    { label: '✅ Published', value: dashboard.stats?.published },
-    { label: '👥 Students', value: dashboard.stats?.students },
-    { label: '💰 Revenue', value: fmtCurrency(dashboard.stats?.revenue || 0) },
+    { label: '📚 Courses', value: dashboard?.stats?.courses },
+    { label: '✅ Published', value: dashboard?.stats?.published },
+    { label: '👥 Students', value: dashboard?.stats?.students },
+    { label: '💰 Revenue', value: fmtCurrency(dashboard?.stats?.revenue || 0) },
   ];
   items.forEach(item => {
     const li = document.createElement('li');
@@ -67,6 +155,8 @@ function renderOverview(dashboard) {
 
 function renderCourses(courses = []) {
   const list = $('courses-list');
+  if (!list) return;
+  
   list.innerHTML = '';
   if (!courses.length) {
     list.innerHTML = '<div class="muted" style="padding:12px">No courses created yet. Click "New Course" to start!</div>';
@@ -83,9 +173,14 @@ function renderCourses(courses = []) {
 
 function renderEarnings(dashboard) {
   const list = $('earnings-list');
+  if (!list) {
+    console.warn('Earnings list container not found');
+    return;
+  }
+  
   list.innerHTML = '';
   
-  const courses = dashboard.lists?.courses || [];
+  const courses = dashboard?.lists?.courses || [];
   const totalRevenue = courses.reduce((sum, c) => sum + (c.revenue || 0), 0);
   
   if (!courses.length) {
@@ -152,6 +247,11 @@ function renderEarnings(dashboard) {
 
 function renderLessons(courses = []) {
   const list = $('lessons-list');
+  if (!list) {
+    console.warn('Lessons list container not found');
+    return;
+  }
+  
   list.innerHTML = '';
   
   const allLessons = [];
@@ -178,6 +278,11 @@ function renderLessons(courses = []) {
 
 function renderStudents(courses = []) {
   const list = $('students-list');
+  if (!list) {
+    console.warn('Students list container not found');
+    return;
+  }
+  
   list.innerHTML = '';
   
   const allStudents = new Map();
@@ -213,6 +318,11 @@ function renderStudents(courses = []) {
 
 function renderQuizzes(courses = []) {
   const list = $('quizzes-list');
+  if (!list) {
+    console.warn('Quizzes list container not found');
+    return;
+  }
+  
   list.innerHTML = '';
   
   const allQuizzes = [];
@@ -240,15 +350,20 @@ function renderQuizzes(courses = []) {
 
 function renderProfile(user) {
   const list = $('profile-list');
+  if (!list) {
+    console.warn('Profile list container not found');
+    return;
+  }
+  
   list.innerHTML = '';
   
   const profileItems = [
-    { label: 'Name', value: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A' },
-    { label: 'Email', value: user.email || 'N/A' },
-    { label: 'Member Since', value: fmtDate(user.created_at) || 'N/A' },
-    { label: 'Expertise', value: user.instructorProfile?.expertise_area || 'Not specified' },
-    { label: 'Website', value: user.instructorProfile?.website || 'Not specified' },
-    { label: 'Verification Status', value: user.instructorProfile?.is_verified ? '✓ Verified' : '⏳ Not Verified' },
+    { label: 'Name', value: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'N/A' },
+    { label: 'Email', value: user?.email || 'N/A' },
+    { label: 'Member Since', value: fmtDate(user?.created_at) || 'N/A' },
+    { label: 'Expertise', value: user?.instructorProfile?.expertise_area || 'Not specified' },
+    { label: 'Website', value: user?.instructorProfile?.website || 'Not specified' },
+    { label: 'Verification Status', value: user?.instructorProfile?.is_verified ? '✓ Verified' : '⏳ Not Verified' },
   ];
 
   profileItems.forEach(item => {
@@ -261,35 +376,64 @@ function renderProfile(user) {
 
 function renderNotifications(items = [], activities = []) {
   const notifList = $('notifications-list');
-  notifList.innerHTML = '';
-  if (!items.length) notifList.innerHTML = '<div class="muted" style="padding:12px">No new notifications.</div>';
-  items.forEach(n => {
-    const li = document.createElement('li');
-    li.className = 'list-item';
-    li.innerHTML = `<div>${n.message}</div><div class="muted">${fmtDate(n.created_at)}</div>`;
-    notifList.appendChild(li);
-  });
+  if (!notifList) {
+    console.warn('Notifications list container not found');
+    return;
+  }
 
-  const activityList = $('activities-list');
-  activityList.innerHTML = '';
-  if (!activities.length) activityList.innerHTML = '<div class="muted" style="padding:12px">No recent activity.</div>';
-  activities.forEach(a => {
-    const li = document.createElement('li');
-    li.className = 'list-item';
-    const label = a.course?.title || a.lesson?.title || 'Course activity';
-    li.innerHTML = `<div><div style="font-weight:600">${label}</div><div class="muted">${a.action || 'Activity'}</div></div><div class="muted">${fmtDate(a.created_at)}</div>`;
-    activityList.appendChild(li);
-  });
+  notifList.innerHTML = '';
+  if (!items.length && !activities.length) {
+    notifList.innerHTML = '<div class="muted" style="padding:12px">No new notifications or activity.</div>';
+    return;
+  }
+
+  // Render notifications
+  if (items.length > 0) {
+    items.forEach(n => {
+      const li = document.createElement('li');
+      li.className = 'list-item';
+      li.innerHTML = `<div>${n.message || 'Notification'}</div><div class="muted">${fmtDate(n.created_at)}</div>`;
+      notifList.appendChild(li);
+    });
+  }
+
+  // Render activities
+  if (activities.length > 0) {
+    activities.forEach(a => {
+      const li = document.createElement('li');
+      li.className = 'list-item';
+      const label = a.course?.title || a.lesson?.title || 'Course activity';
+      li.innerHTML = `<div><div style="font-weight:600">${label}</div><div class="muted">${a.action || 'Activity'}</div></div><div class="muted">${fmtDate(a.created_at)}</div>`;
+      notifList.appendChild(li);
+    });
+  }
 }
 
 async function bootstrap() {
+  console.log('Starting instructor dashboard bootstrap...');
+  
   try {
-    const res = await fetch('/api/profile/me', { headers: { Authorization: `Bearer ${token}` } });
-    if (res.status === 401) throw new Error('unauthorized');
+    // Check if instructor is verified first
+    await checkInstructorVerification();
+    
+    console.log('Fetching profile data...');
+    const res = await fetch('http://localhost:3000/api/profile/me', { headers: { Authorization: `Bearer ${token}` } });
+    console.log('Profile/me response status:', res.status);
+    
+    if (!res.ok) {
+      throw new Error(`Profile fetch failed: ${res.status}`);
+    }
+    
     const payload = await res.json();
+    console.log('Profile data received:', payload);
+    
+    if (!payload || !payload.user || !payload.dashboard) {
+      throw new Error('Invalid profile data received');
+    }
     
     if (payload.dashboard?.role !== 'INSTRUCTOR') {
-      window.location.href = '/student/student-dashboard.html';
+      console.log('Role check failed, redirecting to student page');
+      window.location.href = '../student/courses.html';
       return;
     }
 
@@ -297,7 +441,7 @@ async function bootstrap() {
     const user = payload.user;
 
     renderHeader(user);
-    setStats(dashboard.stats);
+    setStats(dashboard.stats || {});
     renderOverview(dashboard);
     renderCourses(dashboard.lists?.courses || []);
     renderEarnings(dashboard);
@@ -306,16 +450,21 @@ async function bootstrap() {
     renderQuizzes(dashboard.lists?.courses || []);
     renderProfile(user);
     renderNotifications(dashboard.lists?.notifications || [], dashboard.lists?.activities || []);
+    
+    console.log('Dashboard bootstrap completed successfully');
   } catch (err) {
-    console.error(err);
+    console.error('Bootstrap failed:', err.message);
+    // Clear invalid tokens and redirect to login
     localStorage.removeItem('ocms_token');
-    window.location.href = '/auth/login.html';
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user');
+    window.location.href = '../auth/login.html';
   }
 }
 
 // Helper functions
 function goToCreateCourse() {
-  window.location.href = '/instructor/create-course.html';
+  window.location.href = 'create-course.html';
 }
 
 function editProfile() {

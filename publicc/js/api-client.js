@@ -1,5 +1,7 @@
-// Global API helper
-const API_BASE = '/api';
+// Global API helper with robust base resolution
+const OCMS_BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API_BASE = `${OCMS_BACKEND_ORIGIN}/api`;
 
 // Fetch with authentication
 async function apiCall(endpoint, options = {}) {

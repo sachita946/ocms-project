@@ -8,19 +8,23 @@ export const getStats = async (req, res) => {
     }
 
     const totalUsers = await prisma.user.count();
-    const totalCourses = await prisma.course.count();
-    const totalEnrollments = await prisma.enrollment.count();
-    const totalPayments = await prisma.payment.count();
+    const students = await prisma.user.count({ where: { role: 'STUDENT' } });
+    const instructors = await prisma.user.count({ where: { role: 'INSTRUCTOR' } });
+    const courses = await prisma.course.count();
+    const payments = await prisma.payment.count();
     const totalRevenue = await prisma.payment.aggregate({
       _sum: { amount: true }
     });
+    const reviews = await prisma.review.count();
 
     res.json({
       totalUsers,
-      totalCourses,
-      totalEnrollments,
-      totalPayments,
+      students,
+      instructors,
+      courses,
+      payments,
       totalRevenue: totalRevenue._sum.amount || 0,
+      reviews,
       timestamp: new Date()
     });
   } catch (err) {

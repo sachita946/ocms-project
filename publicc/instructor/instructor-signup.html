@@ -38,10 +38,17 @@ input[type="file"]::file-selector-button:hover{transform:translateY(-2px);box-sh
 .btn.primary:active{transform:translateY(0);box-shadow:0 4px 15px rgba(245,158,11,0.3)}
 .btn.ghost{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,0.2)}
 .btn.ghost:hover{background:rgba(255,255,255,0.08);border-color:var(--instructor-accent);color:var(--instructor-accent)}
+.input.error-input{border-color:var(--error);background:rgba(239,68,68,0.05)}
+.input.success-input{border-color:#10b981;background:rgba(16,185,129,0.05)}
+.error{display:block;color:var(--error);font-size:0.85rem;margin-top:6px;font-weight:500;min-height:20px}
+.error:empty{display:none}
+.message{position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;font-weight:500;z-index:1000;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.message.success-message{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-left:4px solid #10b981}
+.message.error-message{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border-left:4px solid #ef4444}
 @media (max-width:768px){body{padding:20px 10px}.form-card{padding:32px 24px}.row{grid-template-columns:1fr;gap:16px}.actions{flex-direction:column}.btn{min-width:100%}}
 @media (max-width:480px){.logo{font-size:2rem}.subtitle{font-size:1rem}h2{font-size:1.6rem}.form-card{padding:24px 16px}}
   </style>
-  <script defer src="js/instructor-signup.js"></script>
+  <script defer src="instructor-signup.js" type="module"></script>
 </head>
 <body>
 <div class="page">
@@ -58,14 +65,14 @@ input[type="file"]::file-selector-button:hover{transform:translateY(-2px);box-sh
 
         <div class="row">
           <div class="half">
-            <label class="label">Full Name *</label>
-            <input class="input" type="text" id="instructorName" placeholder="Your full name">
-          <small class="error" id="errName"></small>
+            <label class="label">First Name *</label>
+            <input class="input" type="text" id="instructorName" placeholder="Your first name">
+            <small class="error" id="errName"></small>
           </div>
           <div class="half">
-            <label class="label">Date of Birth</label>
-            <input class="input" type="date" id="instructorDob">
-            <small class ="error" id="errDob"></small>
+            <label class="label">Last Name</label>
+            <input class="input" type="text" id="instructorLastName" placeholder="Your last name">
+            <small class="error" id="errLastName"></small>
           </div>
         </div>
 

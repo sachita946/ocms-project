@@ -1,7 +1,3 @@
-// ============================================
-// PAYMENTS MANAGEMENT PAGE (Single Algorithm: Linear Search)
-// ============================================
-
 initAdminPage();
 
 const token = localStorage.getItem('ocms_token');

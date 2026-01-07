@@ -1,6 +1,6 @@
-// ============================================
+
 // ADMIN - STUDENT PROGRESS JAVASCRIPT
-// ============================================
+
 
 // Check Auth
 const token = checkAuth();
