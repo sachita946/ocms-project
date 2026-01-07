@@ -741,7 +741,7 @@
 
 		async function loadCourses() {
 			try {
-				const res = await fetch('http://localhost:5000/api/profile/me', {
+				const res = await fetch('http://localhost:5500/api/profile/me', {
 					headers: { Authorization: `Bearer ${token}` }
 				});
 				if (res.status === 401) throw new Error('unauthorized');

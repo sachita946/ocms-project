@@ -260,10 +260,10 @@ function showConfirmDialog(message, onConfirm, onCancel) {
 
 // Decide dashboard path by role
 function getDashboardPath(role) {
-  if (role === 'INSTRUCTOR') return '/instructor/instructor-dashboard.html';
-  if (role === 'ADMIN') return '/admin/dashboard.html';
-  if (role === 'STUDENT') return '/student/student-dashboard.html';
-  return '/student/courses.html';
+  if (role === 'INSTRUCTOR') return './instructor/instructor-dashboard.html';
+  if (role === 'ADMIN') return './admin/dashboard.html';
+  if (role === 'STUDENT') return './student/student-dashboard.html';
+  return './student/courses.html';
 }
 
 // Save token and optionally redirect to dashboard
@@ -455,10 +455,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = '/instructor/instructor-dashboard.html';
               } else if (role === 'ADMIN') {
                 console.log('Redirecting to admin dashboard...');
-                window.location.href = '/admin/dashboard.html';
+                window.location.href = './admin/dashboard.html';
               } else {
                 console.log('Redirecting to student dashboard...');
-                window.location.href = '/student/student-dashboard.html';
+                window.location.href = './student/student-dashboard.html';
               }
             } catch (redirectError) {
               console.error('Redirect failed:', redirectError);
