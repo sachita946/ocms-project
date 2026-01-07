@@ -222,8 +222,8 @@ function initiateEsewaPayment(amount) {
     tAmt: amount, // Total amount
     pid: transactionId,
     scd: ESEWA_MERCHANT_ID,
-    su: `${window.location.origin}/publicc/student/payment-success.html?method=esewa&courseId=${courseData.id}&amount=${amount}&txId=${transactionId}&type=${courseType}`,
-    fu: `${window.location.origin}/publicc/student/payment.html?failed=true`
+    su: `${window.location.origin}/student/payment-success.html?method=esewa&courseId=${courseData.id}&amount=${amount}&txId=${transactionId}&type=${courseType}`,
+    fu: `${window.location.origin}/student/payment.html?failed=true`
   };
 
   // Create and submit form

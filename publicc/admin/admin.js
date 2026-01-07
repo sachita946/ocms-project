@@ -4,7 +4,7 @@ const checkAuth = () => {
   const userRole = localStorage.getItem('user_role') || localStorage.getItem('role') || localStorage.getItem('ocms_role');
 
   if (!token || userRole !== 'ADMIN') {
-    window.location.replace(window.location.origin + '/publicc/auth/login.html');
+    window.location.replace(window.location.origin + '/auth/login.html');
     return false;
   }
   return token;
@@ -54,7 +54,7 @@ const setupLogout = () => {
       localStorage.removeItem('ocms_user_role');
       localStorage.removeItem('user');
     } finally {
-      window.location.replace(window.location.origin + '/publicc/auth/login.html');
+      window.location.replace(window.location.origin + '/auth/login.html');
     }
   });
 };
@@ -67,7 +67,7 @@ const fetchAPI = async (url) => {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.status === 401) {
-      window.location.replace(window.location.origin + '/publicc/auth/login.html');
+      window.location.replace(window.location.origin + '/auth/login.html');
       return null;
     }
     return await res.json();

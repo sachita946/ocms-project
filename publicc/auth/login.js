@@ -279,7 +279,7 @@ async function saveTokenAndRedirect(token, role) {
       const instructorProfile = body?.user?.instructorProfile;
       if (instructorProfile && !instructorProfile.is_verified) {
         // Redirect to a pending approval page or show message
-        window.location.href = '/publicc/auth/pending-approval.html';
+        window.location.href = '/auth/pending-approval.html';
         return;
       }
     } catch (error) {
@@ -303,7 +303,7 @@ async function fetchRoleFromToken(token) {
 // requireLogin: to protect pages (use in protected pages)
 export function requireLogin() {
   const token = localStorage.getItem('ocms_token');
-  if (!token) window.location.href = '/publicc/auth/login.html';
+  if (!token) window.location.href = '/auth/login.html';
 }
 
 // Parse OAuth token from query param ?token=...

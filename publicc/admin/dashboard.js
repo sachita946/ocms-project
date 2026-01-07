@@ -81,7 +81,7 @@ $('logoutBtn').addEventListener('click', () => {
   showToast('Logged out successfully', 'success');
 
   // Redirect immediately
-  window.location.href = '/publicc/index.html';
+  window.location.href = '/index.html';
 });
 
 function switchSection(section) {
@@ -409,7 +409,7 @@ async function bootstrap() {
     console.error(err);
     localStorage.removeItem('ocms_token');
     localStorage.removeItem('user_role');
-    window.location.href = '/publicc/auth/login.html';
+    window.location.href = '/auth/login.html';
   }
 }
 

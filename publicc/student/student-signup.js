@@ -175,7 +175,7 @@ form.addEventListener("submit", async (e) => {
 
     // Redirect to login page for manual login
     setTimeout(() => {
-      window.location.href = window.location.origin + '/publicc/auth/login.html';
+      window.location.href = window.location.origin + '/auth/login.html';
     }, 1500);
 
   } catch (error) {

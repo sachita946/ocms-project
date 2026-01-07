@@ -47,16 +47,16 @@ export const SUCCESS_MESSAGES = {
 
 // Routes
 export const ROUTES = {
-  HOME: '/publicc/',
-  LOGIN: '/publicc/auth/login.html',
-  SIGNUP: '/publicc/auth/signup.html',
-  STUDENT_DASHBOARD: '/publicc/student/student-dashboard.html',
-  INSTRUCTOR_DASHBOARD: '/publicc/instructor/instructor-dashboard.html',
-  ADMIN_DASHBOARD: '/publicc/admin/dashboard.html',
-  STUDENT_SIGNUP: '/publicc/student/student-signup.html',
-  INSTRUCTOR_SIGNUP: '/publicc/instructor/instructor-signup.html',
-  COURSES: '/publicc/student/courses.html',
-  CREATE_COURSE: '/publicc/instructor/create-course.html'
+  HOME: '/',
+  LOGIN: '/auth/login.html',
+  SIGNUP: '/auth/signup.html',
+  STUDENT_DASHBOARD: '/student/student-dashboard.html',
+  INSTRUCTOR_DASHBOARD: '/instructor/instructor-dashboard.html',
+  ADMIN_DASHBOARD: '/admin/dashboard.html',
+  STUDENT_SIGNUP: '/student/student-signup.html',
+  INSTRUCTOR_SIGNUP: '/instructor/instructor-signup.html',
+  COURSES: '/student/courses.html',
+  CREATE_COURSE: '/instructor/create-course.html'
 };
 
 // User Roles

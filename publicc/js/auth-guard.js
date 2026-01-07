@@ -30,16 +30,16 @@ export function requireRole(requiredRole) {
 export function redirectToDashboard(role) {
   switch (role) {
     case USER_ROLES.STUDENT:
-      window.location.href = window.location.origin + '/publicc/student/student-dashboard.html';
+      window.location.href = window.location.origin + '/student/student-dashboard.html';
       break;
     case USER_ROLES.INSTRUCTOR:
-      window.location.href = window.location.origin + '/publicc/instructor/instructor-dashboard.html';
+      window.location.href = window.location.origin + '/instructor/instructor-dashboard.html';
       break;
     case USER_ROLES.ADMIN:
-      window.location.href = window.location.origin + '/publicc/admin/dashboard.html';
+      window.location.href = window.location.origin + '/admin/dashboard.html';
       break;
     default:
-      window.location.href = window.location.origin + '/publicc/auth/login.html';
+      window.location.href = window.location.origin + '/auth/login.html';
   }
 }
 
@@ -47,17 +47,17 @@ export function redirectToDashboard(role) {
 export function initAuthGuard() {
   // Skip auth check for public pages
   const publicPages = [
-    '/publicc/index.html',
-    '/publicc/auth/login.html',
-    '/publicc/auth/signup.html',
-    '/publicc/student/student-signup.html',
-    '/publicc/instructor/instructor-signup.html',
-    '/publicc/privacy.html',
-    '/publicc/terms.html',
-    '/publicc/about.html',
-    '/publicc/contact.html',
-    '/publicc/faq.html',
-    '/publicc/support.html'
+    '/index.html',
+    '/auth/login.html',
+    '/auth/signup.html',
+    '/student/student-signup.html',
+    '/instructor/instructor-signup.html',
+    '/privacy.html',
+    '/terms.html',
+    '/about.html',
+    '/contact.html',
+    '/faq.html',
+    '/support.html'
   ];
 
   const currentPath = window.location.pathname;
@@ -90,12 +90,12 @@ export async function handleLogout(event) {
 
     // Redirect to login after short delay
     setTimeout(() => {
-      window.location.href = window.location.origin + '/publicc/auth/login.html';
+      window.location.href = window.location.origin + '/auth/login.html';
     }, 1000);
   } catch (error) {
     console.error('Logout error:', error);
     // Force logout even if there's an error
-    window.location.href = window.location.origin + '/publicc/auth/login.html';
+    window.location.href = window.location.origin + '/auth/login.html';
   }
 }
 
