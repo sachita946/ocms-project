@@ -102,13 +102,23 @@
 <script>
 const API_URL = "/api";
 
-async function verifyStripePayment() {
+async function verifyEsewaPayment() {
   const urlParams = new URLSearchParams(window.location.search);
-  const paymentIntentId = urlParams.get('payment_intent');
+  
+  // Log all URL parameters for debugging
+  console.log('All URL parameters:', Array.from(urlParams.entries()));
+  
+  // eSewa can return different parameter names depending on version/config
+  // Try multiple possible parameter names
+  const transactionCode = urlParams.get('refId') || urlParams.get('txnId') || urlParams.get('transaction_code');
+  const transactionUuid = urlParams.get('oid') || urlParams.get('transaction_uuid');
   const paymentId = urlParams.get('payment_id');
+  const totalAmount = urlParams.get('amt') || urlParams.get('total_amount');
 
-  console.log('Payment success URL parameters:', {
-    paymentIntentId, paymentId, fullUrl: window.location.href
+  console.log('eSewa payment success URL parameters:', {
+    transactionCode, transactionUuid, paymentId, totalAmount, 
+    allParams: Array.from(urlParams.entries()),
+    fullUrl: window.location.href
   });
 
   const loader = document.getElementById('loader');
@@ -116,12 +126,23 @@ async function verifyStripePayment() {
   const statusMessage = document.getElementById('statusMessage');
   const actionButtons = document.getElementById('actionButtons');
 
-  if (!paymentIntentId || !paymentId) {
+  if (!transactionCode || !paymentId) {
     loader.style.display = 'none';
     statusTitle.textContent = 'Payment Verification Failed';
     statusTitle.className = 'error';
-    statusMessage.textContent = 'Invalid payment parameters. Please contact support.';
+    
+    // Show detailed error for debugging
+    const missingParams = [];
+    if (!transactionCode) missingParams.push('Transaction Code (refId/txnId)');
+    if (!paymentId) missingParams.push('Payment ID');
+    
+    statusMessage.innerHTML = `Invalid payment parameters.<br>Missing: ${missingParams.join(', ')}<br><br>`;
+    statusMessage.innerHTML += '<small style="opacity:0.7">Please check the URL parameters or contact support.</small>';
+    
     actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
+    
+    // Log for debugging
+    console.error('Missing parameters:', { transactionCode, paymentId, allParams: Array.from(urlParams.entries()) });
     return;
   }
 
@@ -136,8 +157,10 @@ async function verifyStripePayment() {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        payment_intent_id: paymentIntentId,
-        payment_id: paymentId
+        transaction_code: transactionCode, // refId from eSewa
+        oid: transactionUuid, // oid from eSewa
+        payment_id: paymentId, // our custom parameter
+        amt: totalAmount // amt from eSewa
       })
     });
 
@@ -175,7 +198,7 @@ async function verifyStripePayment() {
 }
 
 // Run verification on page load
-verifyStripePayment();
+verifyEsewaPayment();
 
 // Development helper: Add test payment button for localhost
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -187,7 +210,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
     testButton.onclick = () => {
       // Simulate successful payment with test parameters
       const testUrl = window.location.origin + window.location.pathname +
-        '?payment_intent=pi_test_123&payment_id=1';
+        '?refId=0000ABC&oid=OCMS-1-123&payment_id=1&amt=15000';
       window.location.href = testUrl;
     };
     document.getElementById('actionButtons').appendChild(testButton);

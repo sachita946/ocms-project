@@ -1,46 +1,35 @@
-// Stripe Payment Integration
+// eSewa Payment Integration
 const API_URL = "/api";
 
-// Configuration
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SuaMhKGkUSoeBnp9N69d5kkpfTotJ6WzSvA45RSOj6n8PIFkAMbaeneT6ePsxzfwRlgkDh9TEF6vX9d9iLADdFL00VhBe7w1m';
-// Check if Stripe is configured
-if (STRIPE_PUBLISHABLE_KEY === 'pk_test_your_stripe_publishable_key_here') {
-  document.addEventListener('DOMContentLoaded', () => {
-    showMessage('Payment system is not configured. Please contact support.', 'error');
-    document.getElementById('payBtn').disabled = true;
-    document.getElementById('payBtn').textContent = 'Payment Unavailable';
-  });
-}
-
-let selectedPaymentMethod = 'stripe';
+let selectedPaymentMethod = 'esewa';
 let courseData = {
   id: null,
   name: "Web Development Bootcamp",
-  price: 20000, // NPR (in paisa for Stripe)
+  price: 20000, // NPR
   instructor: "Dr. Sharma",
   type: "regular"
 };
 
-let stripe;
-let elements;
-let paymentElement;
+let esewaPaymentData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('ocms_token');
-  if (!token) {
-    window.location.href = '../auth/login.html';
-    return;
-  }
-
-  // Initialize Stripe
-  stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-  elements = stripe.elements();
-
-  // Get course info from URL parameters
+  // Get course info from URL parameters first
   const urlParams = new URLSearchParams(window.location.search);
   const courseIdFromUrl = urlParams.get('courseId');
   const courseNameFromUrl = urlParams.get('courseName');
   const coursePriceFromUrl = urlParams.get('price');
+  
+  const token = localStorage.getItem('ocms_token');
+  console.log('Payment page - Token check:', !!token);
+  console.log('Payment page - Course params:', { courseIdFromUrl, courseNameFromUrl, coursePriceFromUrl });
+  
+  if (!token) {
+    // No token - redirect to login with enrollment parameters
+    const loginUrl = `/auth/login.html?enrollCourse=${courseIdFromUrl}&courseName=${encodeURIComponent(courseNameFromUrl)}&price=${coursePriceFromUrl}`;
+    console.log('No token, redirecting to login:', loginUrl);
+    window.location.href = loginUrl;
+    return;
+  }
   const courseType = urlParams.get('type') || 'regular';
   const returnUrl = urlParams.get('returnUrl');
 
@@ -62,6 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage('Course not found. It may have been deleted or unpublished.', 'error');
         return;
       }
+      if (courseResponse.status === 401 || courseResponse.status === 403) {
+        // Token invalid or expired, redirect to login
+        localStorage.removeItem('ocms_token');
+        window.location.href = '../auth/login.html';
+        return;
+      }
       throw new Error(`Failed to fetch course: ${courseResponse.status}`);
     }
 
@@ -76,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Use database data as the source of truth
     courseData.id = courseDetails.id;
     courseData.name = courseDetails.title;
-    courseData.price = Math.round(parseFloat(courseDetails.price) * 100); // Convert to paisa
+    courseData.price = parseFloat(courseDetails.price); // Store as NPR
     
     // Update UI with correct course information
     document.getElementById('courseName').textContent = courseDetails.title;
@@ -108,19 +103,11 @@ function initializePaymentForm() {
   payBtn.disabled = true;
   payBtn.textContent = 'Initializing Payment...';
 
-  // Create payment element container
-  const paymentElementContainer = document.createElement('div');
-  paymentElementContainer.id = 'payment-element';
-  paymentElementContainer.style.marginBottom = '20px';
-
-  // Insert before the pay button
-  payBtn.parentNode.insertBefore(paymentElementContainer, payBtn);
-
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // Double-check payment intent is initialized
-    if (!window.paymentIntentData) {
+    if (!esewaPaymentData) {
       showMessage('Payment system is still initializing. Please wait...', 'error');
       return;
     }
@@ -130,18 +117,24 @@ function initializePaymentForm() {
     payBtn.disabled = true;
     payBtn.textContent = 'Processing...';
 
-    await initiateStripePayment(amount);
+    await initiateEsewaPayment(amount);
   });
 
-  // Initialize Stripe Elements after form setup
-  initializeStripeElements();
+  // Initialize eSewa payment
+  initializeEsewaPayment();
 }
 
-async function initializeStripeElements() {
+async function initializeEsewaPayment() {
   const payBtn = document.getElementById('payBtn');
+  const paymentInfo = document.getElementById('payment-info');
 
   try {
-    console.log('Initializing Stripe payment elements...');
+    console.log('Initializing eSewa payment...');
+
+    // Show payment info
+    if (paymentInfo) {
+      paymentInfo.style.display = 'block';
+    }
 
     // Create payment intent first
     const response = await fetch(`${API_URL}/payments/create-intent`, {
@@ -152,7 +145,7 @@ async function initializeStripeElements() {
       },
       body: JSON.stringify({
         course_id: courseData.id,
-        amount: courseData.price / 100 // Convert from paisa back to NPR for API
+        amount: courseData.price // Send NPR amount
       })
     });
 
@@ -162,72 +155,51 @@ async function initializeStripeElements() {
       throw new Error(data.message || `Failed to create payment intent (${response.status})`);
     }
 
-    console.log('Payment intent created successfully:', data);
+    console.log('eSewa payment initialized successfully:', data);
 
-    // Store payment intent details
-    window.paymentIntentData = data;
-
-    // Create payment element with the client secret
-    const options = {
-      clientSecret: data.clientSecret,
-      appearance: {
-        theme: 'stripe',
-        variables: {
-          colorPrimary: '#22c55e',
-        },
-      },
-    };
-
-    // Update the global elements instance with client secret
-    elements = stripe.elements(options);
-    paymentElement = elements.create('payment');
-    paymentElement.mount('#payment-element');
-
-    console.log('Stripe elements mounted successfully');
+    // Store eSewa payment details
+    esewaPaymentData = data;
 
     // Enable pay button
     payBtn.disabled = false;
-    payBtn.textContent = 'Complete Payment';
+    payBtn.textContent = 'Pay with eSewa';
 
-    showMessage('Payment system ready. Enter your card details below.', 'success');
+    showMessage('Payment system ready. Click the button to proceed with eSewa payment.', 'success');
 
   } catch (error) {
-    console.error('Stripe initialization error:', error);
+    console.error('eSewa initialization error:', error);
     showMessage(`Failed to initialize payment: ${error.message}. Please refresh the page and try again.`, 'error');
     payBtn.disabled = true;
     payBtn.textContent = 'Payment Unavailable';
   }
 }
 
-// Stripe Payment Processing
-async function initiateStripePayment(amount) {
+// eSewa Payment Processing
+async function initiateEsewaPayment(amount) {
   try {
-    if (!window.paymentIntentData) {
+    if (!esewaPaymentData) {
       throw new Error('Payment system not initialized. Please refresh the page.');
     }
 
-    if (!elements) {
-      throw new Error('Payment elements not initialized. Please refresh the page.');
+    console.log('Redirecting to eSewa...');
+
+    // Create a form and submit it to eSewa
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = esewaPaymentData.esewa_payment_url;
+
+    // Add all eSewa parameters as hidden fields
+    for (const [key, value] of Object.entries(esewaPaymentData.esewa_params)) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      form.appendChild(input);
     }
 
-    console.log('Confirming payment with Stripe...');
-
-    const { error } = await stripe.confirmPayment({
-      elements: elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/student/payment-success.html?payment_intent=${window.paymentIntentData.clientSecret.split('_secret_')[0]}&payment_id=${window.paymentIntentData.payment_id}`,
-      },
-    });
-
-    if (error) {
-      console.error('Stripe payment error:', error);
-      throw error;
-    }
-
-    console.log('Payment confirmed, redirecting to success page...');
-
-    // Payment succeeded - redirect to success page
-    window.location.href = `${window.location.origin}/student/payment-success.html?payment_intent=${window.paymentIntentData.clientSecret.split('_secret_')[0]}&payment_id=${window.paymentIntentData.payment_id}`;
+    // Add form to page and submit
+    document.body.appendChild(form);
+    form.submit();
 
   } catch (error) {
     console.error('Payment error:', error);

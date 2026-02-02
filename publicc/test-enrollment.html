@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enrollment Flow Tester</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .scenario-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .scenario-card h2 {
+      color: #22c55e;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .flow-steps {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    
+    .flow-steps .step {
+      margin: 5px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .flow-steps .step::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #22c55e;
+      font-weight: bold;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin: 5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      color: #000;
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .status-box {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .logged-in { border-left-color: #22c55e; }
+    .logged-out { border-left-color: #ef4444; }
+    
+    .actions {
+      margin-top: 20px;
+    }
+    
+    .note {
+      background: rgba(255, 193, 7, 0.2);
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Enrollment Flow Tester</h1>
+    
+    <div id="authStatus" class="status-box">
+      <strong>Checking authentication status...</strong>
+    </div>
+    
+    <!-- Scenario 1: Not Logged In -->
+    <div class="scenario-card">
+      <h2>📝 Scenario A: NOT LOGGED IN</h2>
+      <p>Test the full enrollment flow when user is not authenticated:</p>
+      
+      <div class="flow-steps">
+        <div class="step">Click "Enroll Now" on course</div>
+        <div class="step">Redirect to <strong>Login Page</strong></div>
+        <div class="step">Enter email & password</div>
+        <div class="step">Redirect to <strong>Payment Page</strong></div>
+        <div class="step">Complete eSewa payment</div>
+        <div class="step">Payment success → <strong>Join Zoom</strong></div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-danger" onclick="logout()">
+          🚪 Logout First (Clear Token)
+        </button>
+        <button class="btn btn-primary" onclick="testEnrollmentFlow(false)">
+          🧪 Test: Enroll Without Login
+        </button>
+      </div>
+      
+      <div class="note">
+        <strong>Expected Result:</strong> Should redirect to login page with enrollment parameters in URL
+      </div>
+    </div>
+    
+    <!-- Scenario 2: Already Logged In -->
+    <div class="scenario-card">
+      <h2>✅ Scenario B: ALREADY LOGGED IN</h2>
+      <p>Test the enrollment flow when user is already authenticated:</p>
+      
+      <div class="flow-steps">
+        <div class="step">Click "Enroll Now" on course</div>
+        <div class="step">Redirect to <strong>Payment Page</strong> (skip login)</div>
+        <div class="step">Complete eSewa payment</div>
+        <div class="step">Payment success → <strong>Join Zoom</strong></div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-info" onclick="goToLogin()">
+          🔑 Login First
+        </button>
+        <button class="btn btn-primary" onclick="testEnrollmentFlow(true)">
+          🧪 Test: Enroll While Logged In
+        </button>
+      </div>
+      
+      <div class="note">
+        <strong>Expected Result:</strong> Should redirect directly to payment page (skip login)
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="scenario-card">
+      <h2>⚡ Quick Actions</h2>
+      <div class="actions">
+        <a href="/student/courses.html" class="btn btn-info">📚 Go to Courses Page</a>
+        <a href="/auth/login.html" class="btn btn-info">🔑 Go to Login</a>
+        <a href="/student/check-auth.html" class="btn btn-info">🔍 Check Auth Status</a>
+        <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check and display auth status
+    function updateAuthStatus() {
+      const token = localStorage.getItem('ocms_token');
+      const statusBox = document.getElementById('authStatus');
+      
+      if (token) {
+        statusBox.className = 'status-box logged-in';
+        statusBox.innerHTML = `
+          <strong>✅ LOGGED IN</strong><br>
+          <small>Token exists in localStorage</small><br>
+          <small style="opacity: 0.7;">You can test Scenario B (already logged in)</small>
+        `;
+      } else {
+        statusBox.className = 'status-box logged-out';
+        statusBox.innerHTML = `
+          <strong>❌ NOT LOGGED IN</strong><br>
+          <small>No token found</small><br>
+          <small style="opacity: 0.7;">You can test Scenario A (not logged in)</small>
+        `;
+      }
+    }
+    
+    // Test enrollment flow
+    function testEnrollmentFlow(expectLoggedIn) {
+      const courseId = 1;
+      const courseName = 'UI/UX-Centric Flutter App Development';
+      const price = 22000;
+      
+      const token = localStorage.getItem('ocms_token');
+      const isLoggedIn = !!token;
+      
+      console.log('=== ENROLLMENT FLOW TEST ===');
+      console.log('Course:', { courseId, courseName, price });
+      console.log('Expected to be logged in:', expectLoggedIn);
+      console.log('Actually logged in:', isLoggedIn);
+      
+      if (expectLoggedIn && !isLoggedIn) {
+        alert('❌ You need to login first for Scenario B!\nClick "Login First" button.');
+        return;
+      }
+      
+      if (!expectLoggedIn && isLoggedIn) {
+        alert('⚠️ You are still logged in!\nClick "Logout First" to test Scenario A.');
+        return;
+      }
+      
+      // This simulates clicking "Enroll Now" button
+      if (!token) {
+        const loginUrl = `/auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        console.log('➡️ Redirecting to LOGIN:', loginUrl);
+        alert('✅ Test Starting!\n\nNot logged in → Going to LOGIN page\n\nCheck the URL after redirect!');
+        setTimeout(() => window.location.href = loginUrl, 1000);
+      } else {
+        const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        console.log('➡️ Redirecting to PAYMENT:', paymentUrl);
+        alert('✅ Test Starting!\n\nAlready logged in → Going to PAYMENT page\n\nCheck the URL after redirect!');
+        setTimeout(() => window.location.href = paymentUrl, 1000);
+      }
+    }
+    
+    // Logout
+    function logout() {
+      localStorage.removeItem('ocms_token');
+      localStorage.removeItem('token');
+      console.log('Logged out - tokens cleared');
+      alert('✅ Logged out successfully!\n\nYou can now test Scenario A.');
+      updateAuthStatus();
+    }
+    
+    // Clear all
+    function clearAll() {
+      localStorage.clear();
+      console.log('All localStorage cleared');
+      alert('✅ All data cleared!\n\nRefreshing page...');
+      location.reload();
+    }
+    
+    // Go to login
+    function goToLogin() {
+      if (confirm('Go to login page?\n\nAfter login, come back to this tester to test Scenario B.')) {
+        window.location.href = '/auth/login.html';
+      }
+    }
+    
+    // Initialize
+    updateAuthStatus();
+    
+    // Log current state
+    console.log('Enrollment Flow Tester Ready');
+    console.log('Current auth state:', {
+      hasToken: !!localStorage.getItem('ocms_token'),
+      allKeys: Object.keys(localStorage)
+    });
+  </script>
+</body>
+</html>

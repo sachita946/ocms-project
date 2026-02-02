@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eSewa Payment Test</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px;
+      background: linear-gradient(135deg, #0f172a, #0d1c42);
+      color: #fff;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+    }
+    h1 { color: #60BB46; }
+    .test-info { 
+      background: rgba(96, 187, 70, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+    button { 
+      padding: 12px 30px;
+      background: #60BB46;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #4a9936; }
+    .message { 
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 6px;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: rgba(96, 187, 70, 0.3); color: #fff; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🟢 eSewa Payment Test</h1>
+    <p>This page tests the eSewa payment integration.</p>
+
+    <div class="test-info">
+      <strong>Test Environment Credentials:</strong><br>
+      <strong>eSewa ID:</strong> 9806800001, 9806800002, 9806800003<br>
+      <strong>Password:</strong> Nepal@123<br>
+      <strong>MPIN:</strong> 1122<br>
+      <br>
+      <small>These are test credentials provided by eSewa for development.</small>
+    </div>
+
+    <div class="form-group">
+      <label>Course ID</label>
+      <input type="number" id="courseId" value="1" />
+    </div>
+
+    <div class="form-group">
+      <label>Amount (NPR)</label>
+      <input type="number" id="amount" value="15000" />
+    </div>
+
+    <div class="form-group">
+      <label>JWT Token (Get from login)</label>
+      <input type="text" id="token" placeholder="Bearer token..." />
+    </div>
+
+    <button id="testBtn" onclick="testEsewaPayment()">Test eSewa Payment</button>
+
+    <div id="paymentMessage" class="message info" style="display:none;"></div>
+
+    <div id="responseData" style="margin-top: 20px; display:none;">
+      <h3>Payment Response:</h3>
+      <pre id="responseContent" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; overflow-x: auto;"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function testEsewaPayment() {
+      const courseId = document.getElementById('courseId').value;
+      const amount = document.getElementById('amount').value;
+      const token = document.getElementById('token').value;
+      const btn = document.getElementById('testBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Testing...';
+
+      try {
+        showMessage('Creating payment intent...', 'info');
+
+        const response = await fetch('http://localhost:3000/api/payments/create-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            course_id: parseInt(courseId),
+            amount: parseFloat(amount)
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || `Failed: ${response.status}`);
+        }
+
+        console.log('Payment intent created:', data);
+        
+        // Display response
+        document.getElementById('responseContent').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('responseData').style.display = 'block';
+
+        showMessage('Payment intent created! Click "Proceed to eSewa" to test payment.', 'success');
+
+        // Create and show eSewa redirect button
+        btn.textContent = 'Proceed to eSewa';
+        btn.disabled = false;
+        btn.onclick = () => redirectToEsewa(data);
+
+      } catch (error) {
+        console.error('Test error:', error);
+        showMessage(`Error: ${error.message}`, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Test eSewa Payment';
+      }
+    }
+
+    function redirectToEsewa(paymentData) {
+      showMessage('Redirecting to eSewa...', 'info');
+
+      // Create form and submit to eSewa
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = paymentData.esewa_payment_url;
+
+      for (const [key, value] of Object.entries(paymentData.esewa_params)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    function showMessage(message, type) {
+      const messageEl = document.getElementById('paymentMessage');
+      messageEl.textContent = message;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = 'block';
+    }
+
+    // Load token from localStorage if available
+    window.addEventListener('load', () => {
+      const token = localStorage.getItem('ocms_token');
+      if (token) {
+        document.getElementById('token').value = token;
+      }
+    });
+  </script>
+</body>
+</html>

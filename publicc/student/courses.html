@@ -1248,18 +1248,23 @@
   <script>
     // Course enrollment and payment functions
     async function enrollAdvancedCourse(courseId, courseName, price) {
+      console.log('Enrolling in advanced course:', { courseId, courseName, price });
+      
       // Check if user is logged in
       const token = localStorage.getItem('ocms_token');
+      console.log('Token present:', !!token);
+      
       if (!token) {
-        // Store course info for after login and redirect to login with enrollment parameters
-        const loginUrl = `../auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}&returnUrl=${encodeURIComponent(window.location.href)}`;
+        // Not logged in - redirect to login with enrollment info
+        const loginUrl = `/auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        console.log('Redirecting to login:', loginUrl);
         window.location.href = loginUrl;
         return;
       }
-
-      // User is logged in, redirect directly to payment page
-      // The payment page will fetch course details and store the Zoom link
-      const paymentUrl = `payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+      
+      // Already logged in - go directly to payment
+      const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+      console.log('Redirecting to payment:', paymentUrl);
       window.location.href = paymentUrl;
     }
 

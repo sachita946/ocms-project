@@ -1,5 +1,5 @@
-// Test script for Stripe payment integration with NPR currency
-// Run with: node test-stripe-payment.js
+// Test script for eSewa payment integration
+// Run with: node test-esewa-payment.js
 
 import fetch from 'node-fetch';
 import { config } from 'dotenv';
@@ -20,21 +20,17 @@ const ADVANCED_COURSES = [
   { id: 1005, name: 'Artificial Intelligence & Machine Learning', price: 28000 }
 ];
 
-async function testStripePaymentFlow() {
-  console.log('🧪 Testing Stripe Payment Integration for ALL Advanced Courses (NPR Currency)...\n');
+async function testEsewaPaymentFlow() {
+  console.log('🧪 Testing eSewa Payment Integration for ALL Advanced Courses (NPR Currency)...\n');
 
-  // Check if Stripe keys are configured
-  const stripeSecret = process.env.STRIPE_SECRET_KEY;
-  if (!stripeSecret || stripeSecret === 'sk_test_your_stripe_secret_key_here') {
-    console.log('❌ Stripe secret key not configured!');
-    console.log('Please update your .env file with actual Stripe test keys:');
-    console.log('STRIPE_SECRET_KEY=sk_test_...');
-    console.log('STRIPE_PUBLISHABLE_KEY=pk_test_...');
-    console.log('Get keys from: https://dashboard.stripe.com/test/apikeys\n');
-    return;
+  // Check if eSewa keys are configured
+  const esewaMerchantId = process.env.ESEWA_MERCHANT_ID;
+  if (!esewaMerchantId) {
+    console.log('ℹ️  eSewa merchant ID not configured, using default test credentials.');
+    console.log('   Default: ESEWA_MERCHANT_ID=EPAYTEST\n');
+  } else {
+    console.log('✅ eSewa credentials configured\n');
   }
-
-  console.log('✅ Stripe keys configured\n');
 
   // Test each advanced course
   for (const course of ADVANCED_COURSES) {
@@ -61,13 +57,23 @@ async function testStripePaymentFlow() {
         continue;
       }
 
-      console.log(`✅ Payment intent created: ${intentData.amount} paisa (${(intentData.amount / 100).toLocaleString()} NPR)`);
-      console.log(`   Currency: ${intentData.currency}`);
-      console.log(`   Payment ID: ${intentData.paymentId}`);
-      console.log(`   Client Secret: ${intentData.clientSecret.substring(0, 50)}...`);
+      console.log(`✅ Payment intent created successfully`);
+      console.log(`   Transaction UUID: ${intentData.transaction_uuid}`);
+      console.log(`   Amount: NPR ${intentData.amount}`);
+      console.log(`   Payment ID: ${intentData.payment_id}`);
+      console.log(`   eSewa URL: ${intentData.esewa_payment_url}`);
+      console.log(`   Signature: ${intentData.esewa_params.signature.substring(0, 30)}...`);
 
-      // Step 2: Test payment confirmation (mock)
-      console.log(`✅ Course ${course.id} payment system working!\n`);
+      // Step 2: Verify payment form data
+      console.log(`\n📋 eSewa Form Parameters:`);
+      console.log(`   - amount: ${intentData.esewa_params.amount}`);
+      console.log(`   - total_amount: ${intentData.esewa_params.total_amount}`);
+      console.log(`   - transaction_uuid: ${intentData.esewa_params.transaction_uuid}`);
+      console.log(`   - product_code: ${intentData.esewa_params.product_code}`);
+      console.log(`   - success_url: ${intentData.esewa_params.success_url}`);
+      console.log(`   - failure_url: ${intentData.esewa_params.failure_url}`);
+
+      console.log(`\n✅ Course ${course.id} payment system working!\n`);
 
     } catch (error) {
       console.log(`❌ Error testing course ${course.id}: ${error.message}\n`);
@@ -81,4 +87,11 @@ async function testStripePaymentFlow() {
   ADVANCED_COURSES.forEach(course => {
     console.log(`   - ${course.name}: /student/payment.html?courseId=${course.id}&price=${course.price}&courseName=${encodeURIComponent(course.name)}`);
   });
+  console.log('\n3. Use eSewa test credentials:');
+  console.log('   - ID: 9806800001, 9806800002, 9806800003');
+  console.log('   - Password: Nepal@123');
+  console.log('   - MPIN: 1122');
 }
+
+// Run the test
+testEsewaPaymentFlow().catch(console.error);

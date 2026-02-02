@@ -1,17 +1,21 @@
 
-import Stripe from 'stripe';
+import crypto from 'crypto';
 import { prisma } from '../utils/prisma-client.js';
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(stripeSecretKey || 'sk_test_your_stripe_secret_key_here');
+// eSewa Configuration
+const ESEWA_MERCHANT_ID = process.env.ESEWA_MERCHANT_ID || 'EPAYTEST';
+const ESEWA_SECRET_KEY = process.env.ESEWA_SECRET_KEY || '8gBm/:&EnhH.1/q';
+const ESEWA_PAYMENT_URL = process.env.ESEWA_PAYMENT_URL || 'https://rc-epay.esewa.com.np/api/epay/main/v2/form';
+const ESEWA_SUCCESS_URL = process.env.ESEWA_SUCCESS_URL || 'http://localhost:3000/student/payment-success.html';
+const ESEWA_FAILURE_URL = process.env.ESEWA_FAILURE_URL || 'http://localhost:3000/student/payment.html?payment_failed=true';
 
-// Create payment intent for Stripe
+// Create payment intent for eSewa
 export const createPaymentIntent = async (req, res) => {
   try {
-    // Check if Stripe is properly configured
-    if (!stripeSecretKey || stripeSecretKey === 'sk_test_your_stripe_secret_key_here') {
+    // Check if eSewa is properly configured
+    if (!ESEWA_MERCHANT_ID || ESEWA_MERCHANT_ID === 'your_esewa_merchant_id') {
       return res.status(500).json({
-        message: 'Stripe payment system is not configured. Please contact support.'
+        message: 'eSewa payment system is not configured. Please contact support.'
       });
     }
 
@@ -57,38 +61,47 @@ export const createPaymentIntent = async (req, res) => {
       return res.status(400).json({ message: 'You have already paid for this course' });
     }
 
-    // Create Stripe payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(parseFloat(amount) * 100), // Amount is in NPR, convert to paisa (100 paisa = 1 NPR)
-      currency: 'npr', // Use Nepalese Rupee
-      metadata: {
-        course_id: course_id.toString(),
-        student_id: studentProfile.id.toString(),
-        course_title: course.title
-      },
-      description: `Payment for ${course.title}`,
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
-
-    // Create payment record in database
+    // Create payment record in database first
     const payment = await prisma.payment.create({
       data: {
         student_id: studentProfile.id,
         course_id: parseInt(course_id),
         amount: parseFloat(amount),
-        payment_method: 'STRIPE',
-        transaction_id: paymentIntent.id,
+        payment_method: 'ESEWA',
+        transaction_id: `TXN_${Date.now()}_${studentProfile.id}`, // Temporary transaction ID
         status: 'PENDING',
       },
     });
 
+    // Generate eSewa payment signature
+    const transaction_uuid = `OCMS-${payment.id}-${Date.now()}`;
+    const total_amount = parseFloat(amount).toFixed(2);
+    const product_code = ESEWA_MERCHANT_ID;
+    
+    // Create message for signature: total_amount,transaction_uuid,product_code
+    const message = `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${product_code}`;
+    const signature = crypto.createHmac('sha256', ESEWA_SECRET_KEY).update(message).digest('base64');
+
+    // Return eSewa payment form data
     res.json({
-      clientSecret: paymentIntent.client_secret,
       payment_id: payment.id,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency
+      transaction_uuid: transaction_uuid,
+      amount: total_amount,
+      currency: 'NPR',
+      esewa_payment_url: ESEWA_PAYMENT_URL,
+      esewa_params: {
+        amount: total_amount,
+        tax_amount: '0',
+        total_amount: total_amount,
+        transaction_uuid: transaction_uuid,
+        product_code: product_code,
+        product_service_charge: '0',
+        product_delivery_charge: '0',
+        success_url: `${ESEWA_SUCCESS_URL}?payment_id=${payment.id}`,
+        failure_url: ESEWA_FAILURE_URL,
+        signed_field_names: 'total_amount,transaction_uuid,product_code',
+        signature: signature
+      }
     });
 
   } catch (error) {
@@ -100,10 +113,13 @@ export const createPaymentIntent = async (req, res) => {
 // Confirm payment and create enrollment
 export const confirmPayment = async (req, res) => {
   try {
-    const { payment_intent_id, payment_id } = req.body;
+    const { transaction_code, oid, payment_id, amt } = req.body;
 
-    if (!payment_intent_id || !payment_id) {
-      return res.status(400).json({ message: 'Missing payment_intent_id or payment_id' });
+    // eSewa returns: refId (transaction_code), oid (transaction_uuid), amt (amount)
+    // We also accept payment_id from our custom success URL parameter
+
+    if (!transaction_code || !payment_id) {
+      return res.status(400).json({ message: 'Missing transaction_code or payment_id' });
     }
 
     // Validate payment_id is a valid integer
@@ -121,11 +137,9 @@ export const confirmPayment = async (req, res) => {
       return res.status(400).json({ message: 'Student profile not found' });
     }
 
-    // Retrieve payment intent from Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
-
-    if (paymentIntent.status !== 'succeeded') {
-      return res.status(400).json({ message: 'Payment not completed' });
+    // Verify payment with eSewa (if transaction_code is provided, payment is successful)
+    if (!transaction_code) {
+      return res.status(400).json({ message: 'Payment verification failed - no transaction code provided' });
     }
 
     // Update payment status in database
@@ -133,7 +147,7 @@ export const confirmPayment = async (req, res) => {
       where: { id: paymentIdInt },
       data: {
         status: 'COMPLETED',
-        transaction_id: payment_intent_id
+        transaction_id: transaction_code // Use eSewa's transaction code
       }
     });
 

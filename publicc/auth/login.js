@@ -289,13 +289,21 @@ async function saveTokenAndRedirect(token, role) {
   
   // Check for return URL or enrollment course in URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get('returnUrl');
   const enrollCourse = urlParams.get('enrollCourse');
+  const courseName = urlParams.get('courseName');
+  const price = urlParams.get('price');
+  const returnUrl = urlParams.get('returnUrl');
   const enrollParam = urlParams.get('enroll');
   const courseId = urlParams.get('courseId');
   
-  if (returnUrl) {
-    // If there's an enrollCourse, append it to returnUrl
+  console.log('Post-login redirect params:', { enrollCourse, courseName, price, returnUrl });
+  
+  if (enrollCourse && courseName && price && targetRole === 'STUDENT') {
+    // User logged in to enroll in a course - redirect to payment
+    window.location.href = `/student/payment.html?courseId=${enrollCourse}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+    return;
+  } else if (returnUrl) {
+    // If there's a return URL, use it
     let redirectUrl = decodeURIComponent(returnUrl);
     if (enrollCourse) {
       const url = new URL(redirectUrl, window.location.origin);
@@ -303,10 +311,6 @@ async function saveTokenAndRedirect(token, role) {
       redirectUrl = url.toString();
     }
     window.location.href = redirectUrl;
-    return;
-  } else if (enrollCourse && targetRole === 'STUDENT') {
-    // Redirect to courses page with enrollment param
-    window.location.href = `/student/courses.html?enroll=${enrollCourse}`;
     return;
   } else if (enrollParam === 'true' && courseId && targetRole === 'STUDENT') {
     // Handle enrollment redirect from courses page
@@ -345,12 +349,20 @@ function captureTokenFromUrl() {
     history.replaceState({}, '', newUrl);
     return fetchRoleFromToken(token).then((role) => {
       // Check for return URL or enrollment course in remaining params
-      const returnUrl = params.get('returnUrl');
       const enrollCourse = params.get('enrollCourse');
+      const courseName = params.get('courseName');
+      const price = params.get('price');
+      const returnUrl = params.get('returnUrl');
       const enrollParam = params.get('enroll');
       const courseId = params.get('courseId');
       
-      if (returnUrl) {
+      console.log('OAuth redirect params:', { enrollCourse, courseName, price, returnUrl });
+      
+      if (enrollCourse && courseName && price && role === 'STUDENT') {
+        // User logged in via OAuth to enroll - redirect to payment
+        window.location.href = `/student/payment.html?courseId=${enrollCourse}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        return;
+      } else if (returnUrl) {
         let redirectUrl = decodeURIComponent(returnUrl);
         if (enrollCourse) {
           const url = new URL(redirectUrl, window.location.origin);
@@ -358,9 +370,6 @@ function captureTokenFromUrl() {
           redirectUrl = url.toString();
         }
         window.location.href = redirectUrl;
-        return;
-      } else if (enrollCourse && role === 'STUDENT') {
-        window.location.href = `/student/courses.html?enroll=${enrollCourse}`;
         return;
       } else if (enrollParam === 'true' && courseId && role === 'STUDENT') {
         // Handle enrollment redirect from courses page

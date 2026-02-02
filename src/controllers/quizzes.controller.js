@@ -29,25 +29,48 @@ export const getQuizByLesson = async (req, res) => {
 
 export const getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await prisma.quiz.findMany({ include: { course: true } });
+    const quizzes = await prisma.quiz.findMany({
+      include: {
+        lesson: {
+          include: {
+            course: true
+          }
+        }
+      }
+    });
     res.json(quizzes);
   } catch (err) {
-    console.error('getAllQuizzes', err);
+    console.error('getAllQuizzes error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+
 export const getQuiz = async (req, res) => {
   try {
-    const { id } = req.params;
-    const quiz = await prisma.quiz.findUnique({ where: { id }, include: { questions: true } });
-    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    const id = parseInt(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid quiz id' });
+    }
+
+    const quiz = await prisma.quiz.findUnique({
+      where: { id },
+      include: { questions: true }
+    });
+
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
     res.json(quiz);
   } catch (err) {
-    console.error('getQuiz', err);
+    console.error('getQuiz error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
 
 export const createQuiz = async (req, res) => {
   try {
@@ -86,35 +109,57 @@ export const createQuiz = async (req, res) => {
   }
 };
 
-export const updateQuiz = async (req, res) => {
+
+  export const updateQuiz = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const p = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid quiz id' });
+    }
 
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: {
-        lesson: { include: { course: { select: { instructor_id: true } } } }
+        lesson: {
+          include: {
+            course: { select: { instructor_id: true } }
+          }
+        }
       }
     });
 
-    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
 
-    if (quiz.lesson?.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+    // Authorization check
+    if (
+      quiz.lesson.course.instructor_id !== req.user.id &&
+      req.user.role !== 'ADMIN'
+    ) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    const updated = await prisma.quiz.update({
+    // Build update object safely
+    const data = {};
+
+    if (req.body.title) data.title = req.body.title;
+    if (req.body.passing_score !== undefined)
+      data.passing_score = parseInt(req.body.passing_score);
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ message: 'Nothing to update' });
+    }
+
+    const updatedQuiz = await prisma.quiz.update({
       where: { id },
-      data: {
-        title: p.title ?? undefined,
-        passing_score: p.passing_score ?? undefined,
-        total_marks: p.total_marks ?? undefined
-      }
+      data
     });
-    res.json(updated);
+
+    res.json(updatedQuiz);
   } catch (err) {
-    console.error('updateQuiz', err);
+    console.error('updateQuiz error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -123,59 +168,131 @@ export const deleteQuiz = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid quiz id' });
+    }
+
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: {
-        lesson: { include: { course: { select: { instructor_id: true } } } }
+        lesson: {
+          include: {
+            course: { select: { instructor_id: true } }
+          }
+        }
       }
     });
 
-    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
 
-    if (quiz.lesson?.course?.instructor_id !== req.user.id && req.user.role !== 'ADMIN') {
+    // Authorization check
+    if (
+      quiz.lesson.course.instructor_id !== req.user.id &&
+      req.user.role !== 'ADMIN'
+    ) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    await prisma.quiz.delete({ where: { id } });
-    res.json({ message: 'Quiz deleted' });
+    // Transaction: delete related records first
+    await prisma.$transaction([
+      prisma.quizAttempt.deleteMany({ where: { quiz_id: id } }),
+      prisma.answer.deleteMany({
+        where: { question: { quiz_id: id } }
+      }),
+      prisma.question.deleteMany({ where: { quiz_id: id } }),
+      prisma.quiz.delete({ where: { id } })
+    ]);
+
+    res.json({ message: 'Quiz deleted successfully' });
   } catch (err) {
-    console.error('deleteQuiz', err);
+    console.error('deleteQuiz error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 export const submitAttempt = async (req, res) => {
   try {
-    const { id: quiz_id } = req.params;
+    const quiz_id = parseInt(req.params.id);
     const { answers } = req.body;
-    const questions = await prisma.question.findMany({ where: { quiz_id }, include: { answers: true } });
+
+    if (!quiz_id) {
+      return res.status(400).json({ message: 'Invalid quiz id' });
+    }
+
+    if (!Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({ message: 'Answers are required' });
+    }
+
+    // Check quiz exists
+    const quiz = await prisma.quiz.findUnique({
+      where: { id: quiz_id },
+      include: { questions: { include: { answers: true } } }
+    });
+
+    if (!quiz) {
+      return res.status(404).json({ message: 'Quiz not found' });
+    }
+
+    // Prevent multiple attempts (optional)
+    const existingAttempt = await prisma.quizAttempt.findFirst({
+      where: {
+        quiz_id,
+        user_id: req.user.id
+      }
+    });
+
+    if (existingAttempt) {
+      return res.status(400).json({ message: 'Quiz already submitted' });
+    }
+
     let score = 0;
-    let total = 0;
-    for (const q of questions) {
-      total += q.marks ?? 1;
-      const provided = answers?.find(a => a.questionId === q.id);
-      if (!provided) continue;
-      if (q.type === 'MULTIPLE_CHOICE') {
-        const correct = q.answers.find(a => a.is_correct);
-        if (correct && provided.answerId === correct.id) score += q.marks ?? 1;
+    let totalMarks = 0;
+
+    for (const q of quiz.questions) {
+      const marks = q.marks ?? 1;
+      totalMarks += marks;
+
+      const userAnswer = answers.find(a => a.questionId === q.id);
+      if (!userAnswer) continue;
+
+      if (q.question_type === 'MULTIPLE_CHOICE') {
+        const correct = q.answers.find(a => a.is_correct === true);
+        if (correct && userAnswer.answerId === correct.id) {
+          score += marks;
+        }
       }
     }
+
+    const percentage = (score / totalMarks) * 100;
+    const isPassed = percentage >= (quiz.passing_score ?? 50);
+
     const attempt = await prisma.quizAttempt.create({
       data: {
         user_id: req.user.id,
         quiz_id,
         score,
-        total_marks: total,
-        is_passed: score >= (total * 0.5),
-        answers_json: JSON.stringify(answers || [])
+        total_marks: totalMarks,
+        is_passed: isPassed,
+        answers_json: JSON.stringify(answers)
       }
     });
-    res.status(201).json(attempt);
+
+    res.status(201).json({
+      message: 'Quiz submitted successfully',
+      result: {
+        score,
+        totalMarks,
+        percentage,
+        isPassed
+      }
+    });
   } catch (err) {
-    console.error('submitAttempt', err);
+    console.error('submitAttempt error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 export const getAttemptsForQuiz = async (req, res) => {
   try {

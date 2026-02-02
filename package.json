@@ -15,7 +15,6 @@
   "keywords": [],
   "dependencies": {
     "@prisma/client": "^6.17.1",
-    "@stripe/stripe-js": "^4.10.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -27,7 +26,6 @@
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "prisma": "^6.16.1",
-    "stripe": "^17.7.0"
+    "prisma": "^6.16.1"
   }
 }

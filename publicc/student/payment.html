@@ -285,10 +285,11 @@
     <h2>💳 Payment Method</h2>
 
     <div class="payment-methods">
-      <div class="payment-method-btn stripe-btn active" data-method="stripe">
-        <img src="https://js.stripe.com/v3/stripe-js" alt="Stripe" style="display:none;">
-        <span>💳 Credit/Debit Card</span>
+      <div class="payment-method-btn esewa-btn active" data-method="esewa">
+        <img src="https://esewa.com.np/common/images/esewa_og.jpg" alt="eSewa" style="display:none;">
+        <span>🟢 eSewa</span>
       </div>
+    </div>
 
     <form id="paymentForm">
       <div class="form-group">
@@ -296,7 +297,14 @@
         <input type="number" id="amount" value="200" readonly>
       </div>
 
-      <!-- Stripe Payment Element will be inserted here -->
+      <!-- eSewa Payment Information -->
+      <div id="payment-info" style="padding:15px; background:rgba(96, 187, 70, 0.1); border-radius:8px; margin-bottom:20px; display:none;">
+        <p style="margin:0; font-size:0.9rem; line-height:1.6;">
+          ✓ You will be redirected to eSewa to complete your payment<br>
+          ✓ Please have your eSewa credentials ready<br>
+          ✓ Payment is secure and encrypted
+        </p>
+      </div>
 
       <button type="submit" class="pay-btn" id="payBtn" disabled>
         Complete Payment
@@ -308,8 +316,7 @@
 
 </main>
 
-<!-- Stripe.js -->
-<script src="https://js.stripe.com/v3/"></script>
+<!-- No external scripts needed for eSewa -->
 <script src="payment.js"></script>
 
 </body>

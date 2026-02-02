@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eSewa Payment Debugger</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #0d1c42);
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+    }
+    h1 { color: #60BB46; margin-bottom: 20px; }
+    .section {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border-left: 4px solid #60BB46;
+    }
+    .param-list {
+      list-style: none;
+      padding: 0;
+    }
+    .param-item {
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .param-name { color: #60BB46; font-weight: bold; }
+    .param-value { color: #fff; }
+    .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; }
+    .error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; }
+    .info { background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; }
+    button {
+      background: #60BB46;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover { background: #4a9936; }
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #60BB46;
+    }
+    pre {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      color: #60BB46;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐛 eSewa Payment Debugger</h1>
+    
+    <div class="section">
+      <h2>📋 Current URL Information</h2>
+      <div class="status info">
+        <strong>Full URL:</strong><br>
+        <code id="fullUrl"></code>
+      </div>
+      <div class="status info">
+        <strong>Query String:</strong><br>
+        <code id="queryString"></code>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔍 URL Parameters Detected</h2>
+      <ul class="param-list" id="paramList">
+        <!-- Parameters will be listed here -->
+      </ul>
+      <div id="noParams" class="status error" style="display:none;">
+        ❌ No URL parameters found!<br>
+        <small>This page needs to be accessed with URL parameters from eSewa.</small>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>✅ Expected eSewa Parameters</h2>
+      <div class="status info">
+        <p><strong>eSewa should return these parameters:</strong></p>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+          <li><code>refId</code> - Transaction reference ID (required)</li>
+          <li><code>oid</code> - Order ID / Transaction UUID (optional)</li>
+          <li><code>amt</code> - Amount paid (optional)</li>
+          <li><code>payment_id</code> - Our custom payment ID (required)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔧 Parameter Validation</h2>
+      <div id="validationResults">
+        <!-- Validation results will appear here -->
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🧪 Test Actions</h2>
+      <button onclick="testWithSampleParams()">Test with Sample Parameters</button>
+      <button onclick="copyCurrentUrl()">Copy Current URL</button>
+      <button onclick="window.location.href='/student/payment.html'">Go to Payment Page</button>
+    </div>
+
+    <div class="section">
+      <h2>📝 Debug Log</h2>
+      <pre id="debugLog">No logs yet...</pre>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugLogs = [];
+
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      debugLogs.push(`[${timestamp}] ${message}`);
+      document.getElementById('debugLog').textContent = debugLogs.join('\n');
+    }
+
+    function init() {
+      // Display URL info
+      document.getElementById('fullUrl').textContent = window.location.href;
+      document.getElementById('queryString').textContent = window.location.search || '(empty)';
+
+      log('Page loaded');
+      log(`Full URL: ${window.location.href}`);
+
+      // List all parameters
+      const paramList = document.getElementById('paramList');
+      const params = Array.from(urlParams.entries());
+
+      if (params.length === 0) {
+        document.getElementById('noParams').style.display = 'block';
+        log('No URL parameters found');
+      } else {
+        params.forEach(([key, value]) => {
+          const li = document.createElement('li');
+          li.className = 'param-item';
+          li.innerHTML = `
+            <span class="param-name">${key}</span>
+            <span class="param-value">${value}</span>
+          `;
+          paramList.appendChild(li);
+          log(`Parameter found: ${key} = ${value}`);
+        });
+      }
+
+      // Validate parameters
+      validateParameters();
+    }
+
+    function validateParameters() {
+      const results = document.getElementById('validationResults');
+      const validations = [];
+
+      // Check for required parameters
+      const refId = urlParams.get('refId') || urlParams.get('txnId') || urlParams.get('transaction_code');
+      const paymentId = urlParams.get('payment_id');
+      const oid = urlParams.get('oid') || urlParams.get('transaction_uuid');
+      const amt = urlParams.get('amt') || urlParams.get('total_amount');
+
+      // Validate refId
+      if (refId) {
+        validations.push({ status: 'success', msg: `✅ Transaction Code found: ${refId}` });
+        log(`✅ Transaction Code: ${refId}`);
+      } else {
+        validations.push({ status: 'error', msg: '❌ Missing Transaction Code (refId/txnId)' });
+        log('❌ Missing Transaction Code');
+      }
+
+      // Validate payment_id
+      if (paymentId) {
+        validations.push({ status: 'success', msg: `✅ Payment ID found: ${paymentId}` });
+        log(`✅ Payment ID: ${paymentId}`);
+      } else {
+        validations.push({ status: 'error', msg: '❌ Missing Payment ID (payment_id)' });
+        log('❌ Missing Payment ID');
+      }
+
+      // Optional parameters
+      if (oid) {
+        validations.push({ status: 'info', msg: `ℹ️ Order ID found: ${oid}` });
+        log(`ℹ️ Order ID: ${oid}`);
+      } else {
+        validations.push({ status: 'info', msg: 'ℹ️ Order ID not found (optional)' });
+      }
+
+      if (amt) {
+        validations.push({ status: 'info', msg: `ℹ️ Amount found: ${amt}` });
+        log(`ℹ️ Amount: ${amt}`);
+      } else {
+        validations.push({ status: 'info', msg: 'ℹ️ Amount not found (optional)' });
+      }
+
+      // Render validations
+      results.innerHTML = validations.map(v => 
+        `<div class="status ${v.status}">${v.msg}</div>`
+      ).join('');
+
+      // Final verdict
+      if (refId && paymentId) {
+        results.innerHTML += '<div class="status success"><strong>✅ All required parameters present! Payment should verify successfully.</strong></div>';
+        log('✅ Validation passed: All required parameters present');
+      } else {
+        results.innerHTML += '<div class="status error"><strong>❌ Missing required parameters. Payment verification will fail.</strong></div>';
+        log('❌ Validation failed: Missing required parameters');
+      }
+    }
+
+    function testWithSampleParams() {
+      const testUrl = `${window.location.origin}${window.location.pathname}?refId=TEST123&oid=OCMS-1-${Date.now()}&payment_id=1&amt=15000`;
+      log('Redirecting to test URL with sample parameters');
+      window.location.href = testUrl;
+    }
+
+    function copyCurrentUrl() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('URL copied to clipboard!');
+        log('URL copied to clipboard');
+      });
+    }
+
+    // Initialize on page load
+    init();
+  </script>
+</body>
+</html>

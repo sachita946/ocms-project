@@ -21,17 +21,24 @@ export const createLesson = async (req, res) => {
     return res.status(400).json({ message: "Required fields missing" });
   }
   
-  const lesson = await prisma.lesson.create({
-    data: { 
-      course_id: parseInt(course_id), 
-      subject_id: parseInt(subject_id),
-      title, 
-      content_type, 
-      content_url, 
-      duration: duration ? parseInt(duration) : null
-    }
-  });
-}
+  try {
+    const lesson = await prisma.lesson.create({
+      data: { 
+        course_id: parseInt(course_id), 
+        subject_id: parseInt(subject_id),
+        title, 
+        content_type, 
+        content_url, 
+        duration: duration ? parseInt(duration) : null
+      }
+    });
+    
+    res.status(201).json(lesson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // Read all lessons by course
 export const getLessonsByCourse = async (req, res) => {

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Check</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 40px;
+    }
+    .status {
+      background: #2a2a2a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .logged-in { border-left: 4px solid #22c55e; }
+    .logged-out { border-left: 4px solid #ef4444; }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-success { background: #22c55e; color: white; }
+    .btn-info { background: #3b82f6; color: white; }
+    pre {
+      background: #000;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 Authentication Status Check</h1>
+  
+  <div id="statusContainer"></div>
+  
+  <div>
+    <button class="btn-danger" onclick="logout()">🚪 Logout (Clear Token)</button>
+    <button class="btn-info" onclick="goToLogin()">🔑 Go to Login</button>
+    <button class="btn-success" onclick="goToCourses()">📚 Go to Courses</button>
+    <button class="btn-info" onclick="location.reload()">🔄 Refresh</button>
+  </div>
+
+  <script>
+    function checkAuth() {
+      const token = localStorage.getItem('ocms_token');
+      const altToken = localStorage.getItem('token');
+      const statusContainer = document.getElementById('statusContainer');
+      
+      const isLoggedIn = !!(token || altToken);
+      
+      statusContainer.innerHTML = `
+        <div class="status ${isLoggedIn ? 'logged-in' : 'logged-out'}">
+          <h2>${isLoggedIn ? '✅ LOGGED IN' : '❌ NOT LOGGED IN'}</h2>
+          <p><strong>ocms_token:</strong> ${token ? '✓ Present' : '✗ Missing'}</p>
+          <p><strong>token:</strong> ${altToken ? '✓ Present' : '✗ Missing'}</p>
+          
+          ${token ? `
+            <details>
+              <summary>Show Token</summary>
+              <pre>${token.substring(0, 50)}...</pre>
+            </details>
+          ` : ''}
+          
+          <hr style="margin: 20px 0; border: 1px solid #444;">
+          
+          <h3>All LocalStorage Keys:</h3>
+          <pre>${JSON.stringify(Object.keys(localStorage), null, 2)}</pre>
+          
+          <h3>Test Enrollment Flow:</h3>
+          <p>
+            <button class="btn-info" onclick="testEnrollFlow()">
+              🧪 Test Click "Enroll Now" (Course ID: 1)
+            </button>
+          </p>
+          <p style="font-size: 12px; opacity: 0.7;">
+            This simulates clicking "Enroll Now" button. Check console for logs.
+          </p>
+        </div>
+      `;
+    }
+    
+    function logout() {
+      localStorage.removeItem('ocms_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('payment_return_url');
+      console.log('Logged out - all tokens cleared');
+      checkAuth();
+    }
+    
+    function goToLogin() {
+      window.location.href = '/auth/login.html';
+    }
+    
+    function goToCourses() {
+      window.location.href = '/student/courses.html';
+    }
+    
+    function testEnrollFlow() {
+      const courseId = 1;
+      const courseName = 'UI/UX-Centric Flutter App Development';
+      const price = 22000;
+      
+      console.log('=== TESTING ENROLLMENT FLOW ===');
+      console.log('Course:', { courseId, courseName, price });
+      
+      const token = localStorage.getItem('ocms_token');
+      console.log('Token present:', !!token);
+      
+      if (!token) {
+        const loginUrl = `/auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        console.log('➡️ Redirecting to LOGIN:', loginUrl);
+        alert('Not logged in! Redirecting to login page...');
+        window.location.href = loginUrl;
+      } else {
+        const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+        console.log('➡️ Redirecting to PAYMENT:', paymentUrl);
+        alert('Logged in! Redirecting to payment page...');
+        window.location.href = paymentUrl;
+      }
+    }
+    
+    // Run check on load
+    checkAuth();
+    
+    // Show in console too
+    console.log('Auth Status:', {
+      ocms_token: !!localStorage.getItem('ocms_token'),
+      token: !!localStorage.getItem('token'),
+      allKeys: Object.keys(localStorage)
+    });
+  </script>
+</body>
+</html>
