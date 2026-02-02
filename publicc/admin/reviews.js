@@ -17,9 +17,9 @@ document.querySelectorAll('[data-section]').forEach(btn => {
 // Load Reviews
 async function loadReviews() {
   try {
-    const data = await fetchAPI('/api/admin/reviews');
+    const data = await fetchAPI('/api/admin/demo/reviews');
     if (!data) return;
-    renderReviews(data.reviews || []);
+    renderReviews(Array.isArray(data) ? data : (data.reviews || []));
   } catch (err) {
     console.error(err);
   }

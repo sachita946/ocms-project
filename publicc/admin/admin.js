@@ -10,11 +10,16 @@ const checkAuth = () => {
   return token;
 };
 
+// Resolve backend API base
+const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API_URL = `${BACKEND_ORIGIN}/api`;
+
 // DOM Helper
 const $ = (id) => document.getElementById(id);
 
 // Formatting Functions
-const fmtCurrency = (n) => `$${(n || 0).toFixed(2)}`;
+const fmtCurrency = (n) => `NRP ${(n || 0).toFixed(2)}`;
 const fmtDate = (d) => {
   if (!d) return '';
   return new Date(d).toLocaleDateString('en-US', {
@@ -63,11 +68,11 @@ const setupLogout = () => {
 const fetchAPI = async (url) => {
   const token = localStorage.getItem('ocms_token');
   try {
-    const res = await fetch(url, {
+    const res = await fetch(url.startsWith('/api') ? `${API_URL}${url.slice(4)}` : url, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.status === 401) {
-      window.location.replace(window.location.origin + '/auth/login.html');
+      window.location.replace(window.location.origin + '/../auth/login.html');
       return null;
     }
     return await res.json();

@@ -12,9 +12,12 @@ document.addEventListener('DOMContentLoaded', loadUsers);
 
 // Navigation
 document.querySelectorAll('[data-section]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    window.location.href = 'dashboard.html';
-  });
+  // Only add navigation listener if button doesn't have onclick handler
+  if (!btn.onclick && !btn.getAttribute('onclick')) {
+    btn.addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+  }
 });
 
 // Load Users
@@ -22,7 +25,7 @@ async function loadUsers() {
   try {
     const data = await fetchAPI('/api/admin/users');
     if (!data) return;
-    allUsers = data.users || [];
+    allUsers = Array.isArray(data) ? data : (data.users || []);
     renderUsers(allUsers);
   } catch (err) {
     console.error(err);

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe Elements Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #payment-element { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #22c55e; color: white; border: none; cursor: pointer; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .message { margin: 10px 0; padding: 10px; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>Stripe Elements Test</h1>
+  <p>This page tests if Stripe Elements are working correctly.</p>
+
+  <div id="payment-element"></div>
+
+  <button id="payBtn" disabled>Complete Payment</button>
+
+  <div id="paymentMessage" class="message" style="display:none;"></div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SuaMhKGkUSoeBnp9N69d5kkpfTotJ6WzSvA45RSOj6n8PIFkAMbaeneT6ePsxzfwRlgkDh9TEF6vX9d9iLADdFL00VhBe7w1m';
+
+    let stripe;
+    let elements;
+    let paymentElement;
+
+    async function initStripe() {
+      try {
+        console.log('Initializing Stripe...');
+        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        elements = stripe.elements();
+
+        // Create a test payment intent (you would normally get this from your backend)
+        const response = await fetch('http://localhost:3000/api/payments/create-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer YOUR_JWT_TOKEN_HERE' // Replace with actual token
+          },
+          body: JSON.stringify({
+            course_id: 1,
+            amount: 15000 // NPR
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create payment intent: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Payment intent created:', data);
+
+        // Create payment element
+        const options = {
+          clientSecret: data.clientSecret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#22c55e',
+            },
+          },
+        };
+
+        elements = stripe.elements(options);
+        paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
+
+        console.log('Stripe elements mounted successfully');
+
+        // Enable pay button
+        document.getElementById('payBtn').disabled = false;
+        showMessage('Payment system ready. Enter test card details below.', 'success');
+
+      } catch (error) {
+        console.error('Stripe initialization error:', error);
+        showMessage(`Failed to initialize payment: ${error.message}`, 'error');
+      }
+    }
+
+    function showMessage(message, type) {
+      const messageEl = document.getElementById('paymentMessage');
+      messageEl.textContent = message;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = 'block';
+    }
+
+    document.getElementById('payBtn').addEventListener('click', async () => {
+      try {
+        console.log('Confirming payment...');
+
+        const { error } = await stripe.confirmPayment({
+          elements: elements,
+          confirmParams: {
+            return_url: window.location.origin + '/success.html',
+          },
+        });
+
+        if (error) {
+          console.error('Payment error:', error);
+          showMessage(`Payment failed: ${error.message}`, 'error');
+        } else {
+          console.log('Payment succeeded');
+          showMessage('Payment succeeded!', 'success');
+        }
+
+      } catch (error) {
+        console.error('Payment error:', error);
+        showMessage(`Payment error: ${error.message}`, 'error');
+      }
+    });
+
+    // Initialize on page load
+    initStripe();
+  </script>
+</body>
+</html></content>
+<parameter name="filePath">d:\OCMS project\stripe-test.html

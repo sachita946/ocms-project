@@ -194,9 +194,14 @@
     <header>
       <h1>📚 Course Resources</h1>
       <p>Access notes, questions, preboard, and board materials</p>
-      <button class="btn" onclick="window.location.href='student-dashboard.html'">
-        ← Back to Dashboard
-      </button>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn" onclick="window.location.href='student-dashboard.html'">
+          ← Back to Dashboard
+        </button>
+        <button class="btn ghost" onclick="window.open('/public-resources.html', '_blank')">
+          🌐 Public Resources
+        </button>
+      </div>
     </header>
 
     <div class="tabs">

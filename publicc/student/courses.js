@@ -4,6 +4,12 @@ let allCourses = [];
 let enrolledCourseIds = new Set();
 let currentEnrollmentCourse = null;
 
+// Helper function to extract YouTube video ID
+function getYouTubeVideoId(url) {
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return match ? match[1] : '';
+}
+
 // Static course lists by program/semester (frontend only)
 const STATIC_COURSES = {
   BIM: {
@@ -194,11 +200,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadEnrollments();
   await loadCourses();
   initializeSemesterButtons();
+  
+  // Check for enrollment parameter in URL (from login/signup redirect)
+  const urlParams = new URLSearchParams(window.location.search);
+  const enrollCourseId = urlParams.get('enroll');
+  
+  if (enrollCourseId && localStorage.getItem('ocms_token')) {
+    // User is logged in and wants to enroll in a specific course
+    const course = allCourses.find(c => c.id === parseInt(enrollCourseId));
+    if (course) {
+      if (course.price && course.price > 0) {
+        // Paid course - redirect to payment
+        // Store Zoom link for post-payment redirect
+        if (course.zoom_link) {
+          localStorage.setItem('payment_return_url', course.zoom_link);
+        }
+        window.location.href = `payment.html?courseId=${enrollCourseId}&courseName=${encodeURIComponent(course.title)}&price=${course.price}`;
+      } else {
+        // Free course - enroll directly
+        await processEnrollment(enrollCourseId);
+      }
+    }
+    // Clean up URL
+    const newUrl = window.location.pathname;
+    history.replaceState({}, '', newUrl);
+  }
 });
 
 // Load user enrollments
 async function loadEnrollments() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
   if (!token) return;
 
   try {
@@ -217,11 +248,41 @@ async function loadEnrollments() {
   }
 }
 
-// Load all courses (frontend static data)
+// Load all courses (frontend static data + API)
 async function loadCourses() {
+  // First, try to load published courses from API
+  try {
+    const response = await fetch('/api/courses');
+    if (response.ok) {
+      const apiCourses = await response.json();
+      const publishedCourses = apiCourses.filter(course => course.is_published);
+      // Add API courses to allCourses
+      publishedCourses.forEach(course => {
+        allCourses.push({
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          category: course.category,
+          level: course.level,
+          price: course.price,
+          language: course.language,
+          promo_video_url: course.promo_video_url,
+          thumbnail_url: course.thumbnail_url,
+          instructor: course.instructor,
+          lessons: course.lessons || [],
+          duration_weeks: course.duration_weeks,
+          zoom_link: course.zoom_link,
+          program: 'ADVANCED',  // Treat API courses as advanced
+          isFromAPI: true
+        });
+      });
+    }
+  } catch (error) {
+    console.log('Could not fetch API courses, using static data:', error);
+  }
+
   // Flatten static courses into a list that matches renderer expectations
-  let idCounter = 1;
-  allCourses = [];
+  let idCounter = Math.max(...allCourses.map(c => c.id), 0) + 1;
   programs.forEach(program => {
     const semesters = STATIC_COURSES[program];
     Object.entries(semesters).forEach(([sem, titles]) => {
@@ -256,7 +317,9 @@ async function loadCourses() {
       category: 'Design',
       instructor: { first_name: 'Sarah', last_name: 'Johnson', email: 'sarah@eduverse.com' },
       lessons: [],
-      hasZoom: true
+      hasZoom: true,
+      zoom_link: 'https://zoom.us/j/1234567890',
+      promo_video_url: 'https://youtu.be/dQw4w9WgXcQ'  // Example video
     },
     {
       id: idCounter++,
@@ -270,7 +333,9 @@ async function loadCourses() {
       category: 'Web Development',
       instructor: { first_name: 'Mike', last_name: 'Chen', email: 'mike@eduverse.com' },
       lessons: [],
-      hasZoom: true
+      hasZoom: true,
+      zoom_link: 'https://zoom.us/j/0987654321',
+      promo_video_url: 'https://youtu.be/dQw4w9WgXcQ'
     },
     {
       id: idCounter++,
@@ -284,7 +349,9 @@ async function loadCourses() {
       category: 'Backend Development',
       instructor: { first_name: 'Alex', last_name: 'Rodriguez', email: 'alex@eduverse.com' },
       lessons: [],
-      hasZoom: true
+      hasZoom: true,
+      zoom_link: 'https://zoom.us/j/1122334455',
+      promo_video_url: 'https://youtu.be/dQw4w9WgXcQ'
     },
     {
       id: idCounter++,
@@ -298,7 +365,9 @@ async function loadCourses() {
       category: 'Python Development',
       instructor: { first_name: 'Emma', last_name: 'Davis', email: 'emma@eduverse.com' },
       lessons: [],
-      hasZoom: true
+      hasZoom: true,
+      zoom_link: 'https://zoom.us/j/5566778899',
+      promo_video_url: 'https://youtu.be/dQw4w9WgXcQ'
     },
     {
       id: idCounter++,
@@ -312,7 +381,9 @@ async function loadCourses() {
       category: 'AI/ML',
       instructor: { first_name: 'Dr. James', last_name: 'Wilson', email: 'james@eduverse.com' },
       lessons: [],
-      hasZoom: true
+      hasZoom: true,
+      zoom_link: 'https://zoom.us/j/6677889900',
+      promo_video_url: 'https://youtu.be/dQw4w9WgXcQ'
     }
   ];
 
@@ -504,33 +575,45 @@ function renderCoursePDFs(course) {
 
 // Enroll in course
 async function enrollInCourse(courseId) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
   const course = allCourses.find(c => c.id === parseInt(courseId));
 
+  if (!course) {
+    showInlineMessage('Course not found. Please refresh the page and try again.', 'error');
+    return;
+  }
+
   if (!token) {
-    // For advanced courses, redirect to signup with course info
-    if (course && course.program === 'ADVANCED') {
-      const signupUrl = `student-signup.html?courseId=${courseId}&courseName=${encodeURIComponent(course.title)}${course.price ? `&price=${course.price}` : ''}`;
-      window.location.href = signupUrl;
+    // Always redirect to login first, regardless of course type
+    // Pass course info as URL parameters for post-login enrollment
+    const loginUrl = `../auth/login.html?enroll=true&courseId=${courseId}&courseName=${encodeURIComponent(course.title)}${course.price ? `&price=${course.price}` : ''}`;
+    window.location.href = loginUrl;
+    return;
+  }
+
+  // User is logged in - check if course requires payment
+  if (course && course.price && course.price > 0) {
+    // Validate course still exists and is accessible
+    try {
+      const response = await fetch(`/api/courses/${courseId}`);
+      if (!response.ok) {
+        showInlineMessage('Course is no longer available. Please refresh the page.', 'error');
+        return;
+      }
+      const courseData = await response.json();
+      if (!courseData.is_published) {
+        showInlineMessage('This course is currently unavailable.', 'error');
+        return;
+      }
+    } catch (error) {
+      showInlineMessage('Unable to verify course availability. Please try again.', 'error');
       return;
     }
-
-    // For regular courses, redirect to login
-    showInlineMessage('Please login to enroll in courses', 'info');
-    setTimeout(() => {
-      window.location.href = '../auth/login.html';
-    }, 2000);
-    return;
-  }
-
-  // For advanced courses, show confirmation modal
-  if (course && course.program === 'ADVANCED') {
-    showEnrollmentConfirmationModal(course);
-    return;
-  }
-
-  // If course has a price, redirect to payment
-  if (course && course.price && course.price > 0) {
+    
+    // Paid course - redirect to payment
+    if (course.zoom_link) {
+      localStorage.setItem('payment_return_url', course.zoom_link);
+    }
     window.location.href = `payment.html?courseId=${courseId}&courseName=${encodeURIComponent(course.title)}&price=${course.price}`;
     return;
   }
@@ -542,7 +625,7 @@ async function enrollInCourse(courseId) {
 // Process enrollment after confirmation
 async function processEnrollment(courseId) {
   const course = allCourses.find(c => c.id === parseInt(courseId));
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token');
 
   try {
     const response = await fetch(`${API_URL}/enrollments`, {
@@ -627,10 +710,6 @@ function showEnrollmentConfirmationModal(course) {
                 <label class="payment-option">
                   <input type="radio" name="paymentMethod" value="esewa" checked>
                   <span>💳 eSewa</span>
-                </label>
-                <label class="payment-option">
-                  <input type="radio" name="paymentMethod" value="khalti">
-                  <span>💳 Khalti</span>
                 </label>
                 <label class="payment-option">
                   <input type="radio" name="paymentMethod" value="bank">
@@ -852,6 +931,12 @@ function createAdvancedCourseCard(course) {
 
       <p>${escapeHtml(course.description || 'No description available').substring(0, 120)}${course.description && course.description.length > 120 ? '...' : ''}</p>
 
+      ${course.promo_video_url ? `
+        <div style="margin: 12px 0;">
+          <iframe width="100%" height="200" src="https://www.youtube.com/embed/${getYouTubeVideoId(course.promo_video_url)}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
+        </div>
+      ` : ''}
+
       <div class="course-meta">
         <span>⏱️ ${duration}</span>
         <span>📁 ${escapeHtml(course.category || 'Technology')}</span>
@@ -864,6 +949,11 @@ function createAdvancedCourseCard(course) {
         </div>
 
         <div class="course-actions">
+          ${course.zoom_link ? `
+            <a href="${course.zoom_link}" target="_blank" class="btn btn-zoom">
+              📹 Join Zoom Class
+            </a>
+          ` : ''}
           ${isEnrolled
             ? `
               <a href="courses-lessons.html?courseId=${course.id}" class="btn btn-primary">
@@ -890,7 +980,7 @@ function createAdvancedCourseCard(course) {
 
 // Open course resource (notes, board, preboard)
 function openCourseResource(courseId, courseName, resourceType) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
   
   if (!token) {
     alert('Please login to access resources');
@@ -900,16 +990,6 @@ function openCourseResource(courseId, courseName, resourceType) {
 
   // Redirect to course resources page
   window.location.href = `course-resources.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&type=${resourceType}`;
-}
-
-function escapeHtml(str) {
-	if (!str) return '';
-	return String(str)
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;');
 }
 
 // Modal and Inline Message Functions
@@ -1000,27 +1080,40 @@ function hideInlineMessage() {
 }
 
 // Enroll in advanced course
-function enrollAdvancedCourse(courseId, courseName, price) {
-  const token = localStorage.getItem('token');
+async function enrollAdvancedCourse(courseId, courseName, price) {
+  const token = localStorage.getItem('ocms_token');
   
   if (!token) {
     // Show inline message instead of alert
-    showInlineMessage('Please sign up or login to enroll in courses', 'info');
-    // Redirect to student signup with return URL after a short delay
+    showInlineMessage('Please login to enroll in courses', 'info');
+    // Redirect to login with return URL after a short delay
     setTimeout(() => {
       const returnUrl = encodeURIComponent(window.location.href);
-      window.location.href = `student-signup.html?returnUrl=${returnUrl}&enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+      window.location.href = `../auth/login.html?returnUrl=${returnUrl}&enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
     }, 2000);
     return;
   }
 
+  // Fetch course details to get zoom_link
+  try {
+    const response = await fetch(`${API_URL}/courses/${courseId}`);
+    if (response.ok) {
+      const course = await response.json();
+      if (course.zoom_link) {
+        localStorage.setItem('payment_return_url', course.zoom_link);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch course details:', error);
+  }
+
   // Create course object for modal
   const courseDetails = {
-    'adv-1': { instructor: 'Sarah Johnson', duration_weeks: 8, category: 'Design', language: 'English' },
-    'adv-2': { instructor: 'Mike Chen', duration_weeks: 8, category: 'Web Development', language: 'English' },
-    'adv-3': { instructor: 'Alex Rodriguez', duration_weeks: 8, category: 'Backend Development', language: 'English' },
-    'adv-4': { instructor: 'Emma Davis', duration_weeks: 8, category: 'Python Development', language: 'English' },
-    'adv-5': { instructor: 'Dr. James Wilson', duration_weeks: 8, category: 'AI/ML', language: 'English' }
+    '1001': { instructor: 'Sarah Johnson', duration_weeks: 8, category: 'Design', language: 'English' },
+    '1002': { instructor: 'Mike Chen', duration_weeks: 12, category: 'Web Development', language: 'English' },
+    '1003': { instructor: 'Alex Rodriguez', duration_weeks: 10, category: 'Backend Development', language: 'English' },
+    '1004': { instructor: 'Emma Davis', duration_weeks: 10, category: 'Python Development', language: 'English' },
+    '1005': { instructor: 'Dr. James Wilson', duration_weeks: 14, category: 'AI/ML', language: 'English' }
   };
 
   const details = courseDetails[courseId] || { instructor: 'Qualified Instructor', duration_weeks: 8, category: 'Technology', language: 'English' };

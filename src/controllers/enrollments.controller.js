@@ -3,11 +3,57 @@ import {prisma} from '../utils/prisma-client.js';
 
 export const enrollInCourse = async (req, res) => {
   try {
+    // Get student profile ID from user ID
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { user_id: req.user.id }
+    });
+
+    if (!studentProfile) {
+      return res.status(400).json({ message: 'Student profile not found. Please complete your profile.' });
+    }
+
+    const studentId = studentProfile.id;
     const { course_id } = req.body;
+
+    // Check if course exists and get its price
+    const course = await prisma.course.findUnique({
+      where: { id: parseInt(course_id) }
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // If course has a price, check for completed payment
+    if (course.price && course.price > 0) {
+      const payment = await prisma.payment.findFirst({
+        where: {
+          student_id: studentId,
+          course_id: parseInt(course_id),
+          status: 'COMPLETED'
+        }
+      });
+
+      if (!payment) {
+        return res.status(400).json({ 
+          message: 'Payment required for this course. Please complete payment first.' 
+        });
+      }
+    }
+
+    // Check if already enrolled
+    const existingEnrollment = await prisma.enrollment.findFirst({
+      where: { student_id: studentId, course_id: parseInt(course_id) }
+    });
+
+    if (existingEnrollment) {
+      return res.status(400).json({ message: 'Already enrolled in this course' });
+    }
+
     const enrollment = await prisma.enrollment.create({
       data: {
-        student_id: req.studentProfileId,
-        course_id,
+        student_id: studentId,
+        course_id: parseInt(course_id),
         enrollment_code: `ENR-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
       }
     });
@@ -20,15 +66,35 @@ export const enrollInCourse = async (req, res) => {
 
 export const getMyEnrollments = async (req, res) => {
   try {
+    console.log('getMyEnrollments: User ID from token:', req.user.id);
+
+    // Get student profile ID from user ID
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { user_id: req.user.id }
+    });
+
+    console.log('getMyEnrollments: Student profile found:', !!studentProfile);
+    if (studentProfile) {
+      console.log('getMyEnrollments: Student profile ID:', studentProfile.id);
+    }
+
+    if (!studentProfile) {
+      return res.status(400).json({ message: 'Student profile not found. Please complete your profile.' });
+    }
+
     const enrollments = await prisma.enrollment.findMany({
-      where: { student_id: req.user.id },
-      include: { 
+      where: { student_id: studentProfile.id },
+      include: {
         course: true,
         progress: {
           include: { lesson: true }
         }
       }
     });
+
+    console.log('getMyEnrollments: Found enrollments:', enrollments.length);
+    console.log('getMyEnrollments: Enrollments data:', JSON.stringify(enrollments, null, 2));
+
     res.json(enrollments);
   } catch (err) {
     console.error('getMyEnrollments', err);
@@ -163,8 +229,17 @@ export const unenroll = async (req, res) => {
 
 export const getMyEnrollmentsWithDetails = async (req, res) => {
   try {
+    // Get student profile ID from user ID
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { user_id: req.user.id }
+    });
+
+    if (!studentProfile) {
+      return res.status(400).json({ message: 'Student profile not found. Please complete your profile.' });
+    }
+
     const enrollments = await prisma.enrollment.findMany({
-      where: { student_id: req.user.id },
+      where: { student_id: studentProfile.id },
       include: {
         course: {
           include: {

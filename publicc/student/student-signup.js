@@ -173,10 +173,30 @@ form.addEventListener("submit", async (e) => {
     // Show success message
     showSuccessMessage(SUCCESS_MESSAGES.SIGNUP_SUCCESS);
 
-    // Redirect to login page for manual login
-    setTimeout(() => {
-      window.location.href = window.location.origin + '/auth/login.html';
-    }, 1500);
+    // Check for enrollment parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const enroll = urlParams.get('enroll');
+    const courseId = urlParams.get('courseId');
+    const courseName = urlParams.get('courseName');
+    const price = urlParams.get('price');
+
+    if (enroll === 'true' && courseId) {
+      // User was trying to enroll - redirect to payment after brief delay
+      setTimeout(() => {
+        if (price && parseFloat(price) > 0) {
+          // Paid course - redirect to payment
+          window.location.href = `payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName || '')}&price=${price}`;
+        } else {
+          // Free course - redirect to courses page (will auto-enroll)
+          window.location.href = `courses.html?enroll=${courseId}`;
+        }
+      }, 1500);
+    } else {
+      // Regular signup - redirect to login
+      setTimeout(() => {
+        window.location.href = window.location.origin + '/auth/login.html';
+      }, 1500);
+    }
 
   } catch (error) {
     // Show inline error message

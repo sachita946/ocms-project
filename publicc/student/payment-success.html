@@ -100,23 +100,23 @@
 </div>
 
 <script>
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
-async function verifyEsewaPayment() {
+async function verifyStripePayment() {
   const urlParams = new URLSearchParams(window.location.search);
-  const method = urlParams.get('method');
-  const courseId = urlParams.get('courseId');
-  const amount = urlParams.get('amount');
-  const txId = urlParams.get('txId');
-  const oid = urlParams.get('oid'); // eSewa order ID
-  const refId = urlParams.get('refId'); // eSewa reference ID
+  const paymentIntentId = urlParams.get('payment_intent');
+  const paymentId = urlParams.get('payment_id');
+
+  console.log('Payment success URL parameters:', {
+    paymentIntentId, paymentId, fullUrl: window.location.href
+  });
 
   const loader = document.getElementById('loader');
   const statusTitle = document.getElementById('statusTitle');
   const statusMessage = document.getElementById('statusMessage');
   const actionButtons = document.getElementById('actionButtons');
 
-  if (!oid || !refId) {
+  if (!paymentIntentId || !paymentId) {
     loader.style.display = 'none';
     statusTitle.textContent = 'Payment Verification Failed';
     statusTitle.className = 'error';
@@ -126,21 +126,18 @@ async function verifyEsewaPayment() {
   }
 
   try {
-    const token = localStorage.getItem('token');
-    
-    // Save payment to database
-    const response = await fetch(`${API_URL}/payments`, {
+    const token = localStorage.getItem('ocms_token');
+
+    // Confirm payment with backend
+    const response = await fetch(`${API_URL}/payments/confirm`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        course_id: courseId,
-        amount: parseFloat(amount),
-        payment_method: 'ESEWA',
-        transaction_id: refId,
-        status: 'COMPLETED'
+        payment_intent_id: paymentIntentId,
+        payment_id: paymentId
       })
     });
 
@@ -149,41 +146,23 @@ async function verifyEsewaPayment() {
     loader.style.display = 'none';
 
     if (response.ok) {
-      // Create enrollment record for advanced courses
-      const urlParams = new URLSearchParams(window.location.search);
-      const courseType = urlParams.get('type');
-      
-      if (courseType === 'advanced') {
-        try {
-          const enrollResponse = await fetch(`${API_URL}/enrollments`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              course_id: courseId
-            })
-          });
-          
-          if (enrollResponse.ok) {
-            console.log('Successfully enrolled in advanced course');
-          } else {
-            console.error('Failed to enroll in course');
-          }
-        } catch (enrollError) {
-          console.error('Enrollment error:', enrollError);
-        }
-      }
-      
       statusTitle.textContent = 'Payment Successful!';
       statusMessage.textContent = 'Your payment has been confirmed. You now have access to the course.';
-      actionButtons.innerHTML = '<a href="courses.html?enrolled=true" class="btn">Go to My Courses</a>';
+
+      // Check for return URL (e.g., Zoom join URL)
+      const returnUrl = localStorage.getItem('payment_return_url');
+      if (returnUrl) {
+        localStorage.removeItem('payment_return_url');
+        actionButtons.innerHTML = `<a href="${returnUrl}" class="btn">Join Course Session</a>`;
+      } else {
+        actionButtons.innerHTML = '<a href="courses.html?enrolled=true" class="btn">Go to My Courses</a>';
+      }
     } else {
-      statusTitle.textContent = 'Payment Recording Failed';
+      console.error('Payment confirmation error:', data);
+      statusTitle.textContent = 'Payment Confirmation Failed';
       statusTitle.className = 'error';
-      statusMessage.textContent = data.message || 'Failed to record payment. Please contact support with reference ID: ' + refId;
-      actionButtons.innerHTML = '<a href="student-dashboard.html" class="btn">Go to Dashboard</a>';
+      statusMessage.textContent = data.message || 'Failed to confirm payment. Please contact support.';
+      actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
     }
   } catch (error) {
     console.error('Payment verification error:', error);
@@ -191,12 +170,29 @@ async function verifyEsewaPayment() {
     statusTitle.textContent = 'Verification Error';
     statusTitle.className = 'error';
     statusMessage.textContent = 'An error occurred while verifying your payment. Please contact support.';
-    actionButtons.innerHTML = '<a href="student-dashboard.html" class="btn">Go to Dashboard</a>';
+    actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
   }
 }
 
 // Run verification on page load
-verifyEsewaPayment();
+verifyStripePayment();
+
+// Development helper: Add test payment button for localhost
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  setTimeout(() => {
+    const testButton = document.createElement('button');
+    testButton.textContent = 'Test Payment Success (Dev Only)';
+    testButton.className = 'btn';
+    testButton.style.marginTop = '20px';
+    testButton.onclick = () => {
+      // Simulate successful payment with test parameters
+      const testUrl = window.location.origin + window.location.pathname +
+        '?payment_intent=pi_test_123&payment_id=1';
+      window.location.href = testUrl;
+    };
+    document.getElementById('actionButtons').appendChild(testButton);
+  }, 2000);
+}
 </script>
 
 </body>

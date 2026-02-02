@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const dashboardData = profileData.dashboard;
 
     const enrollmentsEl = document.getElementById('enrollments-list');
-    if (dashboardData.enrollments) {
-      dashboardData.enrollments.forEach(e=>{
+    if (dashboardData.lists && dashboardData.lists.enrollments) {
+      dashboardData.lists.enrollments.forEach(e=>{
         const li=document.createElement('li');
         li.textContent=`${e.course.title} (${e.completion_status})`;
         enrollmentsEl.appendChild(li);
@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
 
     // Create progress chart if data exists
-    if (dashboardData.progressData && dashboardData.progressData.length > 0) {
+    if (dashboardData.charts && dashboardData.charts.progress && dashboardData.charts.progress.length > 0) {
       const ctx=document.getElementById('progress-chart').getContext('2d');
       new Chart(ctx,{
         type:'bar',
         data:{
-          labels:dashboardData.progressData.map(d=>d.courseTitle),
-          datasets:[{label:'Completion %', data:dashboardData.progressData.map(d=>d.percentage), backgroundColor:'#4caf50'}]
+          labels:dashboardData.charts.progress.map(d=>d.courseTitle),
+          datasets:[{label:'Completion %', data:dashboardData.charts.progress.map(d=>d.percentage), backgroundColor:'#4caf50'}]
         },
         options:{ responsive:true, scales:{ y:{ beginAtZero:true, max:100 }}}
       });

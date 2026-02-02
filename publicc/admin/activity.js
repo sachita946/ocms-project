@@ -1,5 +1,9 @@
-const API = '/api';
-const token = localStorage.getItem('token') || '';
+// Resolve backend API base
+const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API = `${BACKEND_ORIGIN}/api`;
+
+const token = localStorage.getItem('ocms_token') || localStorage.getItem('token') || '';
 const form = document.getElementById('actForm');
 const list = document.getElementById('list');
 const btnFilter = document.getElementById('btnFilter');

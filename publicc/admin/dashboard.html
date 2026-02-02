@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/admin/">
   <title>Admin Dashboard | OCMS</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <script src="dashboard.js"></script>
   <style>/* ============================================
    GLOBAL STYLES
    ============================================ */
@@ -75,6 +74,12 @@ a { color: inherit; text-decoration: none; }
 main { padding:28px; overflow-y:auto; background: transparent; border-radius: 16px; }
 
 /* ============================================
+   PANELS
+   ============================================ */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ============================================
    HERO SECTION
    ============================================ */
 .hero { 
@@ -105,6 +110,45 @@ table { width:100%; border-collapse:collapse; color:#e0e0e0; }
 th { background: rgba(255,255,255,0.08); padding:12px; text-align:left; font-weight:600; color:#ffffff; border-bottom:2px solid rgba(255,107,107,0.2);}
 td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.08);}
 tr:hover { background: rgba(255,107,107,0.05); }
+
+/* ============================================
+   LISTS
+   ============================================ */
+.list { display: grid; gap: 12px; }
+.list-item { 
+    background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,107,107,0.02)); 
+    border: 1px solid rgba(255,107,107,0.15); 
+    border-radius: 12px; 
+    padding: 16px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.list-content { flex: 1; }
+.list-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; }
+.list-meta { color: #a0a0a0; font-size: 14px; }
+.value { font-size: 16px; font-weight: 700; color: #ff8787; }
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state { text-align: center; padding: 40px 20px; color: #a0a0a0; }
+
+/* ============================================
+   SETTINGS
+   ============================================ */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+.action-btn { 
+    padding: 12px 20px; 
+    border-radius: 10px; 
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f); 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 600; 
+    transition: all 0.3s ease; 
+}
+.action-btn:hover { transform: translateY(-2px); }
 
 
 @media (max-width: 980px) { 
@@ -147,17 +191,16 @@ tr:hover { background: rgba(255,107,107,0.05); }
         <div class="logo-text">ADMIN PANEL</div>
       </div>
       <nav class="nav">
-        <button class="active" data-section="overview" onclick="window.location.href='dashboard.html'">📊 Overview</button>
-        <button data-section="users" onclick="window.location.href='users.html'">👥 Users</button>
-        <button data-section="courses" onclick="window.location.href='courses.html'">📚 Courses</button>
-        <button data-section="lessons" onclick="window.location.href='lesson-resources.html'">📖 Lesson Resources</button>
-        <button data-section="student-progress" onclick="window.location.href='student-progress.html'">📊 Student Progress</button>
-        <button data-section="payments" onclick="window.location.href='payment.html'">💳 Payments</button>
-        <button data-section="reviews" onclick="window.location.href='reviews.html'">⭐ Reviews</button>
-        <button data-section="notifications" onclick="window.location.href='notifications.html'">🔔 Notifications</button>
-        <button data-section="activities" onclick="window.location.href='activity.html'">📋 Activities</button>
-        <button data-section="messages" onclick="window.location.href='messages.html'">✉️ Messages</button>
-        <button data-section="settings" onclick="window.location.href='dashboard.html#settings'">⚙️ Settings</button>
+        <button class="active" data-section="overview">📊 Overview</button>
+        <button data-section="users">👥 Users</button>
+        <button data-section="lessons">📖 Lesson Resources</button>
+        <button data-section="student-progress">📊 Student Progress</button>
+        <button data-section="payments">💳 Payments</button>
+        <button data-section="reviews">⭐ Reviews</button>
+        <button data-section="notifications">🔔 Notifications</button>
+        <button data-section="activities">📋 Activities</button>
+        <button data-section="messages">✉️ Messages</button>
+        <button data-section="settings">⚙️ Settings</button>
       </nav>
       <button class="logout" id="logoutBtn">🚪 Logout</button>
     </aside>
@@ -178,20 +221,109 @@ tr:hover { background: rgba(255,107,107,0.05); }
         <div class="stat-card"><div class="label">👨‍🎓 Students</div><div class="value" id="stat-students">0</div></div>
         <div class="stat-card"><div class="label">👨‍🏫 Instructors</div><div class="value" id="stat-instructors">0</div></div>
         <div class="stat-card"><div class="label">📚 Courses</div><div class="value" id="stat-courses">0</div></div>
-        <div class="stat-card"><div class="label">💳 Payments</div><div class="value" id="stat-payments">Rs 0</div></div>
+        <div class="stat-card"><div class="label">� Total Earnings</div><div class="value" id="stat-payments">NPR 0.00</div></div>
         <div class="stat-card"><div class="label">⭐ Reviews</div><div class="value" id="stat-reviews">0</div></div>
       </div>
 
       <!-- PANELS -->
-      <section id="section-overview" class="panel active"></section>
-      <section id="section-users" class="panel"></section>
-      <section id="section-courses" class="panel"></section>
-      <section id="section-payments" class="panel"></section>
-      <section id="section-reviews" class="panel"></section>
-      <section id="section-notifications" class="panel"></section>
-      <section id="section-activities" class="panel"></section>
-      <section id="section-settings" class="panel"></section>
+      <section id="section-overview" class="panel active">
+        <h2>📊 System Overview</h2>
+        <ul id="overview-list" class="list"></ul>
+        <div id="statisticsChart" style="height: 300px; margin-top: 20px;"></div>
+      </section>
+      <section id="section-users" class="panel">
+        <h2>👥 Recent Users</h2>
+        <div class="table-container">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="users-empty" style="display: none;">
+          <p>No users found.</p>
+        </div>
+      </section>
+      <section id="section-payments" class="panel">
+        <h2>💰 Recent Instructor Earnings</h2>
+        <div class="table-container">
+          <table id="payments-table">
+            <thead>
+              <tr>
+                <th>Instructor</th>
+                <th>Course</th>
+                <th>Net Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="payments-empty" style="display: none;">
+          <p>No earnings found.</p>
+        </div>
+        <div id="revenueChart" style="height: 300px; margin-top: 20px;"></div>
+      </section>
+      <section id="section-reviews" class="panel">
+        <h2>⭐ Recent Reviews</h2>
+        <div id="reviews-list" class="list"></div>
+        <div class="empty-state" id="reviews-empty" style="display: none;">
+          <p>No reviews found.</p>
+        </div>
+      </section>
+      <section id="section-notifications" class="panel">
+        <h2>🔔 Recent Notifications</h2>
+        <div id="notifications-list" class="list"></div>
+        <div class="empty-state" id="notifications-empty" style="display: none;">
+          <p>No notifications found.</p>
+        </div>
+      </section>
+      <section id="section-lessons" class="panel">
+        <h2>📖 Lesson Resources</h2>
+        <div class="empty-state">
+          <p>Lesson resources management coming soon.</p>
+        </div>
+      </section>
+      <section id="section-student-progress" class="panel">
+        <h2>📊 Student Progress</h2>
+        <div class="empty-state">
+          <p>Student progress tracking coming soon.</p>
+        </div>
+      </section>
+      <section id="section-activities" class="panel">
+        <h2>📋 Recent Activities</h2>
+        <div id="activities-list" class="list"></div>
+        <div class="empty-state" id="activities-empty" style="display: none;">
+          <p>No activities found.</p>
+        </div>
+      </section>
+      <section id="section-messages" class="panel">
+        <h2>✉️ Messages</h2>
+        <div class="empty-state">
+          <p>Messages management coming soon.</p>
+        </div>
+      </section>
+      <section id="section-settings" class="panel">
+        <h2>⚙️ System Settings</h2>
+        <div class="settings-grid">
+          <button class="action-btn" onclick="toggleMaintenance()">Toggle Maintenance Mode</button>
+          <button class="action-btn" onclick="managePermissions()">Manage Permissions</button>
+          <button class="action-btn" onclick="platformSettings()">Platform Settings</button>
+          <button class="action-btn" onclick="manageBackups()">Manage Backups</button>
+        </div>
+      </section>
     </main>
   </div>
+  <script src="dashboard.js"></script>
 </body>
 </html>

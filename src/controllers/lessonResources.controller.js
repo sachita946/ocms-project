@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -7,20 +9,67 @@ export const createLessonResource = async (req, res) => {
   try {
     const { lesson_id, type, title, content, zoom_link } = req.body;
     const user_id = req.user.id;
-    if (!lesson_id || !type || !title || !content) {
-      return res.status(400).json({ message: 'Missing required fields' });
+
+    if (!lesson_id || !type || !title) {
+      return res.status(400).json({ message: 'Missing required fields: lesson_id, type, title' });
     }
 
-    if (!['notes', 'questions', 'preboard', 'zoom'].includes(type)) {
-      return res.status(400).json({ message: 'Invalid resource type' });
+    // Validate type
+    const validTypes = ['notes', 'questions', 'preboard', 'zoom'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({
+        message: `Invalid type. Must be one of: ${validTypes.join(', ')}`
+      });
     }
+
+    // Validate zoom link if type is zoom
     if (type === 'zoom' && !zoom_link) {
       return res.status(400).json({
         message: 'Zoom link is required for zoom type resources'
       });
     }
+
+    let file_url = null;
+    let file_type = null;
+
+    // Handle file upload for notes, questions, and preboard types
+    if ((type === 'notes' || type === 'questions' || type === 'preboard') && req.files && req.files.file) {
+      const file = req.files.file;
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+
+      if (!allowedTypes.includes(file.mimetype)) {
+        return res.status(400).json({
+          message: 'Invalid file type. Only PDF, JPG, and PNG files are allowed.'
+        });
+      }
+
+      // Check file size (max 500MB)
+      if (file.size > 500 * 1024 * 1024) {
+        return res.status(400).json({
+          message: 'File size too large. Maximum size is 500MB.'
+        });
+      }
+
+      // Generate unique filename
+      const fileExtension = path.extname(file.name);
+      const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+      const uploadPath = path.join(process.cwd(), 'publicc', 'uploads', 'lesson-resources', uniqueFilename);
+
+      // Ensure directory exists
+      const dir = path.dirname(uploadPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      // Move file to uploads directory
+      await file.mv(uploadPath);
+
+      file_url = `/uploads/lesson-resources/${uniqueFilename}`;
+      file_type = file.mimetype;
+    }
+
     const lesson = await prisma.lesson.findUnique({
-      where: { id: lesson_id }
+      where: { id: parseInt(lesson_id) }
     });
 
     if (!lesson) {
@@ -28,15 +77,27 @@ export const createLessonResource = async (req, res) => {
     }
 
     // Create resource
+    const resourceData = {
+      lesson_id: parseInt(lesson_id),
+      type,
+      title: title.trim(),
+      file_url,
+      file_type,
+      zoom_link: zoom_link || null,
+      user_id
+    };
+
+    // Handle content based on type
+    if (type === 'zoom') {
+      // For zoom resources, content is optional
+      resourceData.content = content ? content.trim() : '';
+    } else {
+      // For other types, content is required unless file is provided
+      resourceData.content = content ? content.trim() : '';
+    }
+
     const resource = await prisma.lessonResource.create({
-      data: {
-        lesson_id,
-        type,
-        title,
-        content,
-        zoom_link: zoom_link || null,
-        user_id
-      }
+      data: resourceData
     });
 
     res.status(201).json({

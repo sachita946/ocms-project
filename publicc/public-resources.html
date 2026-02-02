@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Resources | Public Access</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #0b6b6b 50%, #10b981 100%);
+      color: #e5f7f6;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      margin-bottom: 28px;
+      backdrop-filter: blur(10px);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: rgba(229, 247, 246, 0.85);
+      margin-bottom: 12px;
+    }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filter-bar select {
+      flex: 1;
+      min-width: 160px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: #e5f7f6;
+    }
+
+    .filter-bar select option {
+      background: #0f172a;
+      color: #e5f7f6;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    /* Resources */
+    .resources-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .resource-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .resource-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    .resource-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .resource-header h3 {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.notes { color:#93c5fd; border:1px solid rgba(59,130,246,.4); }
+    .badge.preboard { color:#6ee7b7; border:1px solid rgba(16,185,129,.4); }
+    .badge.board { color:#fcd34d; border:1px solid rgba(248,180,0,.4); }
+
+    .resource-content {
+      margin-bottom: 12px;
+    }
+
+    .resource-content pre {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-bottom: 12px;
+    }
+
+    .file-attachment {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(22, 197, 94, 0.3);
+    }
+
+    .file-link {
+      color: #22c55e !important;
+      text-decoration: none !important;
+      font-weight: 600;
+      margin-left: 8px;
+      padding: 6px 12px;
+      border: 1px solid #22c55e;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .file-link:hover {
+      background: #22c55e;
+      color: white !important;
+    }
+
+    .resource-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(229,247,246,0.7);
+      font-size: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: rgba(229,247,246,0.7);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar { flex-direction: column; }
+      .resource-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>📚 Course Resources</h1>
+      <p>Access study materials, notes, and question papers</p>
+    </header>
+
+    <div class="filter-bar">
+      <select id="courseSelect">
+        <option value="">All Courses</option>
+      </select>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="notes">Notes</option>
+        <option value="preboard">Preboard Questions</option>
+        <option value="board">Board Questions</option>
+      </select>
+      <button class="btn" onclick="loadResources()">Filter</button>
+    </div>
+
+    <div id="resourcesList" class="resources-list">
+      <div class="empty-state">
+        <div class="icon">📚</div>
+        <h3>Loading resources...</h3>
+        <p>Please wait while we fetch the latest materials</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Public Course Resources Viewer
+    const API_URL = '/api';
+
+    // Load courses for filter
+    async function loadCourses() {
+      try {
+        const response = await fetch(`${API_URL}/courses`);
+        const courses = await response.json();
+
+        const courseSelect = document.getElementById('courseSelect');
+        courseSelect.innerHTML = '<option value="">All Courses</option>';
+
+        courses.forEach(course => {
+          const option = document.createElement('option');
+          option.value = course.id;
+          option.textContent = course.title;
+          courseSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      }
+    }
+
+    // Load resources
+    async function loadResources() {
+      const courseId = document.getElementById('courseSelect').value;
+      const type = document.getElementById('typeFilter').value;
+
+      const params = new URLSearchParams();
+      if (courseId) params.append('courseId', courseId);
+      if (type) params.append('type', type);
+
+      try {
+        const response = await fetch(`${API_URL}/course-resources/public?${params}`);
+        const resources = await response.json();
+
+        displayResources(resources);
+      } catch (error) {
+        console.error('Error loading resources:', error);
+        document.getElementById('resourcesList').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">❌</div>
+            <h3>Error Loading Resources</h3>
+            <p>Please try again later</p>
+          </div>
+        `;
+      }
+    }
+
+    // Display resources
+    function displayResources(resources) {
+      const container = document.getElementById('resourcesList');
+
+      if (!resources || resources.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <h3>No Resources Found</h3>
+            <p>No study materials are currently available for the selected filters</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = resources.map(resource => {
+        const fileIcon = resource.file_type?.includes('pdf') ? '📄' : '🖼️';
+        const courseTitle = resource.course?.title || 'Unknown Course';
+
+        return `
+          <div class="resource-card">
+            <div class="resource-header">
+              <h3>${resource.title}</h3>
+              <span class="badge ${resource.type}">${resource.type}</span>
+            </div>
+            <div class="resource-content">
+              ${resource.content ? `<pre>${resource.content}</pre>` : ''}
+              <div class="file-attachment">
+                <strong>📎 File Attachment:</strong>
+                <a href="${resource.file_url}" target="_blank" class="file-link">
+                  ${fileIcon} View/Download File
+                </a>
+              </div>
+            </div>
+            <div class="resource-footer">
+              <span>${courseTitle}</span>
+              <span>Added ${new Date(resource.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCourses();
+      loadResources();
+    });
+  </script>
+</body>
+</html>

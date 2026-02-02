@@ -63,21 +63,32 @@ async function loadCourseResources() {
       return;
     }
 
-    document.getElementById('courseResourcesList').innerHTML = resources.map(r => `
+    document.getElementById('courseResourcesList').innerHTML = resources.map(r => {
+      const fileAttachment = r.file_url ? `
+        <div class="file-attachment">
+          <strong>📎 File Attachment:</strong>
+          <a href="${r.file_url}" target="_blank" class="file-link" style="color: #22c55e; text-decoration: none; margin-left: 8px;">
+            ${r.file_type?.includes('pdf') ? '📄' : '🖼️'} View/Download File
+          </a>
+        </div>
+      ` : '';
+      
+      return `
       <div class="resource-card">
         <div class="resource-header">
           <h3>${r.title}</h3>
           <span class="badge ${r.type}">${r.type}</span>
         </div>
         <div class="resource-content">
-          <pre>${r.content}</pre>
+          ${r.content ? `<pre>${r.content}</pre>` : ''}
+          ${fileAttachment}
           ${r.zoom_link ? `<p><strong>Zoom Meeting:</strong> <a href="${r.zoom_link}" target="_blank" class="zoom-link">Join Meeting</a></p>` : ''}
         </div>
         <div class="resource-footer">
           <small>Added by ${r.user?.first_name || 'Instructor'} on ${new Date(r.created_at).toLocaleDateString()}</small>
         </div>
       </div>
-    `).join('');
+    `}).join('');
   } catch (err) {
     console.error('Load course resources error:', err);
     document.getElementById('courseResourcesList').innerHTML = '<p class="error">Failed to load resources</p>';
@@ -102,21 +113,32 @@ async function loadLessonResources() {
       return;
     }
 
-    document.getElementById('lessonResourcesList').innerHTML = resources.map(r => `
+    document.getElementById('lessonResourcesList').innerHTML = resources.map(r => {
+      const fileAttachment = r.file_url ? `
+        <div class="file-attachment">
+          <strong>📎 File Attachment:</strong>
+          <a href="${r.file_url}" target="_blank" class="file-link" style="color: #22c55e; text-decoration: none; margin-left: 8px;">
+            ${r.file_type?.includes('pdf') ? '📄' : '🖼️'} View/Download File
+          </a>
+        </div>
+      ` : '';
+      
+      return `
       <div class="resource-card">
         <div class="resource-header">
           <h3>${r.title}</h3>
           <span class="badge ${r.type}">${r.type}</span>
         </div>
         <div class="resource-content">
-          <pre>${r.content}</pre>
+          ${r.content ? `<pre>${r.content}</pre>` : ''}
+          ${fileAttachment}
           ${r.zoom_link ? `<p><strong>Zoom Meeting:</strong> <a href="${r.zoom_link}" target="_blank" class="zoom-link">Join Meeting</a></p>` : ''}
         </div>
         <div class="resource-footer">
           <small>Added by ${r.user?.first_name || 'Instructor'} on ${new Date(r.created_at).toLocaleDateString()}</small>
         </div>
       </div>
-    `).join('');
+    `}).join('');
   } catch (err) {
     console.error('Load lesson resources error:', err);
     document.getElementById('lessonResourcesList').innerHTML = '<p class="error">Failed to load resources</p>';

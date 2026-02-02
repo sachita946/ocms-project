@@ -9,4 +9,7 @@ router.post('/', auth, createCertificate);
 router.get('/', auth, listCertificates);
 router.delete('/:id', auth, deleteCertificate);
 
+// Demo routes (for development)
+router.get('/demo', listCertificates);
+
 export default router;

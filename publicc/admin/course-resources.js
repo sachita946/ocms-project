@@ -1,5 +1,8 @@
 // Admin Course Resources Management
-const API_URL = '/api';
+// Resolve backend API base
+const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API_URL = `${BACKEND_ORIGIN}/api`;
 
 let allCourses = [];
 let currentCourseId = null;

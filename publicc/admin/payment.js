@@ -8,9 +8,12 @@ document.addEventListener('DOMContentLoaded', loadPayments);
 
 // Navigation
 document.querySelectorAll('[data-section]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    window.location.href = 'dashboard.html';
-  });
+  // Only add navigation listener if button doesn't have onclick handler
+  if (!btn.onclick && !btn.getAttribute('onclick')) {
+    btn.addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+  }
 });
 
 // Status filter
@@ -21,9 +24,9 @@ document.getElementById('statusFilter')?.addEventListener('change', () => {
 // Load Payments
 async function loadPayments() {
   try {
-    const data = await fetchAPI('/api/admin/payments');
+    const data = await fetchAPI('/api/admin/demo/payments');
     if (!data) return;
-    allPayments = data.payments || [];
+    allPayments = Array.isArray(data) ? data : (data.payments || []);
     renderPayments(allPayments);
   } catch (err) {
     console.error(err);
@@ -89,7 +92,7 @@ function viewPayment(paymentId) {
 
 // Helper functions
 function fmtCurrency(amount) {
-  return `$${Number(amount).toFixed(2)}`;
+  return `NPR ${Number(amount).toFixed(2)}`;
 }
 
 function fmtDate(dateStr) {

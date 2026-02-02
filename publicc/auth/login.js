@@ -260,10 +260,10 @@ function showConfirmDialog(message, onConfirm, onCancel) {
 
 // Decide dashboard path by role
 function getDashboardPath(role) {
-  if (role === 'INSTRUCTOR') return '../instructor/instructor-dashboard.html';
-  if (role === 'ADMIN') return '../admin/dashboard.html';
-  if (role === 'STUDENT') return '../student/student-dashboard.html';
-  return '../student/courses.html';
+  if (role === 'INSTRUCTOR') return '/instructor/instructor-dashboard.html';
+  if (role === 'ADMIN') return '/admin/dashboard.html';
+  if (role === 'STUDENT') return '/student/student-dashboard.html';
+  return '/student/courses.html';
 }
 
 // Save token and optionally redirect to dashboard
@@ -285,6 +285,33 @@ async function saveTokenAndRedirect(token, role) {
     } catch (error) {
       console.error('Failed to check instructor verification:', error);
     }
+  }
+  
+  // Check for return URL or enrollment course in URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnUrl = urlParams.get('returnUrl');
+  const enrollCourse = urlParams.get('enrollCourse');
+  const enrollParam = urlParams.get('enroll');
+  const courseId = urlParams.get('courseId');
+  
+  if (returnUrl) {
+    // If there's an enrollCourse, append it to returnUrl
+    let redirectUrl = decodeURIComponent(returnUrl);
+    if (enrollCourse) {
+      const url = new URL(redirectUrl, window.location.origin);
+      url.searchParams.set('enroll', enrollCourse);
+      redirectUrl = url.toString();
+    }
+    window.location.href = redirectUrl;
+    return;
+  } else if (enrollCourse && targetRole === 'STUDENT') {
+    // Redirect to courses page with enrollment param
+    window.location.href = `/student/courses.html?enroll=${enrollCourse}`;
+    return;
+  } else if (enrollParam === 'true' && courseId && targetRole === 'STUDENT') {
+    // Handle enrollment redirect from courses page
+    window.location.href = `/student/courses.html?enroll=${courseId}`;
+    return;
   }
   
   window.location.href = getDashboardPath(targetRole);
@@ -317,12 +344,34 @@ function captureTokenFromUrl() {
     const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     history.replaceState({}, '', newUrl);
     return fetchRoleFromToken(token).then((role) => {
+      // Check for return URL or enrollment course in remaining params
+      const returnUrl = params.get('returnUrl');
+      const enrollCourse = params.get('enrollCourse');
+      const enrollParam = params.get('enroll');
+      const courseId = params.get('courseId');
+      
+      if (returnUrl) {
+        let redirectUrl = decodeURIComponent(returnUrl);
+        if (enrollCourse) {
+          const url = new URL(redirectUrl, window.location.origin);
+          url.searchParams.set('enroll', enrollCourse);
+          redirectUrl = url.toString();
+        }
+        window.location.href = redirectUrl;
+        return;
+      } else if (enrollCourse && role === 'STUDENT') {
+        window.location.href = `/student/courses.html?enroll=${enrollCourse}`;
+        return;
+      } else if (enrollParam === 'true' && courseId && role === 'STUDENT') {
+        // Handle enrollment redirect from courses page
+        window.location.href = `/student/courses.html?enroll=${courseId}`;
+        return;
+      }
+      
       window.location.href = getDashboardPath(role);
     });
   }
 }
-
-// Runs once DOM loaded
 document.addEventListener('DOMContentLoaded', () => {
   // Capture OAuth token if present
   captureTokenFromUrl();

@@ -42,9 +42,27 @@ function updatePageTitle() {
   document.getElementById('pageSubtitle').textContent = `${decodeURIComponent(currentCourseName)}`;
 }
 
+// Check if course is advanced (requires payment)
+async function checkIfAdvancedCourse(courseId) {
+  try {
+    const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/courses/${courseId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (response.ok) {
+      const course = await response.json();
+      return course.level === 'ADVANCED';
+    }
+  } catch (error) {
+    console.error('Error checking course level:', error);
+  }
+  return false;
+}
+
 // Load resources from backend
 async function loadResources() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
 
   if (!token) {
     showEmptyState('Please login to view resources', '🔐');
@@ -70,7 +88,7 @@ async function loadResources() {
     resourcesList = await response.json();
 
     if (Array.isArray(resourcesList) && resourcesList.length > 0) {
-      displayResources();
+      await displayResources();
     } else {
       showEmptyState('No resources yet. Be the first to add one!', '📚');
     }
@@ -81,27 +99,44 @@ async function loadResources() {
 }
 
 // Display resources
-function displayResources() {
+async function displayResources() {
   const container = document.getElementById('resourcesList');
   
-  container.innerHTML = resourcesList.map(resource => `
-    <div class="resource-item">
-      <div class="resource-item-header">
-        <div class="resource-item-title">${escapeHtml(resource.title)}</div>
-        <div class="resource-item-date">${formatDate(resource.created_at)}</div>
-      </div>
-      
-      <div class="resource-item-content">
-        ${escapeHtml(resource.content).substring(0, 200)}${resource.content.length > 200 ? '...' : ''}
-      </div>
+  // Check if course is advanced
+  const isAdvanced = await checkIfAdvancedCourse(currentCourseId);
+  
+  container.innerHTML = resourcesList.map(resource => {
+    let actionButton = '';
+    
+    if (resource.type === 'zoom' && resource.zoom_link) {
+      if (isAdvanced) {
+        actionButton = `<a href="/api/zoom/join/${currentCourseId}" target="_blank" class="btn-small btn-zoom">🎥 Join Zoom (Advanced Course)</a>`;
+      } else {
+        actionButton = `<a href="${escapeHtml(resource.zoom_link)}" target="_blank" class="btn-small btn-zoom">🎥 Join Zoom</a>`;
+      }
+    } else if (resource.file_url) {
+      actionButton = `<a href="${escapeHtml(resource.file_url)}" target="_blank" class="btn-small btn-download">📥 Download</a>`;
+    } else {
+      actionButton = `<button class="btn-small btn-view" onclick="viewResource(${resource.id})">👁️ View</button>`;
+    }
 
-      <div class="resource-item-footer">
-        <button class="btn-small btn-view" onclick="viewResource(${resource.id})">
-          👁️ View
-        </button>
+    return `
+      <div class="resource-item">
+        <div class="resource-item-header">
+          <div class="resource-item-title">${escapeHtml(resource.title)}</div>
+          <div class="resource-item-date">${formatDate(resource.created_at)}</div>
+        </div>
+
+        <div class="resource-item-content">
+          ${escapeHtml(resource.content).substring(0, 200)}${resource.content.length > 200 ? '...' : ''}
+        </div>
+
+        <div class="resource-item-footer">
+          ${actionButton}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Show empty state

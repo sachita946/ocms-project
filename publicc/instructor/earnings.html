@@ -145,17 +145,17 @@
 		<div class="stats-grid">
 			<div class="stat-card">
 				<div class="stat-label">Total Earnings</div>
-				<div class="stat-value" id="stat-total">$0</div>
+				<div class="stat-value" id="stat-total">NRP 0</div>
 				<div class="stat-change">↑ +12.5% this month</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-label">This Month</div>
-				<div class="stat-value" id="stat-month">$0</div>
+				<div class="stat-value" id="stat-month">NRP 0</div>
 				<div class="stat-change">↑ +8.2% vs last month</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-label">Pending Payment</div>
-				<div class="stat-value" id="stat-pending">$0</div>
+				<div class="stat-value" id="stat-pending">NRP 0</div>
 				<div class="stat-change">⏳ Next payout in 7 days</div>
 			</div>
 			<div class="stat-card">
@@ -250,9 +250,9 @@
 			const monthRevenue = totalRevenue * 0.3; // Assume 30% of total is this month
 			const pendingRevenue = monthRevenue * 0.2; // Assume 20% is pending
 
-			document.getElementById('stat-total').textContent = '$' + Math.round(totalRevenue);
-			document.getElementById('stat-month').textContent = '$' + Math.round(monthRevenue);
-			document.getElementById('stat-pending').textContent = '$' + Math.round(pendingRevenue);
+			document.getElementById('stat-total').textContent = 'NRP ' + Math.round(totalRevenue);
+			document.getElementById('stat-month').textContent = 'NRP ' + Math.round(monthRevenue);
+			document.getElementById('stat-pending').textContent = 'NRP ' + Math.round(pendingRevenue);
 			document.getElementById('stat-courses').textContent = courses.filter(c => c.published).length;
 		}
 
@@ -271,7 +271,7 @@
 				data: {
 					labels: months,
 					datasets: [{
-						label: 'Revenue ($)',
+						label: 'Revenue (NRP)',
 						data: revenueData,
 						borderColor: '#06b6d4',
 						backgroundColor: 'rgba(6, 182, 212, 0.1)',
@@ -294,7 +294,7 @@
 						y: {
 							ticks: {
 								color: '#9bb0c9',
-								callback: (val) => '$' + val
+								callback: (val) => 'NRP ' + val
 							},
 							grid: { color: 'rgba(255,255,255,0.08)' }
 						},
@@ -322,7 +322,7 @@
 				data: {
 					labels,
 					datasets: [{
-						label: 'Revenue ($)',
+						label: 'Revenue (NRP)',
 						data,
 						backgroundColor: '#06b6d4',
 						borderRadius: 6
@@ -338,7 +338,7 @@
 						y: {
 							ticks: {
 								color: '#9bb0c9',
-								callback: (val) => '$' + val
+								callback: (val) => 'NRP ' + val
 							},
 							grid: { color: 'rgba(255,255,255,0.08)' }
 						},
@@ -366,8 +366,8 @@
 				row.innerHTML = `
 					<td class="course-name">${course.title}</td>
 					<td>${students}</td>
-					<td>$${revenue}</td>
-					<td>$${avgPerStudent}</td>
+					<td>NPR ${revenue}</td>
+					<td>NPR ${avgPerStudent}</td>
 					<td><span class="status-badge ${statusClass}">${statusText}</span></td>
 				`;
 				tbody.appendChild(row);

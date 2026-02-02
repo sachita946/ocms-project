@@ -46,8 +46,17 @@ app.use('/', express.static(path.join(__dirname, 'publicc')));
 app.use('/uploads', express.static(path.join(__dirname, 'publicc/uploads')));
 app.use('/background', express.static(path.join(__dirname, 'publicc/background')));
 
-// SPA fallback — use a RegExp to match any path (avoids path-to-regexp '*' parsing error)
-app.get(/^\/publicc\/.*$/, (req, res) => {
+// Serve admin files directly under /admin/
+app.use('/admin', express.static(path.join(__dirname, 'publicc/admin')));
+
+// SPA fallback — only for the root index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'publicc', 'index.html'), (err) => {
+    if (err) res.status(404).send('Not found');
+  });
+});
+
+app.get('/index.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'publicc', 'index.html'), (err) => {
     if (err) res.status(404).send('Not found');
   });

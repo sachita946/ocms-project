@@ -232,7 +232,7 @@
 				</div>
 				<div class="info-item">
 					<div class="info-label">Total Revenue</div>
-					<div class="info-value" id="totalRevenue">$0</div>
+					<div class="info-value" id="totalRevenue">NPR 0</div>
 				</div>
 				<div class="info-item">
 					<div class="info-label">Avg Rating</div>
@@ -334,7 +334,7 @@
 				// Stats
 				document.getElementById('totalCourses').textContent = dashboard.stats?.courses || 0;
 				document.getElementById('totalStudents').textContent = dashboard.stats?.students || 0;
-				document.getElementById('totalRevenue').textContent = '$' + (dashboard.stats?.revenue || 0);
+				document.getElementById('totalRevenue').textContent = 'NPR ' + (dashboard.stats?.revenue || 0);
 				document.getElementById('avgRating').textContent = ((Math.random() * 2 + 3).toFixed(1)) + ' ⭐';
 
 				// Fill form

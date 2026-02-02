@@ -117,6 +117,7 @@ const instructorNav = `
   <nav class="instructor-nav-menu" id="instructorNavMenu">
     <a href="instructor-dashboard.html" class="instructor-nav-item" data-page="dashboard">📊 Dashboard</a>
     <a href="create-course.html" class="instructor-nav-item" data-page="create">📖 Create Course</a>
+    <a href="resources.html" class="instructor-nav-item" data-page="resources">📚 Course Resources</a>
     <a href="earnings.html" class="instructor-nav-item" data-page="earnings">💰 Earnings</a>
     <a href="students.html" class="instructor-nav-item" data-page="students">👥 Students</a>
     <a href="quizzes.html" class="instructor-nav-item" data-page="quizzes">📝 Quizzes</a>

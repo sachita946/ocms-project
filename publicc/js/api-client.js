@@ -5,7 +5,7 @@ const API_BASE = `${OCMS_BACKEND_ORIGIN}/api`;
 
 // Fetch with authentication
 async function apiCall(endpoint, options = {}) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token');
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
@@ -62,7 +62,7 @@ async function apiDelete(endpoint) {
 
 // Backward compatible fetch helper for admin pages
 async function fetchAPI(endpoint, options = {}) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('ocms_token');
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})

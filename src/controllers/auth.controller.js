@@ -57,7 +57,9 @@ export const signup = async (req, res) => {
         console.log('Instructor profile created successfully for user:', user.id);
       } catch (profileError) {
         console.error('Failed to create instructor profile:', profileError);
-        // Don't fail the signup, just log the error
+        // Delete the user since profile creation failed
+        await prisma.user.delete({ where: { id: user.id } });
+        return res.status(500).json({ message: "Failed to create instructor profile. Signup cancelled." });
       }
     }
 

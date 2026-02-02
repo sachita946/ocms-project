@@ -2,15 +2,23 @@ import { Router } from 'express';
 import  {auth} from '../middleware/auth.js';   // ensures logged-in user
 import { requireRole } from '../middleware/role.js'; // optional if admin needed
 import {
-  payCourse,
+  createPaymentIntent,
+  confirmPayment,
   getPayments,
-  updatePaymentStatus
+  updatePaymentStatus,
+  createPayment
 } from '../controllers/payments.controller.js';
 
 const router = Router();
 
-// Pay for a course (Student)
-router.post('/pay', auth, payCourse);
+// Create payment record
+router.post('/', auth, createPayment);
+
+// Create payment intent for Stripe (Student)
+router.post('/create-intent', auth, createPaymentIntent);
+
+// Confirm payment after Stripe processing (Student)
+router.post('/confirm', auth, confirmPayment);
 
 // Get my payments (Student)
 router.get('/my', auth, getPayments);

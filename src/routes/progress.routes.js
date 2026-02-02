@@ -21,4 +21,7 @@ router.get('/course/:courseId/stats', auth, getCourseProgressStats);
 // Get all students progress (admin view)
 router.get('/all-students', auth, getAllStudentsProgress);
 
+// Demo routes (for development)
+router.get('/demo/all-students', getAllStudentsProgress);
+
 export default router;

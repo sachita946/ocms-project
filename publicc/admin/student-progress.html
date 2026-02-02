@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Progress | Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <base href="/admin/">  <title>Student Progress | Admin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="admin.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -214,6 +214,12 @@
     let searchTerm = '';
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // Remove admin.js navigation listeners that conflict with onclick handlers
+      document.querySelectorAll('[data-section]').forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+      });
+      
       await loadProgress();
       setupFilters();
       setupNavigation();

@@ -198,7 +198,7 @@ const buildInstructorDashboard = async (userId, instructorProfileId) => {
 
 export const getMyProfile = async (req, res) => {
   try {
-    const userId = String(req.user.id);
+    const userId = parseInt(req.user.id);
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -272,21 +272,21 @@ export const getProfileByUserId = async (req, res) => {
 
 export const updateMyProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = parseInt(req.user.id);
     const { first_name, last_name, bio, expertise, interests, profile_picture } = req.body;
 
     // update user table
     await prisma.user.update({
-      where: { id: String(userId) },
+      where: { id: userId },
       data: { first_name, last_name, profile_picture, bio }
     });
 
     // Update based on role
     if (req.user.role === 'STUDENT') {
       await prisma.studentProfile.upsert({
-        where: { user_id: String(userId) },
+        where: { user_id: userId },
         create: {
-          user_id: String(userId),
+          user_id: userId,
           full_name: `${first_name} ${last_name}`,
           interests: interests ?? []
         },
@@ -299,9 +299,9 @@ export const updateMyProfile = async (req, res) => {
 
     if (req.user.role === 'INSTRUCTOR') {
       await prisma.instructorProfile.upsert({
-        where: { user_id: String(userId) },
+        where: { user_id: userId },
         create: {
-          user_id: String(userId),
+          user_id: userId,
           full_name: `${first_name} ${last_name}`,
           bio: bio ?? null,
           expertise_area: expertise ?? null

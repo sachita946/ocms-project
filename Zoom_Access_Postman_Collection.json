@@ -1,0 +1,539 @@
+{
+  "info": {
+    "name": "OCMS Zoom Access Flow Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "student_token",
+      "value": ""
+    },
+    {
+      "key": "instructor_token",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "course_id",
+      "value": ""
+    },
+    {
+      "key": "zoom_join_url",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Student Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\":\"John\",\"last_name\":\"Student\",\"email\":\"john.zoom@example.com\",\"password\":\"Password123\",\"role\":\"STUDENT\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Instructor Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\":\"Jane\",\"last_name\":\"Instructor\",\"email\":\"jane.zoom@example.com\",\"password\":\"Instructor123\",\"role\":\"INSTRUCTOR\",\"qualifications\":\"MSc CS\",\"experience_years\":5,\"bio\":\"Zoom expert\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Student Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"john.zoom@example.com\",\"password\":\"Password123\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "    const response = pm.response.json();",
+                    "    pm.collectionVariables.set('student_token', response.token);",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Instructor Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"jane.zoom@example.com\",\"password\":\"Instructor123\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "    const response = pm.response.json();",
+                    "    pm.collectionVariables.set('instructor_token', response.token);",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Course Management",
+      "item": [
+        {
+          "name": "Create Advanced Course with Zoom",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{instructor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Advanced React with Zoom Sessions\",\"description\":\"Master React with live Zoom coding sessions\",\"category\":\"Web Development\",\"level\":\"ADVANCED\",\"price\":15000,\"zoom_link\":\"https://zoom.us/j/123456789\",\"promo_video_url\":\"https://youtu.be/dQw4w9WgXcQ\",\"requirements\":[\"Basic JavaScript\"],\"learning_outcomes\":[\"React mastery\"],\"duration_weeks\":8,\"language\":\"English\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"]
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    pm.collectionVariables.set('course_id', response.id);",
+                    "}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Publish Course (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_published\":true}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "{{course_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Zoom Resource to Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{instructor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"course_id\":{{course_id}},\"type\":\"zoom\",\"title\":\"Live Session - Week 1\",\"content\":\"Join our first live coding session\",\"zoom_link\":\"https://zoom.us/j/123456789\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/course-resources",
+              "host": ["{{base_url}}"],
+              "path": ["api", "course-resources"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎓 Enrollment & Payment",
+      "item": [
+        {
+          "name": "Enroll in Advanced Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"course_id\":{{course_id}}}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Process Payment for Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"course_id\":{{course_id}},\"amount\":15000,\"payment_method\":\"KHALTI\",\"transaction_id\":\"TXN-ZOOM-123\",\"status\":\"COMPLETED\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎥 Zoom Access Testing",
+      "item": [
+        {
+          "name": "❌ Try Zoom Access Without Auth (Should Redirect)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/zoom/join/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "join", "{{course_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Should redirect to login page",
+                  "pm.test('Should redirect to login', function () {",
+                  "    pm.response.to.have.status(302);",
+                  "    const location = pm.response.headers.get('Location');",
+                  "    pm.expect(location).to.include('/auth/login.html');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ Try Zoom Access Without Payment (Should Redirect)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/zoom/join/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "join", "{{course_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Should redirect to payment page",
+                  "pm.test('Should redirect to payment', function () {",
+                  "    pm.response.to.have.status(302);",
+                  "    const location = pm.response.headers.get('Location');",
+                  "    pm.expect(location).to.include('/student/payment.html');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "✅ Try Zoom Access With Payment (Should Succeed)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/zoom/join/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "join", "{{course_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Should redirect to Zoom link",
+                  "pm.test('Should redirect to Zoom', function () {",
+                  "    pm.response.to.have.status(302);",
+                  "    const location = pm.response.headers.get('Location');",
+                  "    pm.expect(location).to.include('zoom.us');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "🔍 Get Zoom Link Directly (API)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/zoom/access/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "access", "{{course_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Should return Zoom link', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('zoom_link');",
+                  "    pm.collectionVariables.set('zoom_join_url', response.zoom_link);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "📋 Get Course Resources (Zoom Links)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/course-resources?courseId={{course_id}}&type=zoom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "course-resources"],
+              "query": [
+                {
+                  "key": "courseId",
+                  "value": "{{course_id}}"
+                },
+                {
+                  "key": "type",
+                  "value": "zoom"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Edge Cases & Error Testing",
+      "item": [
+        {
+          "name": "Try Access Non-existent Course",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/zoom/join/99999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "join", "99999"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Should return 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Try Access Unpublished Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_published\":false}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses", "{{course_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Try Zoom Access on Unpublished Course",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{student_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/zoom/join/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "zoom", "join", "{{course_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Should return 404 for unpublished', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

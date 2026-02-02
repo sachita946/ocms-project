@@ -11,7 +11,6 @@
       --accent:#22c55e;
       --text:#eaf4f2;
       --bg-card:rgba(255,255,255,0.08);
-      --khalti:#5C2D91;
       --esewa:#60BB46;
     }
 
@@ -177,11 +176,6 @@
       font-size:16px;
     }
 
-    .khalti-btn.active {
-      border-color:var(--khalti);
-      background:rgba(92,45,145,0.1);
-    }
-
     .esewa-btn.active {
       border-color:var(--esewa);
       background:rgba(96,187,70,0.1);
@@ -288,38 +282,34 @@
 
   <!-- PAYMENT METHOD -->
   <div class="card">
-    <h2>💳 Select Payment Method</h2>
-    
+    <h2>💳 Payment Method</h2>
+
     <div class="payment-methods">
-      <div class="payment-method-btn khalti-btn" data-method="khalti">
-        <img src="https://web.khalti.com/static/img/logo1.png" alt="Khalti">
-        <span>Khalti</span>
+      <div class="payment-method-btn stripe-btn active" data-method="stripe">
+        <img src="https://js.stripe.com/v3/stripe-js" alt="Stripe" style="display:none;">
+        <span>💳 Credit/Debit Card</span>
       </div>
-    
+
     <form id="paymentForm">
       <div class="form-group">
-        <label for="phoneNumber">Phone/Email</label>
-        <input type="text" id="phoneNumber" placeholder="Enter your Khalti phone or email" required>
-      </div>
-
-      <div class="form-group">
         <label for="amount">Amount (NPR)</label>
-        <input type="number" id="amount" value="15000" readonly>
+        <input type="number" id="amount" value="200" readonly>
       </div>
 
-      <button type="submit" class="pay-btn" id="payBtn">
-        Proceed to Payment
+      <!-- Stripe Payment Element will be inserted here -->
+
+      <button type="submit" class="pay-btn" id="payBtn" disabled>
+        Complete Payment
       </button>
     </form>
 
-    <div id="paymentMessage" class="message hidden"></div>
+    <div id="paymentMessage" class="message" style="display:none;"></div>
   </div>
 
 </main>
 
-<!-- Khalti Checkout SDK -->
-<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
-
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
 <script src="payment.js"></script>
 
 </body>

@@ -8,13 +8,85 @@ try {
   userRole = localStorage.getItem('user_role');
 }
 
+// Check for token in URL parameters and store it
+const urlParams = new URLSearchParams(window.location.search);
+const tokenFromUrl = urlParams.get('token');
+if (tokenFromUrl) {
+  localStorage.setItem('ocms_token', tokenFromUrl);
+  // Try to get role from token
+  fetch('http://localhost:3000/api/auth/me', { headers: { Authorization: `Bearer ${tokenFromUrl}` } })
+    .then(res => res.json())
+    .then(data => {
+      if (data.user?.role) {
+        localStorage.setItem('user_role', data.user.role);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    })
+    .catch(err => console.error('Failed to get role from token:', err));
+  
+  // Remove token from URL for security
+  urlParams.delete('token');
+  const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+  history.replaceState({}, '', newUrl);
+  
+  // Refresh the token and role variables
+  const updatedToken = localStorage.getItem('ocms_token');
+  const updatedUserData = localStorage.getItem('user');
+  let updatedRole;
+  try {
+    updatedRole = updatedUserData ? JSON.parse(updatedUserData).role : localStorage.getItem('user_role');
+  } catch (e) {
+    updatedRole = localStorage.getItem('user_role');
+  }
+  
+  if (updatedToken) window.location.reload(); // Reload to use the new token
+}
+
+console.log('Dashboard: token =', !!token, 'userRole =', userRole);
+
 if (!token || userRole !== 'ADMIN') {
+  console.log('Dashboard: redirecting to login because token or role invalid');
   window.location.href = '../auth/login.html';
 }
 
+// Resolve backend API base to avoid 405 when page is served from a different origin (e.g., Live Server)
+const BACKEND_ORIGIN = (window.OCMS_API_ORIGIN)
+  || 'http://localhost:3000';
+const API_URL = `${BACKEND_ORIGIN}/api`;
+
 const $ = (id) => document.getElementById(id);
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-const fmtCurrency = (n) => `$${Number(n || 0).toFixed(2)}`;
+const fmtCurrency = (n) => `NRP ${Number(n || 0).toFixed(2)}`;
+
+// API helper function
+async function apiCall(endpoint, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers
+  });
+
+  if (response.status === 401) {
+    localStorage.clear();
+    window.location.href = '/auth/login.html';
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'API Error');
+  }
+
+  return data;
+}
 
 const panels = document.querySelectorAll('.panel');
 const navButtons = document.querySelectorAll('[data-section]');
@@ -112,8 +184,7 @@ function renderOverview(data = {}) {
     { emoji: '👥', label: 'Total Users', value: (data.students || 0) + (data.instructors || 0) },
     { emoji: '👨‍🎓', label: 'Students', value: data.students || 0 },
     { emoji: '👨‍🏫', label: 'Instructors', value: data.instructors || 0 },
-    { emoji: '📚', label: 'Courses', value: data.courses || 0 },
-    { emoji: '💳', label: 'Total Revenue', value: fmtCurrency(data.totalRevenue || 0) },
+    { emoji: '', label: 'Total Revenue', value: fmtCurrency(data.totalRevenue || 0) },
     { emoji: '⭐', label: 'Total Reviews', value: data.reviews || 0 },
   ];
   items.forEach(item => {
@@ -186,41 +257,6 @@ function renderUsers(users = []) {
       </td>
     `;
     tbody.appendChild(row);
-  });
-}
-
-function renderCourses(courses = []) {
-  const list = $('courses-list');
-  const empty = $('courses-empty');
-  
-  list.innerHTML = '';
-  
-  if (!courses.length) {
-    list.style.display = 'none';
-    empty.style.display = 'block';
-    return;
-  }
-  
-  empty.style.display = 'none';
-  list.style.display = 'grid';
-  
-  courses.forEach(course => {
-    const li = document.createElement('li');
-    li.className = 'list-item';
-    const instructor = course.instructor ? `${course.instructor.first_name || ''} ${course.instructor.last_name || ''}`.trim() : 'Unknown';
-    const publishStatus = course.is_published ? '✓ Published' : '📝 Draft';
-    const statusColor = course.is_published ? '#4ade80' : '#fbbf24';
-    li.innerHTML = `
-      <div class="list-content">
-        <div class="list-title">${course.title}</div>
-        <div class="list-meta">By ${instructor} | Enrollments: ${course._count?.enrollments || 0}</div>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-weight: 600; color: #ff8787; margin-bottom: 4px;">${course.price ? fmtCurrency(course.price) : 'Free'}</div>
-        <span class="pill" style="background: rgba(255,255,255,0.1); color: ${statusColor};">${publishStatus}</span>
-      </div>
-    `;
-    list.appendChild(li);
   });
 }
 
@@ -393,14 +429,11 @@ function renderActivities(activities = []) {
 
 async function bootstrap() {
   try {
-    const res = await fetch('http://localhost:3000/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
-    if (res.status === 401) throw new Error('unauthorized');
-    const data = await res.json();
+    const data = await apiCall('/admin/demo/stats');
     
     setStats(data);
     renderOverview(data);
     renderUsers(data.users || []);
-    renderCourses(data.courses || []);
     renderPayments(data.payments || []);
     renderReviews(data.reviews || []);
     renderNotifications(data.notifications || []);

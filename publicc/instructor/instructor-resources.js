@@ -16,11 +16,27 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Toggle zoom link field for course resources
 document.getElementById('courseResourceType').addEventListener('change', (e) => {
   const zoomGroup = document.getElementById('zoomLinkGroup');
+  const fileGroup = document.getElementById('courseFileGroup');
+  const contentField = document.getElementById('courseResourceContent');
+  const fileField = document.getElementById('courseResourceFile');
+
   if (e.target.value === 'zoom') {
     zoomGroup.style.display = 'block';
+    fileGroup.style.display = 'none';
+    contentField.required = false;
+    fileField.required = false;
     document.getElementById('courseZoomLink').required = true;
+  } else if (['notes', 'questions', 'preboard', 'board'].includes(e.target.value)) {
+    zoomGroup.style.display = 'none';
+    fileGroup.style.display = 'block';
+    contentField.required = false;
+    fileField.required = true;
+    document.getElementById('courseZoomLink').required = false;
   } else {
     zoomGroup.style.display = 'none';
+    fileGroup.style.display = 'none';
+    contentField.required = true;
+    fileField.required = false;
     document.getElementById('courseZoomLink').required = false;
   }
 });
@@ -28,11 +44,27 @@ document.getElementById('courseResourceType').addEventListener('change', (e) => 
 // Toggle zoom link field for lesson resources
 document.getElementById('lessonResourceType').addEventListener('change', (e) => {
   const zoomGroup = document.getElementById('lessonZoomLinkGroup');
+  const fileGroup = document.getElementById('lessonFileGroup');
+  const contentField = document.getElementById('lessonResourceContent');
+  const fileField = document.getElementById('lessonResourceFile');
+
   if (e.target.value === 'zoom') {
     zoomGroup.style.display = 'block';
+    fileGroup.style.display = 'none';
+    contentField.required = false;
+    fileField.required = false;
     document.getElementById('lessonZoomLink').required = true;
+  } else if (['notes', 'questions', 'preboard'].includes(e.target.value)) {
+    zoomGroup.style.display = 'none';
+    fileGroup.style.display = 'block';
+    contentField.required = false;
+    fileField.required = true;
+    document.getElementById('lessonZoomLink').required = false;
   } else {
     zoomGroup.style.display = 'none';
+    fileGroup.style.display = 'none';
+    contentField.required = true;
+    fileField.required = false;
     document.getElementById('lessonZoomLink').required = false;
   }
 });
@@ -80,31 +112,88 @@ document.getElementById('courseResourceForm').addEventListener('submit', async (
   const msg = document.getElementById('courseResourceMsg');
   msg.textContent = '';
 
-  const data = {
-    course_id: parseInt(document.getElementById('courseSelect').value),
-    type: document.getElementById('courseResourceType').value,
-    title: document.getElementById('courseResourceTitle').value.trim(),
-    content: document.getElementById('courseResourceContent').value.trim(),
-    zoom_link: document.getElementById('courseZoomLink').value.trim() || null
-  };
+  const resourceType = document.getElementById('courseResourceType').value;
+  const fileField = document.getElementById('courseResourceFile');
+  const hasFile = fileField.files && fileField.files[0];
 
-  if (!data.course_id || !data.type || !data.title || !data.content) {
-    msg.textContent = 'All fields are required';
-    msg.className = 'msg error';
-    return;
-  }
+  // Prepare data based on resource type
+  let data, headersToUse, body;
 
-  if (data.type === 'zoom' && !data.zoom_link) {
-    msg.textContent = 'Zoom link is required for Zoom meetings';
-    msg.className = 'msg error';
-    return;
+  if (resourceType === 'zoom') {
+    // Zoom meetings only need text data
+    data = {
+      course_id: parseInt(document.getElementById('courseSelect').value),
+      type: resourceType,
+      title: document.getElementById('courseResourceTitle').value.trim(),
+      zoom_link: document.getElementById('courseZoomLink').value.trim()
+    };
+
+    if (!data.course_id || !data.type || !data.title || !data.zoom_link) {
+      msg.textContent = 'All fields are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    headersToUse = headers;
+    body = JSON.stringify(data);
+  } else if (['notes', 'questions', 'preboard', 'board'].includes(resourceType)) {
+    // File-based resources need FormData
+    if (!hasFile) {
+      msg.textContent = 'Please select a file to upload';
+      msg.className = 'msg error';
+      return;
+    }
+
+    // Check file size (max 500MB)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    if (fileField.files[0].size > maxSize) {
+      msg.textContent = 'File size too large. Maximum size is 500MB.';
+      msg.className = 'msg error';
+      return;
+    }
+
+    const courseId = parseInt(document.getElementById('courseSelect').value);
+    const title = document.getElementById('courseResourceTitle').value.trim();
+
+    if (!courseId || !resourceType || !title) {
+      msg.textContent = 'Course, type, and title are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('course_id', courseId.toString());
+    formData.append('type', resourceType);
+    formData.append('title', title);
+    formData.append('file', fileField.files[0]);
+
+    headersToUse = { 'Authorization': `Bearer ${token}` }; // Remove Content-Type for FormData
+    body = formData;
+  } else {
+    // Text-based resources
+    data = {
+      course_id: parseInt(document.getElementById('courseSelect').value),
+      type: resourceType,
+      title: document.getElementById('courseResourceTitle').value.trim(),
+      content: document.getElementById('courseResourceContent').value.trim()
+    };
+
+    if (!data.course_id || !data.type || !data.title || !data.content) {
+      msg.textContent = 'All fields are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    headersToUse = headers;
+    body = JSON.stringify(data);
   }
 
   try {
     const res = await fetch('/api/course-resources', {
       method: 'POST',
-      headers,
-      body: JSON.stringify(data)
+      headers: headersToUse,
+      body: body
     });
 
     if (!res.ok) throw new Error(await res.text());
@@ -113,6 +202,7 @@ document.getElementById('courseResourceForm').addEventListener('submit', async (
     msg.className = 'msg success';
     e.target.reset();
     document.getElementById('zoomLinkGroup').style.display = 'none';
+    document.getElementById('courseFileGroup').style.display = 'none';
     loadCourseResources();
   } catch (err) {
     msg.textContent = `Error: ${err.message}`;
@@ -126,31 +216,88 @@ document.getElementById('lessonResourceForm').addEventListener('submit', async (
   const msg = document.getElementById('lessonResourceMsg');
   msg.textContent = '';
 
-  const data = {
-    lesson_id: parseInt(document.getElementById('lessonSelect').value),
-    type: document.getElementById('lessonResourceType').value,
-    title: document.getElementById('lessonResourceTitle').value.trim(),
-    content: document.getElementById('lessonResourceContent').value.trim(),
-    zoom_link: document.getElementById('lessonZoomLink').value.trim() || null
-  };
+  const resourceType = document.getElementById('lessonResourceType').value;
+  const fileField = document.getElementById('lessonResourceFile');
+  const hasFile = fileField.files && fileField.files[0];
 
-  if (!data.lesson_id || !data.type || !data.title || !data.content) {
-    msg.textContent = 'All fields are required';
-    msg.className = 'msg error';
-    return;
-  }
+  // Prepare data based on resource type
+  let data, headersToUse, body;
 
-  if (data.type === 'zoom' && !data.zoom_link) {
-    msg.textContent = 'Zoom link is required for Zoom meetings';
-    msg.className = 'msg error';
-    return;
+  if (resourceType === 'zoom') {
+    // Zoom meetings only need text data
+    data = {
+      lesson_id: parseInt(document.getElementById('lessonSelect').value),
+      type: resourceType,
+      title: document.getElementById('lessonResourceTitle').value.trim(),
+      zoom_link: document.getElementById('lessonZoomLink').value.trim()
+    };
+
+    if (!data.lesson_id || !data.type || !data.title || !data.zoom_link) {
+      msg.textContent = 'All fields are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    headersToUse = headers;
+    body = JSON.stringify(data);
+  } else if (['notes', 'questions', 'preboard'].includes(resourceType)) {
+    // File-based resources need FormData
+    if (!hasFile) {
+      msg.textContent = 'Please select a file to upload';
+      msg.className = 'msg error';
+      return;
+    }
+
+    // Check file size (max 500MB)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    if (fileField.files[0].size > maxSize) {
+      msg.textContent = 'File size too large. Maximum size is 500MB.';
+      msg.className = 'msg error';
+      return;
+    }
+
+    const lessonId = parseInt(document.getElementById('lessonSelect').value);
+    const title = document.getElementById('lessonResourceTitle').value.trim();
+
+    if (!lessonId || !resourceType || !title) {
+      msg.textContent = 'Lesson, type, and title are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('lesson_id', lessonId.toString());
+    formData.append('type', resourceType);
+    formData.append('title', title);
+    formData.append('file', fileField.files[0]);
+
+    headersToUse = { 'Authorization': `Bearer ${token}` }; // Remove Content-Type for FormData
+    body = formData;
+  } else {
+    // Text-based resources
+    data = {
+      lesson_id: parseInt(document.getElementById('lessonSelect').value),
+      type: resourceType,
+      title: document.getElementById('lessonResourceTitle').value.trim(),
+      content: document.getElementById('lessonResourceContent').value.trim()
+    };
+
+    if (!data.lesson_id || !data.type || !data.title || !data.content) {
+      msg.textContent = 'All fields are required';
+      msg.className = 'msg error';
+      return;
+    }
+
+    headersToUse = headers;
+    body = JSON.stringify(data);
   }
 
   try {
     const res = await fetch('/api/lesson-resources', {
       method: 'POST',
-      headers,
-      body: JSON.stringify(data)
+      headers: headersToUse,
+      body: body
     });
 
     if (!res.ok) throw new Error(await res.text());
@@ -159,6 +306,7 @@ document.getElementById('lessonResourceForm').addEventListener('submit', async (
     msg.className = 'msg success';
     e.target.reset();
     document.getElementById('lessonZoomLinkGroup').style.display = 'none';
+    document.getElementById('lessonFileGroup').style.display = 'none';
     loadLessonResources();
   } catch (err) {
     msg.textContent = `Error: ${err.message}`;
@@ -189,7 +337,11 @@ async function loadCourseResources() {
           <h3>${r.title}</h3>
           <span class="badge ${r.type}">${r.type}</span>
         </div>
-        <p>${r.content.substring(0, 200)}${r.content.length > 200 ? '...' : ''}</p>
+        ${r.file_url ? `
+          <p><strong>File:</strong> <a href="${r.file_url}" target="_blank" download>📎 Download ${r.file_type ? r.file_type.split('/')[1].toUpperCase() : 'File'}</a></p>
+        ` : `
+          <p>${r.content.substring(0, 200)}${r.content.length > 200 ? '...' : ''}</p>
+        `}
         ${r.zoom_link ? `<p><strong>Zoom Link:</strong> <a href="${r.zoom_link}" target="_blank">${r.zoom_link}</a></p>` : ''}
         <div class="resource-meta">
           <small>Added: ${new Date(r.created_at).toLocaleDateString()}</small>
@@ -227,7 +379,11 @@ async function loadLessonResources() {
           <h3>${r.title}</h3>
           <span class="badge ${r.type}">${r.type}</span>
         </div>
-        <p>${r.content.substring(0, 200)}${r.content.length > 200 ? '...' : ''}</p>
+        ${r.file_url ? `
+          <p><strong>File:</strong> <a href="${r.file_url}" target="_blank" download>📎 Download ${r.file_type ? r.file_type.split('/')[1].toUpperCase() : 'File'}</a></p>
+        ` : `
+          <p>${r.content.substring(0, 200)}${r.content.length > 200 ? '...' : ''}</p>
+        `}
         ${r.zoom_link ? `<p><strong>Zoom Link:</strong> <a href="${r.zoom_link}" target="_blank">${r.zoom_link}</a></p>` : ''}
         <div class="resource-meta">
           <small>Added: ${new Date(r.created_at).toLocaleDateString()}</small>
