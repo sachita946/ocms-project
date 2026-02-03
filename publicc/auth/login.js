@@ -295,11 +295,18 @@ async function saveTokenAndRedirect(token, role) {
   const returnUrl = urlParams.get('returnUrl');
   const enrollParam = urlParams.get('enroll');
   const courseId = urlParams.get('courseId');
-  
-  console.log('Post-login redirect params:', { enrollCourse, courseName, price, returnUrl });
-  
-  if (enrollCourse && courseName && price && targetRole === 'STUDENT') {
-    // User logged in to enroll in a course - redirect to payment
+  const redirect = urlParams.get('redirect');
+
+  console.log('Post-login redirect params:', { enrollCourse, courseName, price, returnUrl, redirect });
+
+  if (redirect === 'payment' && courseId && targetRole === 'STUDENT') {
+    // New flow: redirect to payment for advanced courses
+    const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName || '')}&price=${price || ''}`;
+    console.log('Redirecting to payment after login:', paymentUrl);
+    window.location.href = paymentUrl;
+    return;
+  } else if (enrollCourse && courseName && price && targetRole === 'STUDENT') {
+    // Legacy: User logged in to enroll in a course - redirect to payment
     window.location.href = `/student/payment.html?courseId=${enrollCourse}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
     return;
   } else if (returnUrl) {
@@ -382,6 +389,20 @@ function captureTokenFromUrl() {
   }
 }
 document.addEventListener('DOMContentLoaded', () => {
+  // Check if user is already logged in and has enrollment parameters - redirect to payment
+  const token = localStorage.getItem('ocms_token');
+  const urlParams = new URLSearchParams(window.location.search);
+  const enrollCourse = urlParams.get('enrollCourse');
+  const courseName = urlParams.get('courseName');
+  const price = urlParams.get('price');
+
+  if (token && enrollCourse && courseName && price) {
+    // User is already logged in and has enrollment params - redirect directly to payment
+    console.log('User already logged in, redirecting to payment for enrollment');
+    window.location.href = `/student/payment.html?courseId=${enrollCourse}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+    return;
+  }
+
   // Capture OAuth token if present
   captureTokenFromUrl();
 

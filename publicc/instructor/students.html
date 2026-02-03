@@ -219,69 +219,56 @@
 
 		async function loadStudents() {
 			try {
-				const res = await fetch('/api/profile/me', {
+				const res = await fetch('/api/instructor/students', {
 					headers: { Authorization: `Bearer ${token}` }
 				});
-				if (res.status === 401) throw new Error('unauthorized');
-				const data = await res.json();
-				
-				if (data.dashboard?.role !== 'INSTRUCTOR') {
-					window.location.href = '/instructor/instructor-dashboard.html';
+				if (res.status === 401) {
+					window.location.href = '/auth/login.html';
+					return;
+				}
+				if (!res.ok) throw new Error('Failed to load students');
+
+				allStudents = await res.json();
+
+				if (!allStudents.length) {
+					document.getElementById('emptyState').style.display = 'block';
+					document.getElementById('studentsContainer').innerHTML = '';
+					updateStats([]);
 					return;
 				}
 
-				const courses = data.dashboard.lists?.courses || [];
-				allStudents = [];
-
-				courses.forEach(course => {
-					if (course.enrollments && Array.isArray(course.enrollments)) {
-						course.enrollments.forEach(enrollment => {
-							const student = enrollment.student || {};
-							const existing = allStudents.find(s => s.id === student.id);
-							
-							if (!existing) {
-								allStudents.push({
-									id: student.id,
-									name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
-									email: student.email,
-									courses: [course.title],
-									enrolledAt: enrollment.enrolled_at,
-									progress: enrollment.progress || 0,
-									lastActive: enrollment.last_active
-								});
-							} else {
-								existing.courses.push(course.title);
-							}
-						});
-					}
-				});
-
-				updateStats(allStudents, courses);
+				document.getElementById('emptyState').style.display = 'none';
+				updateStats(allStudents);
 				renderStudents(allStudents);
+
 			} catch (err) {
-				console.error(err);
+				console.error('Error loading students:', err);
+				document.getElementById('studentsContainer').innerHTML = '<div style="text-align: center; padding: 40px; color: #f87171;">Failed to load students. Please try again.</div>';
 			}
 		}
 
-		function updateStats(students, courses) {
+		function updateStats(students) {
 			document.getElementById('stat-total').textContent = students.length;
-			
+
 			const activeCount = students.filter(s => {
-				const lastActive = new Date(s.lastActive);
+				const enrolledAt = new Date(s.enrolledAt);
 				const thirtyDaysAgo = new Date();
 				thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-				return lastActive > thirtyDaysAgo;
+				return enrolledAt > thirtyDaysAgo;
 			}).length;
 			document.getElementById('stat-active').textContent = activeCount;
 
-			const avgCompletion = students.length > 0 
+			const avgCompletion = students.length > 0
 				? Math.round(students.reduce((sum, s) => sum + (s.progress || 0), 0) / students.length)
 				: 0;
 			document.getElementById('stat-completion').textContent = avgCompletion + '%';
 
-			const avgRating = (Math.random() * 2 + 3).toFixed(1);
+			// For now, show a placeholder rating
+			const avgRating = students.length > 0 ? (Math.random() * 2 + 3).toFixed(1) : '0.0';
 			document.getElementById('stat-rating').textContent = avgRating + ' ⭐';
 		}
+			
+	
 
 		function renderStudents(students) {
 			const container = document.getElementById('studentsContainer');

@@ -134,7 +134,21 @@ const buildInstructorDashboard = async (userId, instructorProfileId) => {
   const [courses, notifications, activities] = await Promise.all([
     prisma.course.findMany({
       where: { instructor_id: userId },
-      include: { enrollments: true, payments: true, reviews: true, lessons: true },
+      include: { 
+        enrollments: true, 
+        payments: true, 
+        reviews: true, 
+        lessons: {
+          include: {
+            quiz: {
+              include: {
+                questions: true,
+                attempts: true
+              }
+            }
+          }
+        }
+      },
       orderBy: { id: "desc" },
     }),
     prisma.notification.findMany({ where: { user_id: userId }, orderBy: { created_at: "desc" }, take: 8 }),
@@ -168,6 +182,7 @@ const buildInstructorDashboard = async (userId, instructorProfileId) => {
     published: course.is_published,
     enrollments: course.enrollments.length,
     lessons: course.lessons.length,
+    quizzes: course.lessons.filter(lesson => lesson.quiz).length,
     reviews: course.reviews.length,
     revenue: course.payments
       .filter((p) => p.status === "COMPLETED")

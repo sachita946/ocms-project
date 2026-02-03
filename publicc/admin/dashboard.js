@@ -230,6 +230,9 @@ function renderUsers(users = []) {
   const empty = $('users-empty');
   const table = $('users-table');
   
+  console.log('renderUsers called with', users.length, 'users');
+  console.log('Sample user data:', users[0]);
+  
   tbody.innerHTML = '';
   
   if (!users.length) {
@@ -244,20 +247,77 @@ function renderUsers(users = []) {
   users.forEach(user => {
     const row = document.createElement('tr');
     const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
-    const status = user.is_active ? '✓ Active' : '✗ Inactive';
+    const accountStatus = user.is_active ? '✓ Active' : '✗ Inactive';
     const statusColor = user.is_active ? '#4ade80' : '#f87171';
+    
+    // Instructor verification status
+    const isPendingInstructor = user.role === 'INSTRUCTOR' && user.instructorProfile?.is_pending_approval;
+    const isVerifiedInstructor = user.role === 'INSTRUCTOR' && user.instructorProfile?.is_verified;
+    let verificationHtml = '—';
+    
+    console.log(`User ${name} (${user.role}):`, {
+      hasProfile: !!user.instructorProfile,
+      isPending: isPendingInstructor,
+      isVerified: isVerifiedInstructor,
+      profile: user.instructorProfile
+    });
+    
+    if (user.role === 'INSTRUCTOR') {
+      if (isPendingInstructor) {
+        verificationHtml = '<span style="color: #fbbf24; font-weight: 600;">⏳ Pending Approval</span>';
+      } else if (isVerifiedInstructor) {
+        verificationHtml = '<span style="color: #4ade80; font-weight: 600;">✓ Verified</span>';
+      } else {
+        verificationHtml = '<span style="color: #f87171; font-weight: 600;">✗ Not Verified</span>';
+      }
+    }
+    
     row.innerHTML = `
-      <td>${name}</td>
-      <td>${user.email}</td>
-      <td><span class="pill" style="background: rgba(255,107,107,0.2); color: #ff8787;">${user.role}</span></td>
-      <td><span style="color: ${statusColor};">${status}</span></td>
-      <td>${fmtDate(user.created_at)}</td>
+      <td style="font-weight: 600;">${name}</td>
+      <td style="color: #cbd5e1;">${user.email}</td>
+      <td><span class="pill" style="background: rgba(255,107,107,0.2); color: #ff8787; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">${user.role}</span></td>
+      <td><span style="color: ${statusColor}; font-weight: 600;">${accountStatus}</span></td>
+      <td>${verificationHtml}</td>
+      <td style="color: #94a3b8;">${fmtDate(user.created_at)}</td>
       <td>
-        <button class="action-btn" style="padding: 6px 12px;" onclick="viewUser('${user.id}')">View</button>
+        ${isPendingInstructor ? `
+          <button class="action-btn" style="padding: 6px 12px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.2s;" onclick="approveInstructor(${user.id})" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">✓ Approve</button>
+          <button class="action-btn" style="padding: 6px 12px; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; margin-left: 4px; transition: all 0.2s;" onclick="rejectInstructor(${user.id})" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">✗ Reject</button>
+        ` : `
+          <button class="action-btn" style="padding: 6px 12px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px;" onclick="viewUser(${user.id})">👁️ View</button>
+        `}
       </td>
     `;
     tbody.appendChild(row);
   });
+  
+  console.log('Finished rendering users table');
+}
+
+// Approve Instructor
+async function approveInstructor(userId) {
+  if (!confirm('Are you sure you want to approve this instructor? They will be able to create courses and add Zoom links.')) return;
+  
+  try {
+    await apiCall(`/admin/instructors/${userId}/approve`, { method: 'PUT' });
+    showToast('Instructor approved successfully!', 'success');
+    loadData(); // Reload all data
+  } catch (error) {
+    showToast(error.message || 'Failed to approve instructor', 'error');
+  }
+}
+
+// Reject Instructor
+async function rejectInstructor(userId) {
+  if (!confirm('Are you sure you want to reject this instructor? This action cannot be undone.')) return;
+  
+  try {
+    await apiCall(`/admin/instructors/${userId}/reject`, { method: 'PUT' });
+    showToast('Instructor rejected successfully', 'success');
+    loadData(); // Reload all data
+  } catch (error) {
+    showToast(error.message || 'Failed to reject instructor', 'error');
+  }
 }
 
 function renderPayments(payments = []) {
@@ -429,20 +489,31 @@ function renderActivities(activities = []) {
 
 async function bootstrap() {
   try {
-    const data = await apiCall('/admin/demo/stats');
+    // Try to load real stats from the admin endpoint
+    let data;
+    try {
+      data = await apiCall('/admin/stats');
+    } catch (error) {
+      console.log('Failed to load from /admin/stats, trying demo endpoint:', error);
+      // Fallback to demo endpoint if stats endpoint fails
+      data = await apiCall('/admin/demo/stats');
+    }
     
     setStats(data);
     renderOverview(data);
     renderUsers(data.users || []);
-    renderPayments(data.payments || []);
-    renderReviews(data.reviews || []);
+    renderPayments(data.paymentsList || data.payments || []);
+    renderReviews(data.reviewsList || data.reviews || []);
     renderNotifications(data.notifications || []);
     renderActivities(data.activities || []);
   } catch (err) {
-    console.error(err);
-    localStorage.removeItem('ocms_token');
-    localStorage.removeItem('user_role');
-    window.location.href = '/auth/login.html';
+    console.error('Bootstrap error:', err);
+    showToast('Failed to load dashboard data. Redirecting to login...', 'error');
+    setTimeout(() => {
+      localStorage.removeItem('ocms_token');
+      localStorage.removeItem('user_role');
+      window.location.href = '/auth/login.html';
+    }, 2000);
   }
 }
 

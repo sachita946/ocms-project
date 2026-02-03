@@ -1249,26 +1249,15 @@
     // Course enrollment and payment functions
     async function enrollAdvancedCourse(courseId, courseName, price) {
       console.log('Enrolling in advanced course:', { courseId, courseName, price });
-      
-      // Check if user is logged in
-      const token = localStorage.getItem('ocms_token');
-      console.log('Token present:', !!token);
-      
-      if (!token) {
-        // Not logged in - redirect to login with enrollment info
-        const loginUrl = `/auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
-        console.log('Redirecting to login:', loginUrl);
-        window.location.href = loginUrl;
-        return;
-      }
-      
-      // Already logged in - go directly to payment
-      const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
-      console.log('Redirecting to payment:', paymentUrl);
-      window.location.href = paymentUrl;
+
+      // Always redirect to login first for security, even if already logged in
+      // This ensures fresh authentication for payment flows
+      const loginUrl = `../auth/login.html?redirect=payment&courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+      console.log('Redirecting to login for payment (security):', loginUrl);
+      window.location.href = loginUrl;
     }
 
-    function showCourseDetails(title, description, instructor, duration, category, language, price) {
+    function showCourseDetails(title, description, instructor, duration, category, language, price, courseId) {
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalDescription').textContent = description;
       document.getElementById('modalInstructor').textContent = instructor;
@@ -1276,6 +1265,10 @@
       document.getElementById('modalCategory').textContent = category;
       document.getElementById('modalLanguage').textContent = language;
       document.getElementById('modalPriceValue').textContent = price;
+
+      // Store course ID in modal for enrollment
+      const modal = document.getElementById('courseModal');
+      modal.setAttribute('data-course-id', courseId);
 
       // Update modal enroll button
       document.getElementById('modalEnrollBtn').onclick = () => {
@@ -1289,16 +1282,10 @@
       const title = document.getElementById('modalTitle').textContent;
       const price = document.getElementById('modalPriceValue').textContent;
 
-      // Extract course ID from the modal content or use a mapping
-      const courseIdMap = {
-        'UI/UX Design Masterclass': '1001',
-        'Full-Stack Web Development': '1002',
-        'Backend Development with Node.js': '1003',
-        'Python for Data Science & AI': '1004',
-        'Artificial Intelligence & Machine Learning': '1005'
-      };
+      // Get course ID from modal data attribute
+      const modal = document.getElementById('courseModal');
+      const courseId = modal.getAttribute('data-course-id');
 
-      const courseId = courseIdMap[title];
       if (courseId) {
         enrollAdvancedCourse(courseId, title, parseInt(price));
       } else {
@@ -1313,11 +1300,33 @@
     // Enhanced dynamic course loading function for newly created courses and updates
     async function loadCoursesFromAPI() {
       try {
+        // Check if user is logged in and get enrollments
+        const token = localStorage.getItem('ocms_token');
+        let enrolledCourseIds = new Set();
+        
+        if (token) {
+          try {
+            const enrollResponse = await fetch('/api/enrollments/me', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (enrollResponse.ok) {
+              const enrollments = await enrollResponse.json();
+              enrollments.forEach(enr => {
+                if (enr.course_id) enrolledCourseIds.add(enr.course_id);
+              });
+              console.log('Enrolled course IDs:', Array.from(enrolledCourseIds));
+            }
+          } catch (error) {
+            console.log('Could not fetch enrollments:', error);
+          }
+        }
+        
         const response = await fetch('/api/courses');
         const courses = await response.json();
 
         if (response.ok && courses.length > 0) {
-          // Filter for advanced courses
+          // Filter for advanced courses (courses that require payment)
           const advancedCourses = courses.filter(course => course.level === 'ADVANCED');
 
           if (advancedCourses.length > 0) {
@@ -1329,7 +1338,7 @@
 
               // Add all advanced courses from database
               advancedCourses.forEach(course => {
-                addCourseCard(container, course);
+                addCourseCard(container, course, enrolledCourseIds.has(course.id));
               });
             }
           }
@@ -1339,7 +1348,7 @@
       }
     }
 
-    function addCourseCard(container, course) {
+    function addCourseCard(container, course, isEnrolled) {
       const card = document.createElement('div');
       card.className = 'card';
       card.setAttribute('data-course-id', course.id);
@@ -1352,6 +1361,11 @@
           <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
             🎥 Live Zoom Sessions
           </span>
+          ${isEnrolled ? `
+            <span style="display: inline-block; padding: 4px 12px; background: rgba(34, 197, 94, 0.3); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 6px; font-size: 12px; font-weight: 600; color: #86efac; margin-left: 8px;">
+              ✓ Enrolled
+            </span>
+          ` : ''}
         </div>
 
         <h3>${course.title}</h3>
@@ -1371,10 +1385,20 @@
         <div class="course-footer">
           <div class="course-price">NPR ${course.price.toLocaleString()}</div>
           <div class="course-actions">
-            <button class="btn btn-primary" onclick="enrollAdvancedCourse('${course.id}', '${course.title.replace(/'/g, "\\'")}', ${course.price})">
-              ✨ Enroll Now
-            </button>
-            <button class="btn btn-secondary" onclick="showCourseDetails('${course.title.replace(/'/g, "\\'")}', '${course.description.replace(/'/g, "\\'")}', '${course.instructor?.first_name} ${course.instructor?.last_name}', '${course.duration_weeks} weeks', '${course.category}', '${course.language}', '${course.price}')">
+            ${isEnrolled && course.zoom_link ? `
+              <a href="${course.zoom_link}" target="_blank" class="btn btn-zoom">
+                🎥 Join Zoom Session
+              </a>
+            ` : !isEnrolled ? `
+              <button class="btn btn-primary" onclick="enrollAdvancedCourse('${course.id}', '${course.title.replace(/'/g, "\\'")}', ${course.price})">
+                ✨ Enroll Now
+              </button>
+            ` : `
+              <button class="btn btn-secondary" disabled>
+                ✓ Enrolled
+              </button>
+            `}
+            <button class="btn btn-secondary" onclick="showCourseDetails('${course.title.replace(/'/g, "\\'")}', '${course.description.replace(/'/g, "\\'")}', '${course.instructor?.first_name} ${course.instructor?.last_name}', '${course.duration_weeks} weeks', '${course.category}', '${course.language}', '${course.price}', '${course.id}')">
               ℹ️ Details
             </button>
           </div>
@@ -1445,9 +1469,8 @@
       document.getElementById('inlineMessage').style.display = 'none';
     }
 
-    // Resource Management Functions
     async function manageResources(subjectName, program, semester, resourceType) {
-      // Check if user is admin (you might want to get this from a global user object or API call)
+      // Check if user is admin
       const isAdmin = await checkAdminStatus();
 
       if (!isAdmin) {
@@ -1460,8 +1483,6 @@
     }
 
     async function checkAdminStatus() {
-      // This should check if the current user is an admin
-      // For now, we'll assume admin status - you should implement proper authentication check
       try {
         const token = localStorage.getItem('ocms_token');
         if (!token) return false;
@@ -1471,8 +1492,8 @@
         });
 
         if (response.ok) {
-          const user = await response.json();
-          return user.role === 'ADMIN';
+          const data = await response.json();
+          return data.user && data.user.role === 'ADMIN';
         }
         return false;
       } catch (error) {
@@ -1482,7 +1503,7 @@
     }
 
     function showResourceManagementModal(subjectName, program, semester, resourceType) {
-      // Create or show a modal for resource management
+      // Create or show modal for resource management
       let modal = document.getElementById('resourceManagementModal');
 
       if (!modal) {
@@ -1493,19 +1514,22 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Manage ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} Resources</h2>
-              <span class="close-btn" onclick="closeResourceModal()">&times;</span>
+              <span class="close-btn" onclick="closeResourceManagementModal()">&times;</span>
             </div>
             <div class="modal-body">
               <div class="resource-info">
-                <p><strong>Subject:</strong> ${subjectName}</p>
-                <p><strong>Program:</strong> ${program}</p>
-                <p><strong>Semester:</strong> ${semester}</p>
-                <p><strong>Type:</strong> ${resourceType}</p>
+                <p><strong>Subject:</strong> <span id="rm-subject-name"></span></p>
+                <p><strong>Program:</strong> <span id="rm-program"></span></p>
+                <p><strong>Semester:</strong> <span id="rm-semester"></span></p>
+                <p><strong>Type:</strong> <span id="rm-type"></span></p>
               </div>
 
               <div class="resource-form">
                 <h3>Add New Resource</h3>
                 <form id="resourceForm" enctype="multipart/form-data">
+                  <input type="hidden" id="rm-course-id">
+                  <input type="hidden" id="rm-resource-type">
+                  
                   <div class="form-group">
                     <label for="resourceTitle">Title:</label>
                     <input type="text" id="resourceTitle" required>
@@ -1537,28 +1561,44 @@
         document.body.appendChild(modal);
 
         // Add form submit handler
-        document.getElementById('resourceForm').addEventListener('submit', function(e) {
+        document.getElementById('resourceForm').addEventListener('submit', async function(e) {
           e.preventDefault();
-          addResource(subjectName, program, semester, resourceType);
+          await addResourceToBackend();
         });
       }
 
+      // Set modal data
+      document.getElementById('rm-subject-name').textContent = subjectName;
+      document.getElementById('rm-program').textContent = program;
+      document.getElementById('rm-semester').textContent = semester;
+      document.getElementById('rm-type').textContent = resourceType;
+      document.getElementById('rm-resource-type').value = resourceType;
+
       modal.style.display = 'block';
-      loadExistingResources(subjectName, program, semester, resourceType);
+      document.body.style.overflow = 'hidden';
+      
+      // Find or create course ID for this subject
+      getOrCreateCourseId(subjectName, program, semester).then(courseId => {
+        document.getElementById('rm-course-id').value = courseId;
+        loadExistingResources(courseId, resourceType);
+      });
     }
 
-    function closeResourceModal() {
+    function closeResourceManagementModal() {
       const modal = document.getElementById('resourceManagementModal');
       if (modal) {
         modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
       }
     }
 
-    async function addResource(subjectName, program, semester, resourceType) {
+    async function addResourceToBackend() {
       const title = document.getElementById('resourceTitle').value.trim();
       const content = document.getElementById('resourceContent').value.trim();
       const fileInput = document.getElementById('resourceFile');
       const file = fileInput.files[0];
+      const courseId = document.getElementById('rm-course-id').value;
+      const resourceType = document.getElementById('rm-resource-type').value;
 
       if (!title) {
         showInlineMessage('Title is required', 'error');
@@ -1573,9 +1613,6 @@
       try {
         const token = localStorage.getItem('ocms_token');
         const formData = new FormData();
-
-        // Find or create course for this subject
-        const courseId = await getOrCreateCourseId(subjectName, program, semester);
 
         formData.append('course_id', courseId);
         formData.append('type', resourceType);
@@ -1594,7 +1631,7 @@
         if (response.ok) {
           showInlineMessage('Resource added successfully!', 'success');
           document.getElementById('resourceForm').reset();
-          loadExistingResources(subjectName, program, semester, resourceType);
+          loadExistingResources(courseId, resourceType);
         } else {
           const error = await response.json();
           showInlineMessage(error.message || 'Failed to add resource', 'error');
@@ -1606,29 +1643,71 @@
     }
 
     async function getOrCreateCourseId(subjectName, program, semester) {
-      // This function should find an existing course or create a new one
-      // For now, we'll use a placeholder - you should implement proper course management
-      // You might want to have a mapping of subjects to course IDs
-      const subjectToCourseMap = {
-        // BIM Semester 1
-        'Business Mathematics': 1,
-        'English I': 2,
-        'Introduction to Information Technology': 3,
-        'Sociology': 4,
-        'Principles of Management': 5,
-        // Add more mappings as needed
-      };
+      // Try to find existing course for this subject
+      try {
+        const response = await fetch(`/api/courses?category=${program}`);
+        if (response.ok) {
+          const courses = await response.json();
+          const existingCourse = courses.find(c => 
+            c.title === subjectName || 
+            c.title.includes(subjectName)
+          );
+          
+          if (existingCourse) {
+            return existingCourse.id;
+          }
+        }
+      } catch (error) {
+        console.error('Error finding course:', error);
+      }
 
-      return subjectToCourseMap[subjectName] || 1; // Default to course ID 1 if not found
+      // If not found, create a new course
+      try {
+        const token = localStorage.getItem('ocms_token');
+        const response = await fetch('/api/courses', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: subjectName,
+            description: `${program} Semester ${semester} - ${subjectName}`,
+            category: program,
+            level: 'BEGINNER',
+            price: 0,
+            is_published: true,
+            language: 'English'
+          })
+        });
+
+        if (response.ok) {
+          const newCourse = await response.json();
+          return newCourse.id;
+        }
+      } catch (error) {
+        console.error('Error creating course:', error);
+      }
+
+      // Fallback to a default course ID
+      return 1;
     }
 
-    async function loadExistingResources(subjectName, program, semester, resourceType) {
+    async function loadExistingResources(courseId, resourceType) {
       try {
-        const courseId = await getOrCreateCourseId(subjectName, program, semester);
-        const response = await fetch(`/api/course-resources?courseId=${courseId}&type=${resourceType}`);
-        const resources = await response.json();
-
+        const token = localStorage.getItem('ocms_token');
+        const response = await fetch(`/api/course-resources?courseId=${courseId}&type=${resourceType}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
         const resourcesList = document.getElementById('resourcesList');
+        
+        if (!response.ok) {
+          resourcesList.innerHTML = '<p>Error loading resources.</p>';
+          return;
+        }
+        
+        const resources = await response.json();
         resourcesList.innerHTML = '';
 
         if (resources.length === 0) {
@@ -1644,11 +1723,11 @@
               <h4>${resource.title}</h4>
               <div class="resource-actions">
                 <button onclick="editResource(${resource.id})" class="btn-edit">Edit</button>
-                <button onclick="deleteResource(${resource.id})" class="btn-delete">Delete</button>
+                <button onclick="deleteResource(${resource.id}, ${courseId}, '${resourceType}')" class="btn-delete">Delete</button>
               </div>
             </div>
-            ${resource.content ? `<p>${resource.content.substring(0, 100)}...</p>` : ''}
-            ${resource.file_url ? `<p><a href="${resource.file_url}" target="_blank">📎 View File</a></p>` : ''}
+            ${resource.content ? `<p style="color: rgba(255,255,255,0.7); font-size: 14px;">${resource.content.substring(0, 100)}${resource.content.length > 100 ? '...' : ''}</p>` : ''}
+            ${resource.file_url ? `<p><a href="${resource.file_url}" target="_blank" style="color: #3b82f6;">📎 View File</a></p>` : ''}
           `;
           resourcesList.appendChild(resourceItem);
         });
@@ -1663,7 +1742,7 @@
       showInlineMessage('Edit functionality coming soon', 'info');
     }
 
-    async function deleteResource(resourceId) {
+    async function deleteResource(resourceId, courseId, resourceType) {
       if (!confirm('Are you sure you want to delete this resource?')) {
         return;
       }
@@ -1679,12 +1758,7 @@
 
         if (response.ok) {
           showInlineMessage('Resource deleted successfully!', 'success');
-          // Reload the resources list
-          const modal = document.getElementById('resourceManagementModal');
-          if (modal.style.display === 'block') {
-            // You might want to re-trigger the loadExistingResources function
-            // For now, just close and reopen the modal or refresh the list
-          }
+          loadExistingResources(courseId, resourceType);
         } else {
           showInlineMessage('Failed to delete resource', 'error');
         }

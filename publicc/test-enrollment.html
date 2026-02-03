@@ -131,57 +131,31 @@
       <strong>Checking authentication status...</strong>
     </div>
     
-    <!-- Scenario 1: Not Logged In -->
+    <!-- Enrollment Flow Test -->
     <div class="scenario-card">
-      <h2>📝 Scenario A: NOT LOGGED IN</h2>
-      <p>Test the full enrollment flow when user is not authenticated:</p>
-      
+      <h2>🔐 Advanced Course Enrollment Flow</h2>
+      <p>Test the secure enrollment flow for advanced courses:</p>
+
       <div class="flow-steps">
-        <div class="step">Click "Enroll Now" on course</div>
-        <div class="step">Redirect to <strong>Login Page</strong></div>
-        <div class="step">Enter email & password</div>
-        <div class="step">Redirect to <strong>Payment Page</strong></div>
-        <div class="step">Complete eSewa payment</div>
-        <div class="step">Payment success → <strong>Join Zoom</strong></div>
+        <div class="step">Check if user is enrolled in the course</div>
+        <div class="step">If <strong>ENROLLED</strong>: Show "Join Zoom" button (no re-enrollment)</div>
+        <div class="step">If <strong>NOT ENROLLED</strong>: Force login → Payment → Join Zoom</div>
       </div>
-      
+
       <div class="actions">
         <button class="btn btn-danger" onclick="logout()">
           🚪 Logout First (Clear Token)
         </button>
-        <button class="btn btn-primary" onclick="testEnrollmentFlow(false)">
-          🧪 Test: Enroll Without Login
+        <button class="btn btn-primary" onclick="testEnrollmentFlow()">
+          🧪 Test: Try to Enroll
         </button>
       </div>
-      
+
       <div class="note">
-        <strong>Expected Result:</strong> Should redirect to login page with enrollment parameters in URL
-      </div>
-    </div>
-    
-    <!-- Scenario 2: Already Logged In -->
-    <div class="scenario-card">
-      <h2>✅ Scenario B: ALREADY LOGGED IN</h2>
-      <p>Test the enrollment flow when user is already authenticated:</p>
-      
-      <div class="flow-steps">
-        <div class="step">Click "Enroll Now" on course</div>
-        <div class="step">Redirect to <strong>Payment Page</strong> (skip login)</div>
-        <div class="step">Complete eSewa payment</div>
-        <div class="step">Payment success → <strong>Join Zoom</strong></div>
-      </div>
-      
-      <div class="actions">
-        <button class="btn btn-info" onclick="goToLogin()">
-          🔑 Login First
-        </button>
-        <button class="btn btn-primary" onclick="testEnrollmentFlow(true)">
-          🧪 Test: Enroll While Logged In
-        </button>
-      </div>
-      
-      <div class="note">
-        <strong>Expected Result:</strong> Should redirect directly to payment page (skip login)
+        <strong>Updated Flow:</strong><br>
+        • System now auto-creates student profiles during payment if missing<br>
+        • No more "Student profile not found" errors<br>
+        • Seamless enrollment experience for all users
       </div>
     </div>
     
@@ -221,45 +195,28 @@
     }
     
     // Test enrollment flow
-    function testEnrollmentFlow(expectLoggedIn) {
+    function testEnrollmentFlow() {
       const courseId = 1;
       const courseName = 'UI/UX-Centric Flutter App Development';
       const price = 22000;
-      
+
       const token = localStorage.getItem('ocms_token');
       const isLoggedIn = !!token;
-      
-      console.log('=== ENROLLMENT FLOW TEST ===');
+
+      console.log('=== ADVANCED COURSE ENROLLMENT TEST ===');
       console.log('Course:', { courseId, courseName, price });
-      console.log('Expected to be logged in:', expectLoggedIn);
-      console.log('Actually logged in:', isLoggedIn);
-      
-      if (expectLoggedIn && !isLoggedIn) {
-        alert('❌ You need to login first for Scenario B!\nClick "Login First" button.');
-        return;
-      }
-      
-      if (!expectLoggedIn && isLoggedIn) {
-        alert('⚠️ You are still logged in!\nClick "Logout First" to test Scenario A.');
-        return;
-      }
-      
-      // This simulates clicking "Enroll Now" button
-      if (!token) {
-        const loginUrl = `/auth/login.html?enrollCourse=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
-        console.log('➡️ Redirecting to LOGIN:', loginUrl);
-        alert('✅ Test Starting!\n\nNot logged in → Going to LOGIN page\n\nCheck the URL after redirect!');
-        setTimeout(() => window.location.href = loginUrl, 1000);
-      } else {
-        const paymentUrl = `/student/payment.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
-        console.log('➡️ Redirecting to PAYMENT:', paymentUrl);
-        alert('✅ Test Starting!\n\nAlready logged in → Going to PAYMENT page\n\nCheck the URL after redirect!');
-        setTimeout(() => window.location.href = paymentUrl, 1000);
-      }
-    }
-    
-    // Logout
-    function logout() {
+      console.log('Currently logged in:', isLoggedIn);
+
+      // New flow: Always redirect to login with payment redirect for advanced courses
+      const loginUrl = `/auth/login.html?redirect=payment&courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&price=${price}`;
+      console.log('➡️ Advanced course → Redirecting to LOGIN with payment redirect:', loginUrl);
+
+      const message = isLoggedIn
+        ? '✅ Test: Advanced Course Enrollment\n\nAlready logged in → LOGIN page → Auto-redirect to PAYMENT\n\nCheck the flow!'
+        : '✅ Test: Advanced Course Enrollment\n\nNot logged in → LOGIN page → PAYMENT after login\n\nCheck the flow!';
+
+      alert(message);
+      setTimeout(() => window.location.href = loginUrl, 1000);
       localStorage.removeItem('ocms_token');
       localStorage.removeItem('token');
       console.log('Logged out - tokens cleared');

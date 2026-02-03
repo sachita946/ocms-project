@@ -224,9 +224,16 @@
 
     async function loadCourses() {
       try {
-        const response = await fetch(`${API_BASE}/courses/instructor-courses`);
-        if (!response.ok) throw new Error('Failed to load courses');
-        coursesData = await response.json();
+        const response = await fetch(`${API_BASE}/profile/me`);
+        if (!response.ok) throw new Error('Failed to load profile');
+        const data = await response.json();
+        
+        if (data.dashboard?.role !== 'INSTRUCTOR') {
+          window.location.href = '/student/courses.html';
+          return;
+        }
+        
+        coursesData = data.dashboard.lists?.courses || [];
         
         const selector = document.getElementById('courseSelector');
         selector.innerHTML = coursesData.map(course => 
@@ -250,6 +257,7 @@
         });
       } catch (err) {
         console.error('Error loading courses:', err);
+        document.getElementById('courseSelector').innerHTML = '<div style="color: #f87171; padding: 20px;">Failed to load courses</div>';
       }
     }
 
@@ -262,46 +270,48 @@
       container.innerHTML = '';
       
       try {
-        const response = await fetch(`${API_BASE}/progress/course/${courseId}/stats`);
+        const response = await fetch(`${API_BASE}/instructor/student-progress`);
         if (!response.ok) throw new Error('Failed to load progress');
         
-        const data = await response.json();
+        const progressData = await response.json();
+        const courseData = progressData.find(course => course.courseId === courseId);
+        
         loadingState.style.display = 'none';
         
-        if (!data.students || data.students.length === 0) {
+        if (!courseData || !courseData.students || courseData.students.length === 0) {
           emptyState.style.display = 'block';
-          updateStats(data);
+          updateStats({ students: [] });
           return;
         }
         
         emptyState.style.display = 'none';
-        updateStats(data);
+        updateStats({ students: courseData.students });
         
-        container.innerHTML = data.students.map((student, idx) => `
-          <div class="student-item" data-enrollment-id="${student.enrollmentId}">
+        container.innerHTML = courseData.students.map((student, idx) => `
+          <div class="student-item" data-student-id="${student.id}">
             <div class="student-header">
               <div>
-                <div class="student-name">${student.studentName}</div>
-                <div style="font-size: 11px; color: #9bb0c9;">${student.studentEmail}</div>
+                <div class="student-name">${student.name}</div>
+                <div style="font-size: 11px; color: #9bb0c9;">${student.email}</div>
               </div>
-              <div class="progress-percent">${student.progressPercentage}%</div>
+              <div class="progress-percent">${student.progress}%</div>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" style="width: ${student.progressPercentage}%"></div>
+              <div class="progress-fill" style="width: ${student.progress}%"></div>
             </div>
             <div style="font-size: 11px; color: #6b7c95; margin-top: 6px;">
-              ${student.completedLessons}/${student.totalLessons} lessons • Enrolled: ${new Date(student.enrolledAt).toLocaleDateString()}
+              ${student.completedLessons}/${student.totalLessons} lessons • Last active: ${student.lastActivity ? new Date(student.lastActivity).toLocaleDateString() : 'N/A'}
             </div>
           </div>
         `).join('');
         
         container.querySelectorAll('.student-item').forEach(item => {
-          item.addEventListener('click', () => loadStudentDetail(item.getAttribute('data-enrollment-id')));
+          item.addEventListener('click', () => loadStudentDetail(student.id, courseId));
         });
       } catch (err) {
-        console.error('Error loading progress:', err);
+        console.error('Error loading student progress:', err);
         loadingState.style.display = 'none';
-        container.innerHTML = '<div class="empty-state"><h3>Error Loading Progress</h3><p>' + err.message + '</p></div>';
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #f87171;">Failed to load student progress</div>';
       }
     }
 

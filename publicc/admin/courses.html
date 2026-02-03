@@ -265,6 +265,72 @@ tr:hover { background: rgba(77, 164, 211, 0.05); }
 
          <div id="curriculumMsg" class="helper" style="margin-top: 15px;"></div>
 
+         <!-- Lessons Management Section -->
+         <div class="lessons-management-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,107,107,0.2);">
+            <div class="panel-header">
+               <div>
+                  <p class="eyebrow">Lessons Management</p>
+                  <h2>📖 Manage Course Lessons</h2>
+                  <p class="subtext">Create and manage lessons for courses</p>
+               </div>
+            </div>
+
+            <!-- Create Lesson Form -->
+            <div class="lesson-form-card" style="background: rgba(255,107,107,0.05); border: 1px solid rgba(255,107,107,0.15); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+               <h3 style="color: #ffffff; margin-bottom: 15px;">Create New Lesson</h3>
+               <form id="lessonForm">
+                  <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                     <div>
+                        <label for="lessonCourseSelect" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Course:</label>
+                        <select id="lessonCourseSelect" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                           <option value="">Select Course</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label for="lessonSubjectSelect" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Subject:</label>
+                        <select id="lessonSubjectSelect" required disabled style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                           <option value="">Select course first</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                     <div>
+                        <label for="lessonTitle" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Lesson Title:</label>
+                        <input type="text" id="lessonTitle" placeholder="Lesson Title" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                     </div>
+                     <div>
+                        <label for="lessonContentType" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Content Type:</label>
+                        <select id="lessonContentType" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                           <option value="VIDEO">Video</option>
+                           <option value="ARTICLE">Article</option>
+                           <option value="QUIZ">Quiz</option>
+                           <option value="ASSIGNMENT">Assignment</option>
+                           <option value="DOWNLOAD">Download</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label for="lessonDuration" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Duration (min):</label>
+                        <input type="number" id="lessonDuration" placeholder="Duration" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                     </div>
+                  </div>
+                  <div style="margin-bottom: 15px;">
+                     <label for="lessonContentUrl" style="display: block; color: #e0e0e0; margin-bottom: 5px; font-size: 14px;">Content URL:</label>
+                     <input type="text" id="lessonContentUrl" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #ffffff;">
+                  </div>
+                  <button type="submit" class="action-btn">Create Lesson</button>
+               </form>
+               <div id="lessonMsg" style="margin-top: 10px; font-size: 14px;"></div>
+            </div>
+
+            <!-- Lessons List -->
+            <div class="lessons-list-section">
+               <h3 style="color: #ffffff; margin-bottom: 15px;">Existing Lessons</h3>
+               <div id="lessonsList" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
+                  <div style="color: #a0a0a0; text-align: center;">Loading lessons...</div>
+               </div>
+            </div>
+         </div>
+
          <!-- Bulk Upload Section -->
          <div class="bulk-upload-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,107,107,0.2);">
             <h3 style="color: #ffffff; margin-bottom: 15px;">📁 Bulk Upload Resources</h3>

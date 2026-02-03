@@ -17,15 +17,12 @@
     min-height: 100vh; 
     display: flex; 
     overflow: hidden; 
-    color: #e0e0e0;
+    color: #ffffff;
 
-    /* BACKGROUND IMAGE + GRADIENT OVERLAY */
-    background: 
-        linear-gradient(135deg, rgba(16, 30, 95, 0.6), rgba(210, 203, 216, 0.6)),
-        url("../background/instructor.png") no-repeat center center fixed;
-    background-size: cover;
+    /* Clean gradient background for better visibility */
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
     background-attachment: fixed;
-    line-height: 1;
+    line-height: 1.6;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -48,18 +45,66 @@ a { color: inherit; text-decoration: none; }
 		.header p { color: #9bb0c9; margin-top: 4px; }
 		.badge { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #7bd8ff; }
 		.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 14px; margin-bottom: 18px; }
-		.card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; min-height: 90px; }
-		.card strong { font-size: 22px; display: block; margin-top: 6px; color: #fff; }
-		.card .muted { color: #9bb0c9; font-size: 14px; }
-		.panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+		.card { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 16px; min-height: 90px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+		.card strong { font-size: 24px; display: block; margin-top: 6px; color: #fff; font-weight: 700; }
+		.card .muted { color: #e0f2fe; font-size: 14px; font-weight: 500; }
+		.panel { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 		.panel h3 { margin-bottom: 16px; font-size: 18px; }
 		.list { list-style: none; display: grid; gap: 10px; }
-		.list-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-		.muted { color: #9bb0c9; font-size: 14px; }
+		.list-item { padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: all 0.3s ease; }
+		.list-item:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
+		.muted { color: #e0f2fe; font-size: 14px; }
 		.pill { display: inline-block; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); font-size: 12px; color: #9bb0c9; margin-left: 6px; }
-		.action-btn { padding: 10px 16px; background: linear-gradient(135deg, #06b6d4, #38bdf8); color: #0b1226; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+		.action-btn { padding: 10px 16px; background: linear-gradient(135deg, #06b6d4, #38bdf8); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; font-size: 14px; }
 		.action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3); }
 		.chart-container { position: relative; height: 300px; margin-bottom: 20px; }
+		
+		/* Section headers with icons */
+		.panel h3 { 
+			color: #fff; 
+			font-size: 20px; 
+			font-weight: 700; 
+			margin-bottom: 18px; 
+			padding-bottom: 12px;
+			border-bottom: 2px solid rgba(255,255,255,0.15);
+			text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+		}
+		
+		/* Enhanced list items */
+		.list { list-style: none; display: grid; gap: 12px; }
+		.list-item { 
+			padding: 14px 16px; 
+			border-radius: 10px; 
+			background: rgba(255,255,255,0.1); 
+			backdrop-filter: blur(5px); 
+			border: 1px solid rgba(255,255,255,0.2); 
+			display: flex; 
+			justify-content: space-between; 
+			align-items: center; 
+			gap: 12px; 
+			transition: all 0.3s ease;
+		}
+		.list-item:hover { 
+			background: rgba(255,255,255,0.2); 
+			border-color: rgba(255,255,255,0.4);
+			transform: translateX(4px);
+		}
+		.list-item strong {
+			color: #fff;
+			font-weight: 600;
+		}
+		
+		/* Badge styles */
+		.status-badge {
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.badge-verified { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); }
+		.badge-pending { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+		.badge-published { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4); }
+		.badge-draft { background: rgba(156, 163, 175, 0.2); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.4); }
 		@media (max-width: 768px) { .instructor-page-wrapper { margin-left: 0; padding: 16px; } .header { flex-direction: column; align-items: flex-start; gap: 16px; } }
 	</style>
 </head>
@@ -91,39 +136,64 @@ a { color: inherit; text-decoration: none; }
 			<section class="panel">
 				<h3>📊 Teaching Statistics</h3>
 				<ul class="list" id="overview-list"></ul>
-				<div style="margin-top:16px">
-					<button class="action-btn" onclick="location.href='create-course.html'">+ Create New Course</button>
+				<div style="margin-top:16px; display: flex; gap: 12px; flex-wrap: wrap;">
+					<button class="action-btn" onclick="location.href='create-course.html'" style="background: linear-gradient(135deg, #22c55e, #16a34a);">+ Create New Course</button>
+					<button class="action-btn" onclick="location.href='courses.html'" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📚 Manage Courses</button>
+					<button class="action-btn" onclick="location.href='resources.html'" style="background: linear-gradient(135deg, #f59e0b, #d97706);">📁 Resources</button>
+					<button class="action-btn" onclick="location.href='earnings.html'" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">💰 View Earnings</button>
+					<button class="action-btn" onclick="location.href='students.html'" style="background: linear-gradient(135deg, #ec4899, #f97316);">👥 My Students</button>
+					<button class="action-btn" onclick="location.href='student-progress.html'" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">📈 Student Progress</button>
+					<button class="action-btn" onclick="location.href='quizzes.html'" style="background: linear-gradient(135deg, #84cc16, #65a30d);">📝 Manage Quizzes</button>
+					<button class="action-btn" onclick="location.href='profile.html'" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">👤 Edit Profile</button>
 				</div>
 			</section>
 
 			<section class="panel">
 				<h3>📚 Your Courses</h3>
 				<ul class="list" id="courses-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="courses.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">View All Courses →</a>
+				</div>
 			</section>
 
 			<section class="panel">
 				<h3>💰 Earnings & Revenue</h3>
 				<ul class="list" id="earnings-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="earnings.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">View Full Earnings Report →</a>
+				</div>
 			</section>
 
 			<section class="panel">
-				<h3>📖 Your Lessons</h3>
+				<h3>📖 Course Lessons</h3>
 				<ul class="list" id="lessons-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="lesson.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">Manage All Lessons →</a>
+				</div>
 			</section>
 
 			<section class="panel">
 				<h3>👥 Students Enrolled</h3>
 				<ul class="list" id="students-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="students.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">View All Students →</a>
+				</div>
 			</section>
 
 			<section class="panel">
 				<h3>📝 Quizzes & Assessments</h3>
 				<ul class="list" id="quizzes-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="quizzes.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">Manage Quizzes →</a>
+				</div>
 			</section>
 
 			<section class="panel">
 				<h3>👤 My Profile</h3>
 				<ul class="list" id="profile-list"></ul>
+				<div style="margin-top: 12px;">
+					<a href="profile.html" style="color: #06b6d4; font-weight: 600; font-size: 14px;">Edit Profile →</a>
+				</div>
 			</section>
 
 			<section class="panel">

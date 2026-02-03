@@ -61,7 +61,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const courseDetails = await courseResponse.json();
-    
+
+    // Validate course is ADVANCED level (only advanced courses require payment)
+    if (courseDetails.level !== 'ADVANCED') {
+      showMessage('This course does not require payment. You can enroll directly.', 'error');
+      // Redirect back to courses page after a delay
+      setTimeout(() => {
+        window.location.href = '../student/courses.html';
+      }, 3000);
+      return;
+    }
+
     // Validate course has a price
     if (!courseDetails.price || courseDetails.price <= 0) {
       showMessage('This course is not available for purchase or has no price set.', 'error');
@@ -152,7 +162,16 @@ async function initializeEsewaPayment() {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || `Failed to create payment intent (${response.status})`);
+      // Handle eSewa limit errors specifically
+      if (data.details && data.suggestions) {
+        let errorMessage = `${data.message}\n\nSuggestions:\n`;
+        data.suggestions.forEach((suggestion, index) => {
+          errorMessage += `${index + 1}. ${suggestion}\n`;
+        });
+        throw new Error(errorMessage);
+      } else {
+        throw new Error(data.message || `Failed to create payment intent (${response.status})`);
+      }
     }
 
     console.log('eSewa payment initialized successfully:', data);
@@ -182,6 +201,8 @@ async function initiateEsewaPayment(amount) {
     }
 
     console.log('Redirecting to eSewa...');
+    console.log('eSewa payment data:', esewaPaymentData);
+    console.log('eSewa parameters being sent:', esewaPaymentData.esewa_params);
 
     // Create a form and submit it to eSewa
     const form = document.createElement('form');
@@ -211,7 +232,8 @@ async function initiateEsewaPayment(amount) {
 // Show Message
 function showMessage(message, type) {
   const messageEl = document.getElementById('paymentMessage');
-  messageEl.textContent = message;
+  // Preserve line breaks in error messages
+  messageEl.innerHTML = message.replace(/\n/g, '<br>');
   messageEl.className = `message ${type}`;
   messageEl.style.display = 'block';
 }

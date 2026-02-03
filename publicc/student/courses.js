@@ -1132,4 +1132,147 @@ async function enrollAdvancedCourse(courseId, courseName, price) {
   showEnrollmentConfirmationModal(course);
 }
 
+// Open course resource modal
+async function openCourseResource(courseId, courseTitle, resourceType) {
+  const token = localStorage.getItem('ocms_token');
+  
+  if (!token) {
+    showInlineMessage('Please login to view course resources', 'info');
+    return;
+  }
+
+  try {
+    // Fetch course resources
+    const response = await fetch(`${API_URL}/course-resources?courseId=${courseId}&type=${resourceType}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        showInlineMessage(`No ${resourceType} resources available for this course yet.`, 'info');
+        return;
+      }
+      throw new Error('Failed to fetch resources');
+    }
+    
+    const resources = await response.json();
+    
+    // Create and show resource modal
+    showResourceModal(courseTitle, resourceType, resources);
+    
+  } catch (error) {
+    console.error('Error fetching course resources:', error);
+    showInlineMessage('Failed to load course resources. Please try again.', 'error');
+  }
+}
+
+// Show resource modal
+function showResourceModal(courseTitle, resourceType, resources) {
+  // Remove existing modal if present
+  const existingModal = document.getElementById('resourceModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'resourceModal';
+  modal.className = 'modal';
+  
+  const typeLabels = {
+    'notes': '📝 Notes',
+    'questions': '❓ Questions', 
+    'preboard': '🎯 Pre-board Materials',
+    'board': '🏁 Board Materials'
+  };
+  
+  const resourceTypeLabel = typeLabels[resourceType] || resourceType;
+  
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>${resourceTypeLabel} - ${courseTitle}</h2>
+        <span class="close-modal" onclick="closeResourceModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        ${resources.length === 0 ? 
+          `<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.7);">
+            <div style="font-size: 48px; margin-bottom: 16px;">📚</div>
+            <div>No ${resourceType} resources available yet.</div>
+            <div style="font-size: 14px; margin-top: 8px;">Check back later for updates.</div>
+          </div>` :
+          `<div class="resource-list">
+            ${resources.map(resource => `
+              <div class="resource-item" style="padding: 16px; margin-bottom: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: #fff; font-size: 16px;">${escapeHtml(resource.title)}</h4>
+                  <span style="font-size: 12px; color: rgba(255,255,255,0.6);">${new Date(resource.created_at).toLocaleDateString()}</span>
+                </div>
+                ${resource.content ? `<p style="margin: 8px 0; color: rgba(255,255,255,0.8); line-height: 1.5;">${escapeHtml(resource.content)}</p>` : ''}
+                ${resource.file_url ? `
+                  <div style="margin-top: 12px;">
+                    <button onclick="viewResourceFile('${resource.file_url}', '${escapeHtml(resource.title)}')" 
+                            style="padding: 8px 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                      📎 View File
+                    </button>
+                  </div>
+                ` : ''}
+                ${resource.zoom_link ? `
+                  <div style="margin-top: 12px;">
+                    <a href="${resource.zoom_link}" target="_blank" 
+                       style="padding: 8px 16px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; display: inline-block;">
+                      📹 Join Zoom Meeting
+                    </a>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>`
+        }
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Add modal styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .resource-list {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .resource-item:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.2);
+    }
+  `;
+  document.head.appendChild(style);
+  
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+// Close resource modal
+function closeResourceModal() {
+  const modal = document.getElementById('resourceModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    modal.remove();
+  }
+}
+
+// View resource file
+function viewResourceFile(fileUrl, title) {
+  // Open file in new tab
+  window.open(fileUrl, '_blank');
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 

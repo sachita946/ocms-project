@@ -110,40 +110,85 @@ async function verifyEsewaPayment() {
   
   // eSewa can return different parameter names depending on version/config
   // Try multiple possible parameter names
-  const transactionCode = urlParams.get('refId') || urlParams.get('txnId') || urlParams.get('transaction_code');
-  const transactionUuid = urlParams.get('oid') || urlParams.get('transaction_uuid');
-  const paymentId = urlParams.get('payment_id');
-  const totalAmount = urlParams.get('amt') || urlParams.get('total_amount');
+  const transactionCode = urlParams.get('refId') || urlParams.get('txnId') || urlParams.get('transaction_code') || urlParams.get('referenceId');
+  const transactionUuid = urlParams.get('oid') || urlParams.get('transaction_uuid') || urlParams.get('orderId');
+  const paymentId = urlParams.get('payment_id') || urlParams.get('pid');
+  const totalAmount = urlParams.get('amt') || urlParams.get('total_amount') || urlParams.get('amount');
 
   console.log('eSewa payment success URL parameters:', {
-    transactionCode, transactionUuid, paymentId, totalAmount, 
+    transactionCode, transactionUuid, paymentId, totalAmount,
     allParams: Array.from(urlParams.entries()),
-    fullUrl: window.location.href
+    fullUrl: window.location.href,
+    searchString: window.location.search
   });
+
+  // Additional debugging - check for any eSewa-specific parameters
+  const allPossibleParams = ['refId', 'txnId', 'transaction_code', 'referenceId', 'oid', 'transaction_uuid', 'orderId', 'payment_id', 'pid', 'amt', 'total_amount', 'amount'];
+  const foundParams = {};
+  allPossibleParams.forEach(param => {
+    const value = urlParams.get(param);
+    if (value) foundParams[param] = value;
+  });
+  console.log('Found eSewa parameters:', foundParams);
 
   const loader = document.getElementById('loader');
   const statusTitle = document.getElementById('statusTitle');
   const statusMessage = document.getElementById('statusMessage');
   const actionButtons = document.getElementById('actionButtons');
 
-  if (!transactionCode || !paymentId) {
+  // Check if this is actually a successful payment or just a redirect
+  const hasAnyEsewaParams = transactionCode || transactionUuid || totalAmount;
+  const hasPaymentId = !!paymentId;
+
+  console.log('Parameter analysis:', {
+    hasTransactionCode: !!transactionCode,
+    hasTransactionUuid: !!transactionUuid,
+    hasPaymentId: !!hasPaymentId,
+    hasAmount: !!totalAmount,
+    hasAnyEsewaParams,
+    foundParams
+  });
+
+  if (!hasAnyEsewaParams && !hasPaymentId) {
+    // No parameters at all - likely not a valid payment redirect
     loader.style.display = 'none';
-    statusTitle.textContent = 'Payment Verification Failed';
+    statusTitle.textContent = 'Invalid Payment Redirect';
     statusTitle.className = 'error';
-    
-    // Show detailed error for debugging
-    const missingParams = [];
-    if (!transactionCode) missingParams.push('Transaction Code (refId/txnId)');
-    if (!paymentId) missingParams.push('Payment ID');
-    
-    statusMessage.innerHTML = `Invalid payment parameters.<br>Missing: ${missingParams.join(', ')}<br><br>`;
-    statusMessage.innerHTML += '<small style="opacity:0.7">Please check the URL parameters or contact support.</small>';
-    
-    actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
-    
-    // Log for debugging
-    console.error('Missing parameters:', { transactionCode, paymentId, allParams: Array.from(urlParams.entries()) });
+    statusMessage.innerHTML = 'This page was accessed without proper payment parameters.<br><br>Please complete your payment through the proper flow.';
+    actionButtons.innerHTML = '<a href="courses.html" class="btn">Back to Courses</a>';
     return;
+  }
+
+  if (!transactionCode || !paymentId) {
+    // Special handling for test environment - if we have payment_id but no transaction code,
+    // it might be a test scenario where eSewa doesn't return proper parameters
+    if (paymentId && !transactionCode) {
+      console.warn('Missing transaction code but have payment ID - attempting verification anyway');
+      // Continue with verification using just payment_id
+    } else {
+      loader.style.display = 'none';
+      statusTitle.textContent = 'Payment Verification Failed';
+      statusTitle.className = 'error';
+
+      // Show detailed error for debugging
+      const missingParams = [];
+      if (!transactionCode) missingParams.push('Transaction Code (refId/txnId)');
+      if (!paymentId) missingParams.push('Payment ID');
+
+      statusMessage.innerHTML = `Invalid payment parameters.<br>Missing: ${missingParams.join(', ')}<br><br>`;
+      statusMessage.innerHTML += '<small style="opacity:0.7">Please check the URL parameters or contact support.</small>';
+
+      // Show debugging info for developers
+      if (foundParams && Object.keys(foundParams).length > 0) {
+        statusMessage.innerHTML += '<br><br><small style="opacity:0.5">Found parameters: ' + Object.keys(foundParams).join(', ') + '</small>';
+      }
+
+      actionButtons.innerHTML = '<a href="payment.html" class="btn">Try Again</a>';
+
+      // Log for debugging
+      console.error('Missing parameters:', { transactionCode, paymentId, foundParams, allParams: Array.from(urlParams.entries()) });
+      return;
+    }
   }
 
   try {
@@ -169,8 +214,9 @@ async function verifyEsewaPayment() {
     loader.style.display = 'none';
 
     if (response.ok) {
+      const isTestMode = data.test_mode;
       statusTitle.textContent = 'Payment Successful!';
-      statusMessage.textContent = 'Your payment has been confirmed. You now have access to the course.';
+      statusMessage.innerHTML = `Your payment has been confirmed. You now have access to the course.${isTestMode ? '<br><small style="opacity:0.7">(Test Mode)</small>' : ''}`;
 
       // Check for return URL (e.g., Zoom join URL)
       const returnUrl = localStorage.getItem('payment_return_url');

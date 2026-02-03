@@ -82,20 +82,36 @@ function showVerificationWarning() {
   warningDiv.style.cssText = `
     position: fixed;
     top: 0;
-    left: 0;
+    left: 260px;
     right: 0;
-    background: #f59e0b;
-    color: #92400e;
-    padding: 12px 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    padding: 16px 24px;
     text-align: center;
     font-weight: 600;
     z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 14px;
+    animation: slideDown 0.3s ease-out;
   `;
   warningDiv.innerHTML = `
-    ⚠️ Your instructor account is pending admin approval. Some features may be limited.
-    <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; color: #92400e; font-size: 18px; cursor: pointer; margin-left: 10px;">×</button>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+      <span style="font-size: 20px;">⚠️</span>
+      <span><strong>Account Pending Approval:</strong> Your instructor account is awaiting admin verification. You can browse but cannot create courses or add Zoom links until verified.</span>
+      <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: #ffffff; font-size: 20px; cursor: pointer; padding: 4px 12px; border-radius: 6px; margin-left: 10px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+    </div>
   `;
+  
+  // Add slide down animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+  
   document.body.insertBefore(warningDiv, document.body.firstChild);
 }
 
@@ -432,23 +448,29 @@ function renderQuizzes(courses = []) {
   
   const allQuizzes = [];
   courses.forEach(c => {
-    if (c.quizzes && Array.isArray(c.quizzes)) {
-      c.quizzes.forEach(quiz => {
-        allQuizzes.push({ ...quiz, courseName: c.title });
+    if (c.lessons && Array.isArray(c.lessons)) {
+      c.lessons.forEach(lesson => {
+        if (lesson.quiz) {
+          allQuizzes.push({ 
+            ...lesson.quiz, 
+            courseName: c.title,
+            lessonTitle: lesson.title 
+          });
+        }
       });
     }
   });
 
   if (!allQuizzes.length) {
-    list.innerHTML = '<div class="muted" style="padding:12px">No quizzes created yet. Create quizzes to assess student learning!</div>';
+    list.innerHTML = '<div class="muted" style="padding:12px">No quizzes created yet. Create quizzes for your lessons to assess student learning!</div>';
     return;
   }
 
   allQuizzes.forEach(q => {
     const li = document.createElement('li');
     li.className = 'list-item';
-    const questionsText = q.questions ? (Array.isArray(q.questions) ? `${q.questions.length} questions` : 'Multiple questions') : 'Questions added';
-    li.innerHTML = `<div><div style="font-weight:600">${q.title || q.name}</div><div class="muted">${q.courseName} · ${questionsText}</div></div><span class="pill">${q.passing_score || 60}% pass</span>`;
+    const questionsText = q.questions ? `${q.questions.length} questions` : 'Questions added';
+    li.innerHTML = `<div><div style="font-weight:600">${q.title || q.name}</div><div class="muted">${q.courseName} - ${q.lessonTitle} · ${questionsText}</div></div><span class="pill">${q.passing_score || 60}% pass</span>`;
     list.appendChild(li);
   });
 }

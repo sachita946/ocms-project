@@ -30,7 +30,20 @@ export const getStats = async (req, res) => {
         last_name: true,
         role: true,
         is_active: true,
-        created_at: true
+        created_at: true,
+        studentProfile: {
+          select: { id: true, full_name: true }
+        },
+        instructorProfile: {
+          select: { 
+            id: true, 
+            full_name: true, 
+            is_verified: true, 
+            is_pending_approval: true, 
+            qualifications: true, 
+            experience_years: true 
+          }
+        }
       },
       take: 50,
       orderBy: { created_at: 'desc' }

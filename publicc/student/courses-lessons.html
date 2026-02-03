@@ -799,8 +799,30 @@
 				const courseProgress = progress.find(p => p.courseId === enrollment.courseId) || { percentage: 0 };
 				const hasCertificate = certificates.some(c => c.courseId === enrollment.courseId);
 				
-				// Mock lessons data (replace with actual API data when available)
-				const mockLessons = [
+				// Fetch real lessons data from API
+				let lessons = [];
+				try {
+					const lessonsResponse = await fetch(`${API_URL}/lessons/course/${enrollment.courseId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+							'Content-Type': 'application/json'
+						}
+					});
+					if (lessonsResponse.ok) {
+						lessons = await lessonsResponse.json();
+					}
+				} catch (error) {
+					console.error('Error fetching lessons:', error);
+				}
+
+				// Use real lessons data, fallback to mock if empty
+				const displayLessons = lessons.length > 0 ? lessons.map(lesson => ({
+					id: lesson.id,
+					title: lesson.title,
+					type: lesson.content_type,
+					duration: lesson.duration || 0,
+					completed: false // TODO: Check progress from API
+				})) : [
 					{ id: 1, title: 'Introduction', type: 'VIDEO', duration: 15, completed: true },
 					{ id: 2, title: 'Core Concepts', type: 'VIDEO', duration: 25, completed: true },
 					{ id: 3, title: 'Practical Examples', type: 'VIDEO', duration: 30, completed: false },
@@ -827,7 +849,7 @@
 						
 						<div class="lessons-container">
 							<div class="lessons-header">📖 Course Lessons</div>
-							${mockLessons.map(lesson => `
+							${displayLessons.map(lesson => `
 								<div class="lesson-item">
 									<div style="display: flex; align-items: center; flex: 1;">
 										<span class="lesson-icon">${lesson.type === 'VIDEO' ? '🎬' : lesson.type === 'QUIZ' ? '📝' : '📄'}</span>

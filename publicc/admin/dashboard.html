@@ -16,15 +16,11 @@ body {
     min-height: 100vh; 
     display: flex; 
     overflow: hidden; 
-    color: #e0e0e0;
-/* 
-    BACKGROUND IMAGE + GRADIENT OVERLAY */
-    background: 
-        linear-gradient(135deg, rgba(16, 30, 95, 0.6), rgba(210, 203, 216, 0.6)),
-        url("../background/admin.png") no-repeat center center fixed;
-    background-size: cover;
+    color: #ffffff;
+    /* Clean gradient for better visibility */
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
     background-attachment: fixed;
-    line-height: 1;
+    line-height: 1.6;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -59,15 +55,6 @@ a { color: inherit; text-decoration: none; }
   color: #ff8787;
   font-weight: 600;
   transition: all 0.3s ease;
-}
-.logout:hover { 
-  background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(239,68,68,0.2)); 
-  border-color: rgba(255,107,107,0.6); 
-  color: #ff6b6b;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255,107,107,0.3);
-}
-
 /* ============================================
    MAIN CONTENT
    ============================================ */
@@ -85,49 +72,55 @@ main { padding:28px; overflow-y:auto; background: transparent; border-radius: 16
 .hero { 
     display:flex; justify-content:space-between; align-items:center; 
     margin-bottom:26px; 
-    background: rgba(255,107,107,0.05); 
+    background: rgba(255,107,107,0.15); 
+    backdrop-filter: blur(10px);
     padding:22px; 
     border-radius:16px; 
-    border:1px solid rgba(255,107,107,0.2);
+    border:1px solid rgba(255,107,107,0.4);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-.hero h1 { font-size:26px; color:#ffffff; font-weight:600;}
-.hero p { color:#a0a0a0; font-size:14px;}
+.hero h1 { font-size:28px; color:#ffffff; font-weight:700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);}
+.hero p { color: #e2e8f0; font-size:14px; font-weight: 500;}
 .badge { padding:8px 16px; border-radius:999px; background:linear-gradient(135deg, #ff6b6b, #ee5a6f); color:white; font-weight:600; font-size:12px; }
 
 /* ============================================
    STATS GRID
    ============================================ */
 .stats-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:16px; margin-bottom:20px; }
-.stat-card { background: rgba(255,107,107,0.05); border:1px solid rgba(255,107,107,0.2); border-radius:14px; padding:18px; box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-.stat-card .label { color:#a0a0a0; font-size:13px; font-weight:600; text-transform:uppercase; }
-.stat-card .value { font-size:28px; font-weight:700; color:#ff8787; margin-top:6px; }
+.stat-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:18px; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition: all 0.3s ease;}
+.stat-card:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.4);}
+.stat-card .label { color:#e2e8f0; font-size:13px; font-weight:600; text-transform:uppercase; }
+.stat-card .value { font-size:30px; font-weight:700; color:#fbbf24; margin-top:6px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
 /* ============================================
    TABLES
    ============================================ */
-.table-container { overflow-x:auto; margin-top:12px; }
-table { width:100%; border-collapse:collapse; color:#e0e0e0; }
-th { background: rgba(255,255,255,0.08); padding:12px; text-align:left; font-weight:600; color:#ffffff; border-bottom:2px solid rgba(255,107,107,0.2);}
-td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.08);}
-tr:hover { background: rgba(255,107,107,0.05); }
+.table-container { overflow-x:auto; margin-top:12px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 8px;}
+table { width:100%; border-collapse:collapse; color:#ffffff; }
+th { background: rgba(255,255,255,0.15); padding:14px; text-align:left; font-weight:700; color:#ffffff; border-bottom:2px solid rgba(255,107,107,0.4); font-size: 14px;}
+td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.1); color: #f1f5f9; font-size: 13px;}
+tr:hover { background: rgba(255,255,255,0.1); }
 
 /* ============================================
    LISTS
    ============================================ */
 .list { display: grid; gap: 12px; }
 .list-item { 
-    background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,107,107,0.02)); 
-    border: 1px solid rgba(255,107,107,0.15); 
+    background: rgba(255,255,255,0.1); 
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); 
     border-radius: 12px; 
     padding: 16px; 
     display: flex; 
     justify-content: space-between; 
-    align-items: center; 
+    align-items: center;
+    transition: all 0.3s ease; 
 }
+.list-item:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
 .list-content { flex: 1; }
-.list-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; }
-.list-meta { color: #a0a0a0; font-size: 14px; }
-.value { font-size: 16px; font-weight: 700; color: #ff8787; }
+.list-title { font-weight: 600; color: #ffffff; margin-bottom: 4px; font-size: 15px; }
+.list-meta { color: #cbd5e1; font-size: 13px; }
+.value { font-size: 18px; font-weight: 700; color: #fbbf24; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 
 /* ============================================
    EMPTY STATE
@@ -232,7 +225,12 @@ tr:hover { background: rgba(255,107,107,0.05); }
         <div id="statisticsChart" style="height: 300px; margin-top: 20px;"></div>
       </section>
       <section id="section-users" class="panel">
-        <h2>👥 Recent Users</h2>
+        <h2>👥 User Management</h2>
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); border-radius: 10px;">
+          <p style="margin: 0; color: #ffb3b3; font-size: 14px;">
+            <strong>Note:</strong> Instructors pending approval will show "Approve" and "Reject" buttons. Only verified instructors can create courses and add Zoom links.
+          </p>
+        </div>
         <div class="table-container">
           <table id="users-table">
             <thead>
@@ -240,7 +238,8 @@ tr:hover { background: rgba(255,107,107,0.05); }
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Status</th>
+                <th>Account Status</th>
+                <th>Verification</th>
                 <th>Joined</th>
                 <th>Actions</th>
               </tr>

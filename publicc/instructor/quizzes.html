@@ -244,19 +244,16 @@
 
 		async function loadQuizzes() {
 			try {
-				const res = await fetch('/api/profile/me', {
+				const res = await fetch('/api/instructor/quizzes', {
 					headers: { Authorization: `Bearer ${token}` }
 				});
-				if (res.status === 401) throw new Error('unauthorized');
-				const data = await res.json();
-
-				if (data.dashboard?.role !== 'INSTRUCTOR') {
-					window.location.href = '/instructor/instructor-dashboard.html';
+				if (res.status === 401) {
+					window.location.href = '/auth/login.html';
 					return;
 				}
+				if (!res.ok) throw new Error('Failed to load quizzes');
 
-				const courses = data.dashboard.lists?.courses || [];
-				const quizzes = extractQuizzes(courses);
+				const quizzes = await res.json();
 
 				if (!quizzes.length) {
 					document.getElementById('emptyState').style.display = 'block';
@@ -264,28 +261,14 @@
 					return;
 				}
 
+				document.getElementById('emptyState').style.display = 'none';
 				updateStats(quizzes);
 				renderQuizzes(quizzes);
 
 			} catch (err) {
-				console.error(err);
+				console.error('Error loading quizzes:', err);
+				document.getElementById('quizzesGrid').innerHTML = '<div style="text-align: center; padding: 40px; grid-column: 1/-1; color: #f87171;">Failed to load quizzes. Please try again.</div>';
 			}
-		}
-
-		function extractQuizzes(courses) {
-			const quizzes = [];
-			courses.forEach(course => {
-				if (course.quizzes && Array.isArray(course.quizzes)) {
-					course.quizzes.forEach(quiz => {
-						quizzes.push({
-							...quiz,
-							courseId: course.id,
-							courseName: course.title
-						});
-					});
-				}
-			});
-			return quizzes;
 		}
 
 		function updateStats(quizzes) {

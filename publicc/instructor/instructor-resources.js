@@ -74,7 +74,7 @@ async function loadCourses() {
   try {
     const res = await fetch('/api/profile/me', { headers });
     const data = await res.json();
-    const courses = data.courses || [];
+    const courses = data.dashboard?.lists?.courses || [];
 
     const options = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
     document.getElementById('courseSelect').innerHTML = `<option value="">Select course</option>${options}`;

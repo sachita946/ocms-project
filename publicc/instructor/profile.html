@@ -310,19 +310,14 @@
 
 		async function loadProfile() {
 			try {
-				const res = await fetch('/api/profile/me', {
+				const res = await fetch('/api/instructor/profile', {
 					headers: { Authorization: `Bearer ${token}` }
 				});
 				if (res.status === 401) throw new Error('unauthorized');
 				const data = await res.json();
 
-				if (data.dashboard?.role !== 'INSTRUCTOR') {
-					window.location.href = '/instructor/instructor-dashboard.html';
-					return;
-				}
-
 				const user = data.user;
-				const dashboard = data.dashboard;
+				const profile = data.profile;
 
 				// Display profile info
 				const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Instructor';
@@ -332,19 +327,19 @@
 				document.getElementById('joinDate').textContent = new Date(user.created_at).getFullYear();
 
 				// Stats
-				document.getElementById('totalCourses').textContent = dashboard.stats?.courses || 0;
-				document.getElementById('totalStudents').textContent = dashboard.stats?.students || 0;
-				document.getElementById('totalRevenue').textContent = 'NPR ' + (dashboard.stats?.revenue || 0);
-				document.getElementById('avgRating').textContent = ((Math.random() * 2 + 3).toFixed(1)) + ' ⭐';
+				document.getElementById('totalCourses').textContent = profile.stats?.courses || 0;
+				document.getElementById('totalStudents').textContent = profile.stats?.students || 0;
+				document.getElementById('totalRevenue').textContent = 'NPR ' + (profile.stats?.revenue || 0);
+				document.getElementById('avgRating').textContent = (profile.stats?.avgRating || 0).toFixed(1) + ' ⭐';
 
 				// Fill form
 				document.getElementById('firstName').value = user.first_name || '';
 				document.getElementById('lastName').value = user.last_name || '';
 				document.getElementById('emailInput').value = user.email || '';
-				document.getElementById('bio').value = user.instructorProfile?.bio || '';
-				document.getElementById('expertise').value = user.instructorProfile?.expertise_area || '';
-				document.getElementById('website').value = user.instructorProfile?.website || '';
-				document.getElementById('qualifications').value = user.instructorProfile?.qualifications || '';
+				document.getElementById('bio').value = profile.bio || '';
+				document.getElementById('expertise').value = profile.expertise_area || '';
+				document.getElementById('website').value = profile.website || '';
+				document.getElementById('qualifications').value = profile.qualifications || '';
 
 			} catch (err) {
 				console.error(err);
@@ -385,7 +380,7 @@
 			}
 
 			try {
-				const res = await fetch('/api/profile/update', {
+				const res = await fetch('/api/instructor/profile', {
 					method: 'PUT',
 					headers: {
 						'Authorization': `Bearer ${token}`,

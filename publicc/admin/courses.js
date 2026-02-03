@@ -55,6 +55,10 @@ function populateCourseSelectors() {
   // Populate bulk upload select
   const bulkSelect = document.getElementById('bulkCourseSelect');
   if (bulkSelect) bulkSelect.innerHTML = `<option value="">Select Course for Bulk Upload</option>${courseOptions}`;
+  
+  // Populate lesson management select
+  const lessonCourseSelect = document.getElementById('lessonCourseSelect');
+  if (lessonCourseSelect) lessonCourseSelect.innerHTML = `<option value="">Select Course</option>${courseOptions}`;
 }
 
 // Render Courses
@@ -445,3 +449,192 @@ async function deleteCourseResource(id) {
     alert('Unable to delete resource.');
   }
 }
+
+// Lesson Management Functions
+let allSubjects = [];
+let allLessons = [];
+
+// Initialize lesson management
+function initLessonManagement() {
+  loadSubjectsForLessons();
+  loadLessons();
+  setupLessonEventListeners();
+}
+
+async function loadSubjectsForLessons() {
+  try {
+    const response = await fetch('/api/lesson-resources/semesters', { headers });
+    if (!response.ok) throw new Error('Failed to load subjects');
+    
+    const data = await response.json();
+    allSubjects = [];
+    
+    data.semesters.forEach(semester => {
+      semester.subjects.forEach(subject => {
+        allSubjects.push({
+          ...subject,
+          semester_name: semester.name
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error loading subjects:', error);
+  }
+}
+
+async function loadLessons() {
+  try {
+    const response = await fetch('/api/lessons', { headers });
+    if (!response.ok) throw new Error('Failed to load lessons');
+    
+    allLessons = await response.json();
+    renderLessonsList();
+  } catch (error) {
+    console.error('Error loading lessons:', error);
+    document.getElementById('lessonsList').innerHTML = '<div style="color: #ef4444;">Failed to load lessons</div>';
+  }
+}
+
+function setupLessonEventListeners() {
+  // Course selection change for lessons
+  const courseSelect = document.getElementById('lessonCourseSelect');
+  if (courseSelect) {
+    courseSelect.addEventListener('change', handleLessonCourseChange);
+  }
+  
+  // Lesson form submission
+  const lessonForm = document.getElementById('lessonForm');
+  if (lessonForm) {
+    lessonForm.addEventListener('submit', handleLessonSubmit);
+  }
+}
+
+function handleLessonCourseChange(e) {
+  const courseId = e.target.value;
+  const subjectSelect = document.getElementById('lessonSubjectSelect');
+  
+  if (!courseId) {
+    subjectSelect.disabled = true;
+    subjectSelect.innerHTML = '<option value="">Select a course first</option>';
+    return;
+  }
+  
+  subjectSelect.disabled = false;
+  subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+  
+  // Show all subjects (admin can assign any subject to any course)
+  allSubjects.forEach(subject => {
+    subjectSelect.innerHTML += `<option value="${subject.id}">${subject.semester_name} - ${subject.title}</option>`;
+  });
+}
+
+async function handleLessonSubmit(e) {
+  e.preventDefault();
+  
+  const formData = {
+    course_id: document.getElementById('lessonCourseSelect').value,
+    subject_id: document.getElementById('lessonSubjectSelect').value,
+    title: document.getElementById('lessonTitle').value,
+    content_type: document.getElementById('lessonContentType').value,
+    content_url: document.getElementById('lessonContentUrl').value,
+    duration: document.getElementById('lessonDuration').value
+  };
+  
+  const msgEl = document.getElementById('lessonMsg');
+  
+  try {
+    const response = await fetch('/api/lessons', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(formData)
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      msgEl.style.color = '#10b981';
+      msgEl.textContent = 'Lesson created successfully!';
+      
+      // Reset form
+      document.getElementById('lessonForm').reset();
+      document.getElementById('lessonSubjectSelect').disabled = true;
+      document.getElementById('lessonSubjectSelect').innerHTML = '<option value="">Select a course first</option>';
+      
+      // Reload lessons
+      await loadLessons();
+    } else {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = result.message || 'Failed to create lesson';
+    }
+  } catch (error) {
+    console.error('Error creating lesson:', error);
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = 'Network error. Please try again.';
+  }
+}
+
+function renderLessonsList() {
+  const container = document.getElementById('lessonsList');
+  
+  if (!allLessons.length) {
+    container.innerHTML = '<div style="color: #a0a0a0; text-align: center;">No lessons created yet. Create your first lesson above.</div>';
+    return;
+  }
+  
+  container.innerHTML = allLessons.map(lesson => {
+    const course = allCourses.find(c => c.id === lesson.course_id);
+    const courseName = course ? course.title : 'Unknown Course';
+    const subject = allSubjects.find(s => s.id === lesson.subject_id);
+    const subjectName = subject ? `${subject.semester_name} - ${subject.title}` : 'Unknown Subject';
+    
+    return `
+      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="flex: 1;">
+            <h4 style="color: #ffffff; margin: 0 0 5px 0; font-size: 16px;">${lesson.title}</h4>
+            <div style="color: #a0a0a0; font-size: 12px;">
+              Course: ${courseName} | Subject: ${subjectName} | Type: ${lesson.content_type} | Duration: ${lesson.duration || 0} min
+            </div>
+            ${lesson.content_url ? `<div style="color: #60bcd6; font-size: 12px; margin-top: 5px;">URL: ${lesson.content_url}</div>` : ''}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="action-btn action-btn-warning" onclick="editLesson(${lesson.id})" style="font-size: 12px; padding: 6px 12px;">Edit</button>
+            <button class="action-btn action-btn-danger" onclick="deleteLesson(${lesson.id})" style="font-size: 12px; padding: 6px 12px;">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function editLesson(lessonId) {
+  alert(`Edit lesson ${lessonId} - Feature coming soon`);
+}
+
+async function deleteLesson(lessonId) {
+  if (!confirm('Are you sure you want to delete this lesson?')) return;
+  
+  try {
+    const response = await fetch(`/api/lessons/${lessonId}`, {
+      method: 'DELETE',
+      headers
+    });
+    
+    if (response.ok) {
+      alert('Lesson deleted successfully!');
+      await loadLessons();
+    } else {
+      const result = await response.json();
+      alert('Failed to delete lesson: ' + (result.message || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Error deleting lesson:', error);
+    alert('Network error. Please try again.');
+  }
+}
+
+// Initialize lesson management when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  // ... existing code ...
+  initLessonManagement();
+});

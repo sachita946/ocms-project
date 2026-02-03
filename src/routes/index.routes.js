@@ -19,6 +19,7 @@ import oauthRoutes from "./oauth.routes.js";
 import courseResourcesRoutes from "./courseResources.routes.js";
 import lessonResourcesRoutes from "./lessonResources.routes.js";
 import zoomRoutes from "./zoom.routes.js";
+import instructorRoutes from "./instructor.routes.js";
 import instructorEarningsRoutes from "./instructor-earnings.routes.js";
 
 const router = Router();
@@ -101,6 +102,7 @@ router.use('/oauth', oauthRoutes);
 router.use('/course-resources', courseResourcesRoutes);
 router.use('/lesson-resources', lessonResourcesRoutes);
 router.use('/zoom', zoomRoutes);
+router.use('/instructor', instructorRoutes);
 router.use('/instructor-earnings', instructorEarningsRoutes);
 
 export default router;
