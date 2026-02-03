@@ -96,6 +96,7 @@ async function main() {
         language: 'English',
         instructor_id: instructor.id,
         zoom_link: 'https://zoom.us/j/123456789',
+        is_published: true,
         requirements: ['Basic design knowledge', 'Computer with design software'],
         learning_outcomes: [
           'Master Figma and Adobe XD',
@@ -115,6 +116,7 @@ async function main() {
         language: 'English',
         instructor_id: instructor.id,
         zoom_link: 'https://zoom.us/j/987654321',
+        is_published: true,
         requirements: ['HTML, CSS, JavaScript basics', 'Basic programming knowledge'],
         learning_outcomes: [
           'Build full-stack web applications',
@@ -134,6 +136,7 @@ async function main() {
         language: 'English',
         instructor_id: instructor.id,
         zoom_link: 'https://zoom.us/j/456789123',
+        is_published: true,
         requirements: ['JavaScript programming', 'Basic web development'],
         learning_outcomes: [
           'Build RESTful APIs',
@@ -153,6 +156,7 @@ async function main() {
         language: 'English',
         instructor_id: instructor.id,
         zoom_link: 'https://zoom.us/j/789123456',
+        is_published: true,
         requirements: ['Basic programming knowledge', 'Mathematics basics'],
         learning_outcomes: [
           'Master Python programming',
@@ -172,6 +176,7 @@ async function main() {
         language: 'English',
         instructor_id: instructor.id,
         zoom_link: 'https://zoom.us/j/321654987',
+        is_published: true,
         requirements: ['Python programming', 'Statistics and mathematics', 'Basic ML concepts'],
         learning_outcomes: [
           'Understand AI and ML fundamentals',
@@ -204,6 +209,7 @@ async function main() {
           language: courseData.language,
           instructor_id: courseData.instructor_id,
           zoom_link: courseData.zoom_link,
+          is_published: courseData.is_published,
           requirements: courseData.requirements,
           learning_outcomes: courseData.learning_outcomes
         },
@@ -228,12 +234,91 @@ async function main() {
       }
     }
 
-    console.log('Advanced courses created successfully');
+    // Create free beginner courses
+    const freeCourses = [
+      {
+        id: 2001,
+        title: 'Introduction to Programming',
+        description: 'Learn the fundamentals of programming with hands-on exercises. Perfect for complete beginners.',
+        category: 'Programming',
+        level: 'BEGINNER',
+        price: 0,
+        duration_weeks: 4,
+        language: 'English',
+        instructor_id: instructor.id,
+        is_published: true,
+        requirements: ['Basic computer skills'],
+        learning_outcomes: [
+          'Understand programming concepts',
+          'Write basic programs',
+          'Debug simple code',
+          'Understand programming logic'
+        ]
+      },
+      {
+        id: 2002,
+        title: 'HTML & CSS Fundamentals',
+        description: 'Master the building blocks of web development. Create beautiful websites from scratch.',
+        category: 'Web Development',
+        level: 'BEGINNER',
+        price: 0,
+        duration_weeks: 6,
+        language: 'English',
+        instructor_id: instructor.id,
+        is_published: true,
+        requirements: ['Basic computer literacy'],
+        learning_outcomes: [
+          'Create HTML documents',
+          'Style with CSS',
+          'Build responsive layouts',
+          'Understand web standards'
+        ]
+      },
+      {
+        id: 2003,
+        title: 'JavaScript Basics',
+        description: 'Learn JavaScript programming for web development. Interactive course with practical examples.',
+        category: 'Programming',
+        level: 'INTERMEDIATE',
+        price: 0,
+        duration_weeks: 8,
+        language: 'English',
+        instructor_id: instructor.id,
+        is_published: true,
+        requirements: ['HTML and CSS basics'],
+        learning_outcomes: [
+          'Master JavaScript syntax',
+          'Work with DOM manipulation',
+          'Handle events and user interactions',
+          'Write clean, maintainable code'
+        ]
+      }
+    ];
 
+    for (const courseData of freeCourses) {
+      await prisma.course.upsert({
+        where: { id: courseData.id },
+        update: {
+          title: courseData.title,
+          description: courseData.description,
+          category: courseData.category,
+          level: courseData.level,
+          price: courseData.price,
+          duration_weeks: courseData.duration_weeks,
+          language: courseData.language,
+          instructor_id: courseData.instructor_id,
+          is_published: courseData.is_published,
+          requirements: courseData.requirements,
+          learning_outcomes: courseData.learning_outcomes
+        },
+        create: courseData
+      });
+    }
+
+    console.log('Free courses created successfully');
   } catch (error) {
     console.error('Error seeding database:', error);
-  } finally {
-    await prisma.$disconnect();
+    throw error;
   }
 }
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,8 +97,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .form-card {
@@ -333,6 +341,29 @@
       font-size: 0.85rem;
     }
 
+    .instructor-page-wrapper {
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .two-column-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state h3 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 20px 15px;
@@ -359,169 +390,185 @@
         align-items: flex-start;
         gap: 10px;
       }
+
+      .two-column-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <h1>📚 Course & Lesson Resources</h1>
-      <p>Add notes, questions, preboard, and board materials for your students</p>
-      <button class="btn" onclick="window.location.href='instructor-dashboard.html'">← Back to Dashboard</button>
-    </header>
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="course">Course Resources</button>
-      <button class="tab-btn" data-tab="lesson">Lesson Resources</button>
+<body>
+  <div class="instructor-page-wrapper">
+    <div class="container">
+      <header>
+        <h1>📚 Course & Lesson Resources</h1>
+        <p>Add notes, questions, preboard, and board materials for your students</p>
+        <button class="btn" onclick="window.location.href='instructor-dashboard.html'">← Back to Dashboard</button>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="course">Course Resources</button>
+        <button class="tab-btn" data-tab="lesson">Lesson Resources</button>
+      </div>
+
+      <!-- Course Resources Section -->
+      <section id="course-tab" class="tab-content active">
+        <div class="two-column-layout">
+          <div class="form-card">
+            <h2>Add Course Resource</h2>
+            <form id="courseResourceForm">
+              <div class="form-group">
+                <label for="courseSelect">Select Course *</label>
+                <select id="courseSelect" required>
+                  <option value="">Loading courses...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="courseResourceType">Resource Type *</label>
+                <select id="courseResourceType" required>
+                  <option value="">Select type</option>
+                  <option value="notes">📝 Notes</option>
+                  <option value="questions">❓ Questions</option>
+                  <option value="preboard">📋 Preboard Materials</option>
+                  <option value="board">🏁 Board Materials</option>
+                  <option value="zoom">📹 Zoom Meeting</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="courseResourceTitle">Title *</label>
+                <input type="text" id="courseResourceTitle" placeholder="e.g., Chapter 1 Notes" required>
+              </div>
+
+              <div class="form-group">
+                <label for="courseResourceContent">Content *</label>
+                <textarea id="courseResourceContent" rows="8" placeholder="Enter resource content here..."
+                  required></textarea>
+              </div>
+
+              <div class="form-group" id="courseFileGroup" style="display: none;">
+                <label for="courseResourceFile">Upload File (PDF, JPG, PNG - Max 500MB)</label>
+                <input type="file" id="courseResourceFile" accept=".pdf,.jpg,.jpeg,.png">
+                <small style="color: rgba(255, 255, 255, 0.6);">For notes, questions, preboard, and board
+                  materials</small>
+              </div>
+
+              <div class="form-group" id="zoomLinkGroup" style="display: none;">
+                <label for="courseZoomLink">Zoom Meeting Link</label>
+                <input type="url" id="courseZoomLink" placeholder="https://zoom.us/j/...">
+              </div>
+
+              <button type="submit" class="btn primary">Add Resource</button>
+              <p id="courseResourceMsg" class="msg"></p>
+            </form>
+          </div>
+
+          <div class="resources-list">
+            <h2>Your Course Resources</h2>
+            <div class="filter-bar">
+              <select id="courseFilterSelect">
+                <option value="">All Courses</option>
+              </select>
+              <select id="courseFilterType">
+                <option value="">All Types</option>
+                <option value="notes">Notes</option>
+                <option value="questions">Questions</option>
+                <option value="preboard">Preboard</option>
+                <option value="board">Board</option>
+              </select>
+              <button class="btn ghost" onclick="loadCourseResources()">Filter</button>
+            </div>
+            <div id="courseResourcesList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lesson Resources Section -->
+      <section id="lesson-tab" class="tab-content">
+        <div class="two-column-layout">
+          <div class="form-card">
+            <h2>Add Lesson Resource</h2>
+            <form id="lessonResourceForm">
+              <div class="form-group">
+                <label for="lessonCourseSelect">Select Course *</label>
+                <select id="lessonCourseSelect" required>
+                  <option value="">Loading courses...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="lessonSelect">Select Lesson *</label>
+                <select id="lessonSelect" required>
+                  <option value="">Select course first</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="lessonResourceType">Resource Type *</label>
+                <select id="lessonResourceType" required>
+                  <option value="">Select type</option>
+                  <option value="notes">📝 Notes</option>
+                  <option value="questions">❓ Questions</option>
+                  <option value="preboard">📋 Preboard Materials</option>
+                  <option value="zoom">📹 Zoom Meeting</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="lessonResourceTitle">Title *</label>
+                <input type="text" id="lessonResourceTitle" placeholder="e.g., Lesson 1 Notes" required>
+              </div>
+
+              <div class="form-group">
+                <label for="lessonResourceContent">Content *</label>
+                <textarea id="lessonResourceContent" rows="8" placeholder="Enter resource content here..."
+                  required></textarea>
+              </div>
+
+              <div class="form-group" id="lessonFileGroup" style="display: none;">
+                <label for="lessonResourceFile">Upload File (PDF, JPG, PNG - Max 500MB)</label>
+                <input type="file" id="lessonResourceFile" accept=".pdf,.jpg,.jpeg,.png">
+                <small style="color: rgba(255, 255, 255, 0.6);">For notes, questions, and preboard materials</small>
+              </div>
+
+              <div class="form-group" id="lessonZoomLinkGroup" style="display: none;">
+                <label for="lessonZoomLink">Zoom Meeting Link</label>
+                <input type="url" id="lessonZoomLink" placeholder="https://zoom.us/j/...">
+              </div>
+
+              <button type="submit" class="btn primary">Add Resource</button>
+              <p id="lessonResourceMsg" class="msg"></p>
+            </form>
+          </div>
+
+          <div class="resources-list">
+            <h2>Your Lesson Resources</h2>
+            <div class="filter-bar">
+              <select id="lessonFilterCourse">
+                <option value="">All Courses</option>
+              </select>
+              <select id="lessonFilterLesson">
+                <option value="">All Lessons</option>
+              </select>
+              <select id="lessonFilterType">
+                <option value="">All Types</option>
+                <option value="notes">Notes</option>
+                <option value="questions">Questions</option>
+                <option value="preboard">Preboard</option>
+              </select>
+              <button class="btn ghost" onclick="loadLessonResources()">Filter</button>
+            </div>
+            <div id="lessonResourcesList"></div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- Course Resources Section -->
-    <section id="course-tab" class="tab-content active">
-      <div class="form-card">
-        <h2>Add Course Resource</h2>
-        <form id="courseResourceForm">
-          <div class="form-group">
-            <label for="courseSelect">Select Course *</label>
-            <select id="courseSelect" required>
-              <option value="">Loading courses...</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="courseResourceType">Resource Type *</label>
-            <select id="courseResourceType" required>
-              <option value="">Select type</option>
-              <option value="notes">📝 Notes</option>
-              <option value="questions">❓ Questions</option>
-              <option value="preboard">📋 Preboard Materials</option>
-              <option value="board">🏁 Board Materials</option>
-              <option value="zoom">📹 Zoom Meeting</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="courseResourceTitle">Title *</label>
-            <input type="text" id="courseResourceTitle" placeholder="e.g., Chapter 1 Notes" required>
-          </div>
-
-          <div class="form-group">
-            <label for="courseResourceContent">Content *</label>
-            <textarea id="courseResourceContent" rows="8" placeholder="Enter resource content here..." required></textarea>
-          </div>
-
-          <div class="form-group" id="courseFileGroup" style="display: none;">
-            <label for="courseResourceFile">Upload File (PDF, JPG, PNG - Max 500MB)</label>
-            <input type="file" id="courseResourceFile" accept=".pdf,.jpg,.jpeg,.png">
-            <small style="color: rgba(255, 255, 255, 0.6);">For notes, questions, preboard, and board materials</small>
-          </div>
-
-          <div class="form-group" id="zoomLinkGroup" style="display: none;">
-            <label for="courseZoomLink">Zoom Meeting Link</label>
-            <input type="url" id="courseZoomLink" placeholder="https://zoom.us/j/...">
-          </div>
-
-          <button type="submit" class="btn primary">Add Resource</button>
-          <p id="courseResourceMsg" class="msg"></p>
-        </form>
-      </div>
-
-      <div class="resources-list">
-        <h2>Your Course Resources</h2>
-        <div class="filter-bar">
-          <select id="courseFilterSelect">
-            <option value="">All Courses</option>
-          </select>
-          <select id="courseFilterType">
-            <option value="">All Types</option>
-            <option value="notes">Notes</option>
-            <option value="questions">Questions</option>
-            <option value="preboard">Preboard</option>
-            <option value="board">Board</option>
-          </select>
-          <button class="btn ghost" onclick="loadCourseResources()">Filter</button>
-        </div>
-        <div id="courseResourcesList"></div>
-      </div>
-    </section>
-
-    <!-- Lesson Resources Section -->
-    <section id="lesson-tab" class="tab-content">
-      <div class="form-card">
-        <h2>Add Lesson Resource</h2>
-        <form id="lessonResourceForm">
-          <div class="form-group">
-            <label for="lessonCourseSelect">Select Course *</label>
-            <select id="lessonCourseSelect" required>
-              <option value="">Loading courses...</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="lessonSelect">Select Lesson *</label>
-            <select id="lessonSelect" required>
-              <option value="">Select course first</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="lessonResourceType">Resource Type *</label>
-            <select id="lessonResourceType" required>
-              <option value="">Select type</option>
-              <option value="notes">📝 Notes</option>
-              <option value="questions">❓ Questions</option>
-              <option value="preboard">📋 Preboard Materials</option>
-              <option value="zoom">📹 Zoom Meeting</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="lessonResourceTitle">Title *</label>
-            <input type="text" id="lessonResourceTitle" placeholder="e.g., Lesson 1 Notes" required>
-          </div>
-
-          <div class="form-group">
-            <label for="lessonResourceContent">Content *</label>
-            <textarea id="lessonResourceContent" rows="8" placeholder="Enter resource content here..." required></textarea>
-          </div>
-
-          <div class="form-group" id="lessonFileGroup" style="display: none;">
-            <label for="lessonResourceFile">Upload File (PDF, JPG, PNG - Max 500MB)</label>
-            <input type="file" id="lessonResourceFile" accept=".pdf,.jpg,.jpeg,.png">
-            <small style="color: rgba(255, 255, 255, 0.6);">For notes, questions, and preboard materials</small>
-          </div>
-
-          <div class="form-group" id="lessonZoomLinkGroup" style="display: none;">
-            <label for="lessonZoomLink">Zoom Meeting Link</label>
-            <input type="url" id="lessonZoomLink" placeholder="https://zoom.us/j/...">
-          </div>
-
-          <button type="submit" class="btn primary">Add Resource</button>
-          <p id="lessonResourceMsg" class="msg"></p>
-        </form>
-      </div>
-
-      <div class="resources-list">
-        <h2>Your Lesson Resources</h2>
-        <div class="filter-bar">
-          <select id="lessonFilterCourse">
-            <option value="">All Courses</option>
-          </select>
-          <select id="lessonFilterLesson">
-            <option value="">All Lessons</option>
-          </select>
-          <select id="lessonFilterType">
-            <option value="">All Types</option>
-            <option value="notes">Notes</option>
-            <option value="questions">Questions</option>
-            <option value="preboard">Preboard</option>
-          </select>
-          <button class="btn ghost" onclick="loadLessonResources()">Filter</button>
-        </div>
-        <div id="lessonResourcesList"></div>
-      </div>
-    </section>
-  </div>
-
-  <script defer src="./instructor-resources.js"></script>
+    <script defer src="./nav.js"></script>
+    <script defer src="./instructor-resources.js"></script>
 </body>
+
 </html>

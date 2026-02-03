@@ -327,7 +327,7 @@ async function loadCourseResources() {
     const resources = await res.json();
 
     if (!resources.length) {
-      document.getElementById('courseResourcesList').innerHTML = '<p>No resources found</p>';
+      document.getElementById('courseResourcesList').innerHTML = '<div class="empty-state"><h3>No resources found</h3><p>Add your first course resource using the form on the left.</p></div>';
       return;
     }
 
@@ -335,7 +335,7 @@ async function loadCourseResources() {
       <div class="resource-card">
         <div class="resource-header">
           <h3>${r.title}</h3>
-          <span class="badge ${r.type}">${r.type}</span>
+          <span class="badge ${r.type}">${r.type.charAt(0).toUpperCase() + r.type.slice(1)}</span>
         </div>
         ${r.file_url ? `
           <p><strong>File:</strong> <a href="${r.file_url}" target="_blank" download>📎 Download ${r.file_type ? r.file_type.split('/')[1].toUpperCase() : 'File'}</a></p>
@@ -369,7 +369,7 @@ async function loadLessonResources() {
     const resources = data.resources || data;
 
     if (!resources.length) {
-      document.getElementById('lessonResourcesList').innerHTML = '<p>No resources found</p>';
+      document.getElementById('lessonResourcesList').innerHTML = '<div class="empty-state"><h3>No resources found</h3><p>Add your first lesson resource using the form on the left.</p></div>';
       return;
     }
 
@@ -377,7 +377,7 @@ async function loadLessonResources() {
       <div class="resource-card">
         <div class="resource-header">
           <h3>${r.title}</h3>
-          <span class="badge ${r.type}">${r.type}</span>
+          <span class="badge ${r.type}">${r.type.charAt(0).toUpperCase() + r.type.slice(1)}</span>
         </div>
         ${r.file_url ? `
           <p><strong>File:</strong> <a href="${r.file_url}" target="_blank" download>📎 Download ${r.file_type ? r.file_type.split('/')[1].toUpperCase() : 'File'}</a></p>

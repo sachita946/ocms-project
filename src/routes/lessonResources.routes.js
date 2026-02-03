@@ -12,19 +12,19 @@ const router = express.Router();
 
 
 // Get all lesson resources (with filters)
-router.get('/lesson-resources', auth, lessonResourcesController.getLessonResources);
+router.get('/', auth, lessonResourcesController.getLessonResources);
 
 // Get single lesson resource
-router.get('/lesson-resources/:id', auth, lessonResourcesController.getLessonResourceById);
+router.get('/:id', auth, lessonResourcesController.getLessonResourceById);
 
-// Create lesson resource (admin only)
-router.post('/lesson-resources', auth, requireRole(['ADMIN']), lessonResourcesController.createLessonResource);
+// Create lesson resource (instructor or admin)
+router.post('/', auth, requireRole(['INSTRUCTOR', 'ADMIN']), lessonResourcesController.createLessonResource);
 
 // Update lesson resource (admin or owner)
-router.put('/lesson-resources/:id', auth, lessonResourcesController.updateLessonResource);
+router.put('/:id', auth, lessonResourcesController.updateLessonResource);
 
 // Delete lesson resource (admin or owner)
-router.delete('/lesson-resources/:id', auth, lessonResourcesController.deleteLessonResource);
+router.delete('/:id', auth, lessonResourcesController.deleteLessonResource);
 
 
 // HIERARCHY ROUTES (Students + Admin)

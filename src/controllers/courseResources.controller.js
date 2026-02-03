@@ -124,8 +124,8 @@ export const getCourseResources = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // For published courses, check enrollment and payment
-    if (course.is_published) {
+    // For published courses, check enrollment and payment (skip for instructors)
+    if (course.is_published && req.user.role !== 'INSTRUCTOR') {
       // Get student profile
       const studentProfile = await prisma.studentProfile.findUnique({
         where: { user_id: req.user.id }

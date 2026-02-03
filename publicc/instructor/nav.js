@@ -90,12 +90,10 @@ const instructorNav = `
     box-shadow: 0 4px 12px rgba(255,107,107,0.3);
   }
   .instructor-page-wrapper {
-    margin-left: 260px;
     min-height: 100vh;
   }
   @media (max-width: 768px) {
     .instructor-nav-sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .instructor-page-wrapper { margin-left: 0; }
     .instructor-nav-menu { flex-direction: row; overflow-x: auto; gap: 8px; }
   }
 
