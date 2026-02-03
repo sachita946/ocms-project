@@ -99,7 +99,7 @@ export const createPaymentIntent = async (req, res) => {
     }
 
     // Check if already paid
-    const existingPayment = await prisma.payment.findFirst({
+    const existingCompletedPayment = await prisma.payment.findFirst({
       where: {
         student_id: studentProfile.id,
         course_id: parseInt(course_id),
@@ -107,22 +107,36 @@ export const createPaymentIntent = async (req, res) => {
       }
     });
 
-    if (existingPayment) {
+    if (existingCompletedPayment) {
       return res.status(400).json({ message: 'You have already paid for this course' });
     }
 
-    // Create payment record in database first
-    const payment = await prisma.payment.create({
-      data: {
-        student_id: studentProfile.id, // Required field - references StudentProfile
-        userId: req.user.id, // Optional field - references User
+    // Check for existing pending payment and reuse it
+    let payment = await prisma.payment.findFirst({
+      where: {
+        student_id: studentProfile.id,
         course_id: parseInt(course_id),
-        amount: parseFloat(amount),
-        payment_method: 'ESEWA',
-        transaction_id: `TXN_${Date.now()}_${req.user.id}`, // Use user ID
-        status: 'PENDING',
-      },
+        status: 'PENDING'
+      }
     });
+
+    if (payment) {
+      // Reuse existing pending payment
+      console.log('Reusing existing pending payment:', payment.id);
+    } else {
+      // Create new payment record in database first
+      payment = await prisma.payment.create({
+        data: {
+          student_id: studentProfile.id, // Required field - references StudentProfile
+          userId: req.user.id, // Optional field - references User
+          course_id: parseInt(course_id),
+          amount: parseFloat(amount),
+          payment_method: 'ESEWA',
+          transaction_id: `TXN_${Date.now()}_${req.user.id}`, // Use user ID
+          status: 'PENDING',
+        },
+      });
+    }
 
     // Generate eSewa payment signature
     const transaction_uuid = `OCMS-${payment.id}-${Date.now()}`;
@@ -311,6 +325,68 @@ export const confirmPayment = async (req, res) => {
   } catch (error) {
     console.error('Confirm payment error:', error);
     res.status(500).json({ message: 'Failed to confirm payment' });
+  }
+};
+
+// Mark payment as failed
+export const failPayment = async (req, res) => {
+  try {
+    const { payment_id } = req.body;
+
+    if (!payment_id) {
+      return res.status(400).json({ message: 'Missing payment_id' });
+    }
+
+    // Validate payment_id is a valid integer
+    const paymentIdInt = parseInt(payment_id);
+    if (isNaN(paymentIdInt) || paymentIdInt <= 0) {
+      return res.status(400).json({ message: `Invalid payment_id format: ${payment_id}` });
+    }
+
+    // Get or create student profile
+    let studentProfile = await prisma.studentProfile.findUnique({
+      where: { user_id: req.user.id }
+    });
+
+    if (!studentProfile) {
+      return res.status(404).json({ message: 'Student profile not found' });
+    }
+
+    // Find the payment and ensure it belongs to the current user
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: paymentIdInt,
+        student_id: studentProfile.id,
+        status: 'PENDING' // Only allow failing pending payments
+      }
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found or already processed' });
+    }
+
+    // Mark payment as failed
+    const updatedPayment = await prisma.payment.update({
+      where: { id: paymentIdInt },
+      data: {
+        status: 'FAILED',
+        transaction_id: `FAILED_${Date.now()}_${paymentIdInt}`
+      }
+    });
+
+    console.log('Payment marked as failed:', paymentIdInt);
+
+    res.json({
+      message: 'Payment marked as failed',
+      payment: {
+        id: updatedPayment.id,
+        status: updatedPayment.status
+      }
+    });
+
+  } catch (error) {
+    console.error('Fail payment error:', error);
+    res.status(500).json({ message: 'Failed to mark payment as failed' });
   }
 };
 

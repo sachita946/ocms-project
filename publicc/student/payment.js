@@ -185,6 +185,32 @@ async function initializeEsewaPayment() {
 
     showMessage('Payment system ready. Click the button to proceed with eSewa payment.', 'success');
 
+    // Check for payment failure after initialization
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_failed') === 'true') {
+      // Mark the payment as failed on the backend
+      try {
+        const token = localStorage.getItem('ocms_token');
+        if (token && esewaPaymentData && esewaPaymentData.payment_id) {
+          await fetch(`${API_URL}/payments/fail`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              payment_id: esewaPaymentData.payment_id
+            })
+          });
+          console.log('Payment marked as failed on backend');
+        }
+      } catch (error) {
+        console.error('Failed to mark payment as failed:', error);
+      }
+      
+      showMessage('Payment was cancelled or failed. Please try again.', 'error');
+    }
+
   } catch (error) {
     console.error('eSewa initialization error:', error);
     showMessage(`Failed to initialize payment: ${error.message}. Please refresh the page and try again.`, 'error');
@@ -244,11 +270,3 @@ function resetPayButton() {
   payBtn.disabled = false;
   payBtn.textContent = 'Complete Payment';
 }
-
-// Handle payment failure from URL
-window.addEventListener('load', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('payment_failed') === 'true') {
-    showMessage('Payment was cancelled or failed. Please try again.', 'error');
-  }
-});
