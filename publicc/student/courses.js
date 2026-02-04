@@ -12,6 +12,7 @@ function getYouTubeVideoId(url) {
 document.addEventListener('DOMContentLoaded', async () => {
   await loadEnrollments();
   await loadCourses();
+  await loadCurriculumData(); // Load curriculum data from API
   
   // Check for enrollment parameter in URL (from login/signup redirect)
   const urlParams = new URLSearchParams(window.location.search);
@@ -375,4 +376,162 @@ function openCourseResource(courseId, courseName, resourceType) {
 
   // Redirect to course resources page
   window.location.href = `course-resources.html?courseId=${courseId}&courseName=${encodeURIComponent(courseName)}&type=${resourceType}`;
+}
+
+// Load curriculum data from API
+async function loadCurriculumData() {
+  try {
+    const programs = ['BIM', 'CSIT', 'BCA'];
+    
+    for (const program of programs) {
+      const response = await fetch(`${API_URL}/lesson-resources/curriculum?program=${program}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        renderCurriculumSection(program, data.semesters);
+      } else {
+        console.error(`Failed to load ${program} curriculum:`, await response.text());
+      }
+    }
+  } catch (error) {
+    console.error('Error loading curriculum data:', error);
+    // If API fails, the static HTML will remain visible
+  }
+}
+
+// Render curriculum section dynamically
+function renderCurriculumSection(program, semesters) {
+  // Find the existing curriculum section for this program
+  const existingSections = document.querySelectorAll('.curriculum-section');
+  let targetSection = null;
+  
+  existingSections.forEach(section => {
+    const heading = section.querySelector('h3');
+    if (heading && heading.textContent.includes(program)) {
+      targetSection = section;
+    }
+  });
+
+  if (!targetSection) {
+    console.warn(`No section found for ${program}`);
+    return;
+  }
+
+  // Clear existing content but keep the heading
+  const heading = targetSection.querySelector('h3').cloneNode(true);
+  const resourceNote = targetSection.querySelector('.resource-note').cloneNode(true);
+  targetSection.innerHTML = '';
+  targetSection.appendChild(heading);
+  targetSection.appendChild(resourceNote);
+
+  // Create curriculum grid
+  const grid = document.createElement('div');
+  grid.className = 'curriculum-grid';
+
+  // Render each semester
+  semesters.forEach(semester => {
+    const semesterCard = document.createElement('div');
+    semesterCard.className = 'semester-card';
+
+    const semesterHeading = document.createElement('h4');
+    semesterHeading.textContent = semester.name;
+    semesterCard.appendChild(semesterHeading);
+
+    const subjectList = document.createElement('ul');
+    subjectList.className = 'subject-list';
+
+    semester.subjects.forEach(subject => {
+      const listItem = document.createElement('li');
+      listItem.className = 'subject-item';
+      listItem.setAttribute('data-subject', subject.title);
+      listItem.setAttribute('data-program', program);
+      listItem.setAttribute('data-semester', semester.semester_num);
+
+      listItem.innerHTML = `
+        <span class="subject-name">${subject.title}</span>
+        <div class="subject-actions">
+          <button class="resource-btn notes-btn" onclick="viewSubjectResources(${subject.id}, '${subject.title.replace(/'/g, "\\'")}', 'notes')">📝 Notes</button>
+          <button class="resource-btn preboard-btn" onclick="viewSubjectResources(${subject.id}, '${subject.title.replace(/'/g, "\\'")}', 'preboard')">📋 Preboard</button>
+          <button class="resource-btn board-btn" onclick="viewSubjectResources(${subject.id}, '${subject.title.replace(/'/g, "\\'")}', 'board')">🎯 Board</button>
+        </div>
+      `;
+
+      subjectList.appendChild(listItem);
+    });
+
+    semesterCard.appendChild(subjectList);
+    grid.appendChild(semesterCard);
+  });
+
+  targetSection.appendChild(grid);
+
+  const note = document.createElement('p');
+  note.className = 'resource-note';
+  note.textContent = 'Click on resource buttons to view and download study materials.';
+  targetSection.appendChild(note);
+}
+
+// View subject resources (for students)
+async function viewSubjectResources(subjectId, subjectTitle, resourceType) {
+  try {
+    const response = await fetch(`${API_URL}/lesson-resources/subject-resources?subject_id=${subjectId}&type=${resourceType}`);
+    const data = await response.json();
+
+    if (data.resources && data.resources.length > 0) {
+      showResourcesModal(subjectTitle, resourceType, data.resources);
+    } else {
+      showInlineMessage(`No ${resourceType} available for ${subjectTitle} yet.`, 'info');
+    }
+  } catch (error) {
+    console.error('Failed to load resources:', error);
+    showInlineMessage('Failed to load resources', 'error');
+  }
+}
+
+// Show resources in a modal
+function showResourcesModal(subjectTitle, resourceType, resources) {
+  // Create modal if it doesn't exist
+  let modal = document.getElementById('resourcesViewModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'resourcesViewModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="resourcesModalTitle"></h2>
+          <button class="close-btn" onclick="closeResourcesModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="resourcesModalBody"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById('resourcesModalTitle').textContent = `${subjectTitle} - ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}`;
+  
+  const body = document.getElementById('resourcesModalBody');
+  body.innerHTML = resources.map(resource => `
+    <div style="background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+      <h3 style="margin-bottom: 8px; font-size: 16px;">${resource.title}</h3>
+      ${resource.content ? `<p style="opacity: 0.8; font-size: 14px; margin-bottom: 10px;">${resource.content}</p>` : ''}
+      ${resource.file_url ? `
+        <a href="${resource.file_url}" target="_blank" download class="btn btn-primary" style="display: inline-block; margin-top: 8px;">
+          <i class="fas fa-download"></i> Download
+        </a>
+      ` : ''}
+      <div style="font-size: 12px; opacity: 0.6; margin-top: 8px;">
+        Uploaded by: ${resource.user ? resource.user.first_name + ' ' + resource.user.last_name : 'Unknown'}
+      </div>
+    </div>
+  `).join('');
+
+  modal.style.display = 'block';
+}
+
+function closeResourcesModal() {
+  const modal = document.getElementById('resourcesViewModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
 }

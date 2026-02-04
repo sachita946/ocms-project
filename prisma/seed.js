@@ -316,6 +316,143 @@ async function main() {
     }
 
     console.log('Free courses created successfully');
+
+    // ===================================================
+    // CURRICULUM DATA - Semesters and Subjects
+    // ===================================================
+
+    // Create 8 semesters
+    const semesters = [];
+    for (let i = 1; i <= 8; i++) {
+      const semester = await prisma.semester.upsert({
+        where: { semester_num: i },
+        update: {},
+        create: {
+          semester_num: i,
+          name: `Semester ${i}`,
+          description: `${i}${i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th'} semester courses`
+        }
+      });
+      semesters.push(semester);
+    }
+    console.log('✅ Created 8 semesters');
+
+    // BIM Curriculum Data
+    const bimCurriculum = {
+      1: ['Business Mathematics', 'English I', 'Introduction to Information Technology', 'Sociology', 'Principles of Management'],
+      2: ['Financial Accounting', 'English II', 'Micro Economics', 'Computer Programming', 'Business Statistics'],
+      3: ['Data Communication and Networking', 'Web Technology I', 'Cost and Management Accounting', 'Organizational Behavior', 'System Analysis and Design'],
+      4: ['Database Management System', 'Web Technology II', 'Macro Economics', 'Operations Management', 'Business Research Methods'],
+      5: ['Object-Oriented Programming (Java)', 'Software Engineering', 'Information Security Management', 'Financial Management', 'Management Information System'],
+      6: ['Artificial Intelligence', 'E-Commerce', 'Mobile Application Development', 'Business Strategy', 'Internship'],
+      7: ['Project Management', 'Digital Marketing', 'Cloud Computing', 'Data Mining', 'Elective I'],
+      8: ['Final Year Project', 'Entrepreneurship', 'Knowledge Management', 'Elective II', 'Seminar']
+    };
+
+    // CSIT Curriculum Data
+    const csitCurriculum = {
+      1: ['Introduction to Information Technology', 'C Programming', 'Digital Logic', 'Mathematics I', 'Physics'],
+      2: ['Discrete Mathematics', 'Object-Oriented Programming (C++)', 'Microprocessor', 'Mathematics II', 'Statistics I'],
+      3: ['Data Structures and Algorithms', 'Computer Organization and Architecture', 'Numerical Methods', 'Statistics II', 'Computer Graphics'],
+      4: ['Operating Systems', 'Database Management System', 'Artificial Intelligence', 'Theory of Computation', 'Computer Networks'],
+      5: ['Software Engineering', 'Web Technology', 'Cryptography', 'Simulation and Modeling', 'Technical Writing'],
+      6: ['Compiler Design', 'E-Governance', 'Image Processing', 'Mobile Computing', 'Minor Project'],
+      7: ['Data Mining and Warehousing', 'Cloud Computing', 'Network Security', 'Distributed Systems', 'Elective I'],
+      8: ['Final Year Project', 'Advanced Java Programming', 'Big Data Technologies', 'Elective II', 'Seminar']
+    };
+
+    // BCA Curriculum Data
+    const bcaCurriculum = {
+      1: ['Computer Fundamentals', 'Programming in C', 'Mathematics', 'English', 'Digital Systems'],
+      2: ['Data Structures', 'Object-Oriented Programming (C++)', 'Discrete Mathematics', 'Financial Accounting', 'Communication Skills'],
+      3: ['Database Management System', 'Operating System', 'Software Engineering', 'Computer Networks', 'Web Technology'],
+      4: ['Java Programming', 'System Analysis and Design', 'Numerical Methods', 'Computer Graphics', 'E-Commerce'],
+      5: ['Python Programming', 'Mobile Application Development', 'Artificial Intelligence', 'Linux Administration', 'MIS'],
+      6: ['Data Mining', 'Cloud Computing', 'Network Security', 'Project Work', 'Internship'],
+      7: ['Big Data Analytics', 'Internet of Things (IoT)', 'Software Testing', 'Elective I', 'Research Methodology'],
+      8: ['Final Year Project', 'Cyber Law and Ethics', 'Digital Marketing', 'Elective II', 'Seminar']
+    };
+
+    // Seed BIM subjects
+    for (const [semesterNum, subjects] of Object.entries(bimCurriculum)) {
+      const semester = semesters[parseInt(semesterNum) - 1];
+      for (const subjectTitle of subjects) {
+        await prisma.subject.upsert({
+          where: {
+            semester_id_program_title: {
+              semester_id: semester.id,
+              program: 'BIM',
+              title: subjectTitle
+            }
+          },
+          update: {},
+          create: {
+            semester_id: semester.id,
+            program: 'BIM',
+            title: subjectTitle,
+            description: `${subjectTitle} course for BIM program`
+          }
+        });
+      }
+    }
+    console.log('✅ Created BIM curriculum (8 semesters, 40 subjects)');
+
+    // Seed CSIT subjects
+    for (const [semesterNum, subjects] of Object.entries(csitCurriculum)) {
+      const semester = semesters[parseInt(semesterNum) - 1];
+      for (const subjectTitle of subjects) {
+        await prisma.subject.upsert({
+          where: {
+            semester_id_program_title: {
+              semester_id: semester.id,
+              program: 'CSIT',
+              title: subjectTitle
+            }
+          },
+          update: {},
+          create: {
+            semester_id: semester.id,
+            program: 'CSIT',
+            title: subjectTitle,
+            description: `${subjectTitle} course for CSIT program`
+          }
+        });
+      }
+    }
+    console.log('✅ Created CSIT curriculum (8 semesters, 40 subjects)');
+
+    // Seed BCA subjects
+    for (const [semesterNum, subjects] of Object.entries(bcaCurriculum)) {
+      const semester = semesters[parseInt(semesterNum) - 1];
+      for (const subjectTitle of subjects) {
+        await prisma.subject.upsert({
+          where: {
+            semester_id_program_title: {
+              semester_id: semester.id,
+              program: 'BCA',
+              title: subjectTitle
+            }
+          },
+          update: {},
+          create: {
+            semester_id: semester.id,
+            program: 'BCA',
+            title: subjectTitle,
+            description: `${subjectTitle} course for BCA program`
+          }
+        });
+      }
+    }
+    console.log('✅ Created BCA curriculum (8 semesters, 40 subjects)');
+
+    console.log('\n🎉 Database seeding completed successfully!');
+    console.log('📊 Summary:');
+    console.log('   - Users: Admin, Instructor, Student');
+    console.log('   - Advanced Courses: 5');
+    console.log('   - Free Courses: 3');
+    console.log('   - Semesters: 8');
+    console.log('   - Programs: BIM, CSIT, BCA');
+    console.log('   - Total Subjects: 120 (40 per program)');
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;

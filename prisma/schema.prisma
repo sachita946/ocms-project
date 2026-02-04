@@ -133,16 +133,20 @@ model Semester {
 model Subject {
   id          Int       @id @default(autoincrement())
   semester_id Int
+  program     String    // BIM, CSIT, BCA, etc.
   title       String    // Course subject title
   description String?
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
-  semester Semester @relation(fields: [semester_id], references: [id], onDelete: Cascade)
-  lessons  Lesson[]
+  semester  Semester         @relation(fields: [semester_id], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+  resources CourseResource[] // Subject resources
 
-  @@unique([semester_id, title])
+  @@unique([semester_id, program, title])
   @@index([semester_id])
+  @@index([program])
+  @@index([semester_id, program])
 }
 
 model Course {
@@ -366,8 +370,9 @@ model Payment {
 
 model CourseResource {
   id          Int       @id @default(autoincrement())
-  course_id   Int
-  type        String    // notes, questions, preboard, zoom
+  course_id   Int?      // Nullable - can be null for subject resources
+  subject_id  Int?      // Nullable - for curriculum subject resources
+  type        String    // notes, questions, preboard, zoom, board
   title       String
   content     String    @db.Text
   file_url    String?
@@ -377,10 +382,12 @@ model CourseResource {
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
-  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course  Course?  @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([course_id, type])
+  @@index([subject_id, type])
   @@index([user_id])
 }
 
