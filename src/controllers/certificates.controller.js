@@ -7,48 +7,84 @@ function generateCode(len = 10) {
 
 export const issueCertificate = async (req, res) => {
   try {
-    const { user_id, course_id } = req.body;
-    if (!user_id || !course_id) return res.status(400).json({ message: 'user_id and course_id required' });
+    const { student_id, course_id, certificate_url } = req.body;
 
-    const code = generateCode(10);
-    const cert = await prisma.certificate.create({
-      data: { user_id, course_id, code }
+    if (!student_id || !course_id || !certificate_url) {
+      return res.status(400).json({
+        message: "student_id, course_id and certificate_url are required"
+      });
+    }
+
+    const verification_code = Math.random()
+      .toString(36)
+      .substring(2, 12)
+      .toUpperCase();
+
+    const certificate = await prisma.certificate.create({
+      data: {
+        student_id: Number(student_id),
+        course_id: Number(course_id),
+        certificate_url,
+        verification_code
+      },
+      include: {
+        student: true,
+        course: true
+      }
     });
 
-    return res.status(201).json(cert);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(201).json(certificate);
+  } catch (error) {
+    console.error('[issueCertificate]', error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const verifyCertificate = async (req, res) => {
   try {
     const { code } = req.body;
-    if (!code) return res.status(400).json({ message: 'Code required' });
+    if (!code) {
+      return res.status(400).json({ message: 'Code required' });
+    }
 
     const cert = await prisma.certificate.findUnique({
-      where: { code },
-      include: { user: true, course: true }
+      where: { verification_code: code },
+      include: {
+        User: true,
+        course: true
+      }
     });
 
-    if (!cert) return res.status(404).json({ valid: false, message: 'Certificate not found' });
+    if (!cert) {
+      return res.status(404).json({ valid: false, message: 'Certificate not found' });
+    }
 
     return res.json({
       valid: true,
       certificate: {
         id: cert.id,
-        code: cert.code,
-        issuedAt: cert.issuedAt,
-        user: { id: cert.user.id, name: `${cert.user.first_name} ${cert.user.last_name}`, email: cert.user.email },
-        course: { id: cert.course.id, title: cert.course.title }
+        verification_code: cert.verification_code,
+        issued_at: cert.issued_at,
+        user: cert.User
+          ? {
+              id: cert.User.id,
+              name: `${cert.User.first_name} ${cert.User.last_name}`,
+              email: cert.User.email
+            }
+          : null,
+        course: {
+          id: cert.course.id,
+          title: cert.course.title
+        },
+        certificate_url: cert.certificate_url
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error('[verifyCertificate]', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 export const createCertificate = async (req, res) => {
   try {
     const { student_id, course_id, certificate_url } = req.body;

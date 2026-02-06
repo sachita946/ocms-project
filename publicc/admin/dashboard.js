@@ -173,8 +173,9 @@ function setStats(data = {}) {
   $('stat-students').textContent = data.students || 0;
   $('stat-instructors').textContent = data.instructors || 0;
   $('stat-courses').textContent = data.courses || 0;
+  $('stat-lessons').textContent = data.lessons || 0;
   $('stat-payments').textContent = fmtCurrency(data.totalRevenue || 0);
-  $('stat-reviews').textContent = data.reviews || 0;
+  $('stat-reviews').textContent = data.reviewsCount || 0;
 }
 
 function renderOverview(data = {}) {
@@ -184,8 +185,10 @@ function renderOverview(data = {}) {
     { emoji: '👥', label: 'Total Users', value: (data.students || 0) + (data.instructors || 0) },
     { emoji: '👨‍🎓', label: 'Students', value: data.students || 0 },
     { emoji: '👨‍🏫', label: 'Instructors', value: data.instructors || 0 },
+    { emoji: '📚', label: 'Courses', value: data.courses || 0 },
+    { emoji: '📖', label: 'Lessons', value: data.lessons || 0 },
     { emoji: '', label: 'Total Revenue', value: fmtCurrency(data.totalRevenue || 0) },
-    { emoji: '⭐', label: 'Total Reviews', value: data.reviews || 0 },
+    { emoji: '⭐', label: 'Total Reviews', value: data.reviewsCount || 0 },
   ];
   items.forEach(item => {
     const li = document.createElement('li');
@@ -430,6 +433,35 @@ function renderReviews(reviews = []) {
   });
 }
 
+function renderLessons(lessons = []) {
+  const list = $('lessons-list');
+  const empty = $('lessons-empty');
+  
+  list.innerHTML = '';
+  
+  if (!lessons.length) {
+    list.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  
+  empty.style.display = 'none';
+  list.style.display = 'grid';
+  
+  lessons.forEach(lesson => {
+    const li = document.createElement('li');
+    li.className = 'list-item';
+    li.innerHTML = `
+      <div class="list-content">
+        <div class="list-title">${lesson.title}</div>
+        <div class="list-meta">Course: ${lesson.course?.title} | Subject: ${lesson.subject?.name || 'N/A'}</div>
+        <div class="list-meta" style="margin-top: 6px; color: #999;">Duration: ${lesson.duration_hours || 0} hours</div>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+}
+
 function renderNotifications(notifications = []) {
   const list = $('notifications-list');
   const empty = $('notifications-empty');
@@ -503,7 +535,8 @@ async function bootstrap() {
     renderOverview(data);
     renderUsers(data.users || []);
     renderPayments(data.paymentsList || data.payments || []);
-    renderReviews(data.reviewsList || data.reviews || []);
+    renderReviews(data.reviewsList || []);
+    renderLessons(data.lessonsList || []);
     renderNotifications(data.notifications || []);
     renderActivities(data.activities || []);
   } catch (err) {

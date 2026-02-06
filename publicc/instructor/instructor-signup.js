@@ -115,6 +115,12 @@ form.addEventListener("submit", async (e) => {
   if (!firstName) {
     valid = false;
     showError("instructorName", "errName", "First name is required.");
+  } else if (firstName.length < 2) {
+    valid = false;
+    showError("instructorName", "errName", "First name must be at least 2 characters.");
+  } else if (!/^[a-zA-Z\s]+$/.test(firstName)) {
+    valid = false;
+    showError("instructorName", "errName", "First name can only contain letters and spaces.");
   } else {
     showSuccess("instructorName", "errName");
   }
@@ -123,6 +129,12 @@ form.addEventListener("submit", async (e) => {
   if (!lastName) {
     valid = false;
     showError("instructorLastName", "errLastName", "Last name is required.");
+  } else if (lastName.length < 2) {
+    valid = false;
+    showError("instructorLastName", "errLastName", "Last name must be at least 2 characters.");
+  } else if (!/^[a-zA-Z\s]+$/.test(lastName)) {
+    valid = false;
+    showError("instructorLastName", "errLastName", "Last name can only contain letters and spaces.");
   } else {
     showSuccess("instructorLastName", "errLastName");
   }
@@ -131,17 +143,26 @@ form.addEventListener("submit", async (e) => {
   if (!email) {
     valid = false;
     showError("instructorEmail", "errEmail", "Email is required.");
+  } else if (/^\d/.test(email)) {
+    valid = false;
+    showError("instructorEmail", "errEmail", "Email cannot start with a number.");
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     valid = false;
-    showError("instructorEmail", "errEmail", "Please enter a valid email.");
+    showError("instructorEmail", "errEmail", "Please enter a valid email address.");
   } else {
     showSuccess("instructorEmail", "errEmail");
   }
 
   // Password Validation
-  if (password.length < 6) {
+  if (!password) {
     valid = false;
-    showError("instructorPassword", "errPassword", "Password must be at least 6 characters.");
+    showError("instructorPassword", "errPassword", "Password is required.");
+  } else if (password.length < 10) {
+    valid = false;
+    showError("instructorPassword", "errPassword", "Password must be at least 10 characters long.");
+  } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
+    valid = false;
+    showError("instructorPassword", "errPassword", "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
   } else {
     showSuccess("instructorPassword", "errPassword");
   }

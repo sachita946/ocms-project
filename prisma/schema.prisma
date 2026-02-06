@@ -247,7 +247,10 @@ model Certificate {
 model Notification {
   id         Int      @id @default(autoincrement())
   user_id    Int
+  title      String?       // optional title
   message    String
+  type       String?       // optional: INFO, ALERT, etc.
+  is_read    Boolean  @default(false)
   created_at DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -398,6 +401,8 @@ model LessonResource {
   title     String
   content   String    @db.Text
   zoom_link String?
+  file_url  String?
+  file_type String?
   user_id   Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

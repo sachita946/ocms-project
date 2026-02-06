@@ -410,10 +410,10 @@ function renderStudents(courses = []) {
   courses.forEach(c => {
     if (c.enrollments && Array.isArray(c.enrollments)) {
       c.enrollments.forEach(enrollment => {
-        const studentId = enrollment.student?.id || enrollment.userId;
+        const studentId = enrollment.student?.user?.id || enrollment.userId;
         if (studentId && !allStudents.has(studentId)) {
           allStudents.set(studentId, {
-            ...enrollment.student,
+            ...enrollment.student.user,
             courses: [c.title]
           });
         } else if (studentId) {
@@ -567,14 +567,28 @@ async function bootstrap() {
     const dashboard = payload.dashboard;
     const user = payload.user;
 
+    // Fetch detailed course data for lessons, students, and quizzes
+    console.log('Fetching detailed course data...');
+    const coursesRes = await fetch('http://localhost:3000/api/courses/instructor/my-courses', { 
+      headers: { Authorization: `Bearer ${token}` } 
+    });
+    
+    let detailedCourses = [];
+    if (coursesRes.ok) {
+      detailedCourses = await coursesRes.json();
+      console.log('Detailed courses data received:', detailedCourses.length, 'courses');
+    } else {
+      console.warn('Failed to fetch detailed courses data:', coursesRes.status);
+    }
+
     renderHeader(user);
     setStats(dashboard.stats || {});
     renderOverview(dashboard);
     renderCourses(dashboard.lists?.courses || []);
     renderEarnings(dashboard);
-    renderLessons(dashboard.lists?.courses || []);
-    renderStudents(dashboard.lists?.courses || []);
-    renderQuizzes(dashboard.lists?.courses || []);
+    renderLessons(detailedCourses);
+    renderStudents(detailedCourses);
+    renderQuizzes(detailedCourses);
     renderProfile(user);
     renderNotifications(dashboard.lists?.notifications || [], dashboard.lists?.activities || []);
     

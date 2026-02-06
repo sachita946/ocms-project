@@ -323,6 +323,10 @@ async function saveTokenAndRedirect(token, role) {
     // Handle enrollment redirect from courses page
     window.location.href = `/student/courses.html?enroll=${courseId}`;
     return;
+  } else if (redirect === 'courses' && enrollParam && targetRole === 'STUDENT') {
+    // Handle enrollment redirect from courses page with enroll parameter
+    window.location.href = `/student/courses.html?enroll=${enrollParam}`;
+    return;
   }
   
   window.location.href = getDashboardPath(targetRole);
@@ -466,19 +470,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = qs('loginPassword').value;
 
       // Client-side validation
+      if (!email) {
+        setText('loginEmailError', 'Email is required');
+        showInlineMessage('Please enter your email address', 'error');
+        return;
+      }
       if (!isValidEmail(email)) {
         setText('loginEmailError', 'Enter a valid email');
         showInlineMessage('Please enter a valid email address', 'error');
         return;
       }
+      if (/^\d/.test(email)) {
+        setText('loginEmailError', 'Email cannot start with a number');
+        showInlineMessage('Email address cannot start with a number', 'error');
+        return;
+      }
       if (!password) {
         setText('loginPasswordError', 'Enter your password');
         showInlineMessage('Please enter your password', 'error');
-        return;
-      }
-      if (password.length < 6) {
-        setText('loginPasswordError', 'Password must be at least 6 characters');
-        showInlineMessage('Password must be at least 6 characters', 'error');
         return;
       }
 
@@ -574,11 +583,59 @@ document.addEventListener('DOMContentLoaded', () => {
       const expertise = qs('expertise')?.value.trim();
 
       let invalid = false;
-      if (!isNameValid(first_name)) { setText('firstNameError','Enter a valid first name'); invalid = true; }
-      if (!isNameValid(last_name)) { setText('lastNameError','Enter a valid last name'); invalid = true; }
-      if (!isValidEmail(email)) { setText('signupEmailError','Enter a valid email'); invalid = true; }
-      if (!password || password.length < 6) { setText('signupPasswordError','Password must be at least 6 characters'); invalid = true; }
-      if (role === 'INSTRUCTOR' && !bio) { setText('bioError','Bio is required for instructors'); invalid = true; }
+      
+      // First Name Validation
+      if (!first_name) {
+        setText('firstNameError','First name is required');
+        invalid = true;
+      } else if (first_name.length < 2) {
+        setText('firstNameError','First name must be at least 2 characters');
+        invalid = true;
+      } else if (!/^[a-zA-Z\s]+$/.test(first_name)) {
+        setText('firstNameError','First name can only contain letters and spaces');
+        invalid = true;
+      }
+      
+      // Last Name Validation
+      if (!last_name) {
+        setText('lastNameError','Last name is required');
+        invalid = true;
+      } else if (last_name.length < 2) {
+        setText('lastNameError','Last name must be at least 2 characters');
+        invalid = true;
+      } else if (!/^[a-zA-Z\s]+$/.test(last_name)) {
+        setText('lastNameError','Last name can only contain letters and spaces');
+        invalid = true;
+      }
+      
+      // Email Validation
+      if (!email) {
+        setText('signupEmailError','Email is required');
+        invalid = true;
+      } else if (/^\d/.test(email)) {
+        setText('signupEmailError','Email cannot start with a number');
+        invalid = true;
+      } else if (!isValidEmail(email)) {
+        setText('signupEmailError','Enter a valid email');
+        invalid = true;
+      }
+      
+      // Password Validation
+      if (!password) {
+        setText('signupPasswordError','Password is required');
+        invalid = true;
+      } else if (password.length < 10) {
+        setText('signupPasswordError','Password must be at least 10 characters');
+        invalid = true;
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
+        setText('signupPasswordError','Password must contain uppercase, lowercase, number, and special character');
+        invalid = true;
+      }
+      
+      if (role === 'INSTRUCTOR' && !bio) { 
+        setText('bioError','Bio is required for instructors'); 
+        invalid = true; 
+      }
       if (invalid) return;
 
       try {
@@ -608,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isValidEmail(email)) return setText('forgotEmailError','Enter a valid email');
 
       try {
-        const res = await fetch('/api/password/forgot', {
+        const res = await fetch(`${API_URL}/password/forgot`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ email })
@@ -634,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!newPassword || newPassword.length < 6) return setText('newPasswordError','Password must be at least 6 characters');
 
       try {
-        const res = await fetch('/api/password/reset', {
+        const res = await fetch(`${API_URL}/password/reset`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ token, password: newPassword })

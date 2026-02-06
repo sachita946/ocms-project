@@ -222,7 +222,11 @@ async function verifyEsewaPayment() {
       const returnUrl = localStorage.getItem('payment_return_url');
       if (returnUrl) {
         localStorage.removeItem('payment_return_url');
-        actionButtons.innerHTML = `<a href="${returnUrl}" class="btn">Join Course Session</a>`;
+        statusMessage.innerHTML += '<br><br><small>Redirecting to course session...</small>';
+        // Auto-redirect to Zoom after a short delay
+        setTimeout(() => {
+          window.location.href = returnUrl;
+        }, 2000);
       } else {
         actionButtons.innerHTML = '<a href="courses.html?enrolled=true" class="btn">Go to My Courses</a>';
       }

@@ -10,7 +10,11 @@ async function main() {
 
     const admin = await prisma.user.upsert({
       where: { email: 'admin@ocms.com' },
-      update: {},
+      update: {
+        password: hashedPassword,
+        first_name: 'Admin',
+        last_name: 'User'
+      },
       create: {
         email: 'admin@ocms.com',
         first_name: 'Admin',
@@ -27,7 +31,11 @@ async function main() {
 
     const instructor = await prisma.user.upsert({
       where: { email: 'instructor@ocms.com' },
-      update: {},
+      update: {
+        password: instructorPassword,
+        first_name: 'John',
+        last_name: 'Doe'
+      },
       create: {
         email: 'instructor@ocms.com',
         first_name: 'John',
@@ -59,7 +67,11 @@ async function main() {
 
     const student = await prisma.user.upsert({
       where: { email: 'student@ocms.com' },
-      update: {},
+      update: {
+        password: studentPassword,
+        first_name: 'Jane',
+        last_name: 'Smith'
+      },
       create: {
         email: 'student@ocms.com',
         first_name: 'Jane',

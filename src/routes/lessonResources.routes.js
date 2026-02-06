@@ -1,7 +1,3 @@
-// ============================================
-// LESSON RESOURCES ROUTES
-// ============================================
-
 import express from 'express';
 import * as lessonResourcesController from '../controllers/lessonResources.controller.js';
 import { 

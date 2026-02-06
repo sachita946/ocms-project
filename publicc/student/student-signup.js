@@ -111,6 +111,12 @@ form.addEventListener("submit", async (e) => {
   if (!name) {
     valid = false;
     showError("studentName", "errName", "Full name is required.");
+  } else if (name.length < 2) {
+    valid = false;
+    showError("studentName", "errName", "Full name must be at least 2 characters.");
+  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+    valid = false;
+    showError("studentName", "errName", "Full name can only contain letters and spaces.");
   } else {
     showSuccess("studentName", "errName");
   }
@@ -119,14 +125,26 @@ form.addEventListener("submit", async (e) => {
   if (!email) {
     valid = false;
     showError("studentEmail", "errEmail", "Email is required.");
+  } else if (/^\d/.test(email)) {
+    valid = false;
+    showError("studentEmail", "errEmail", "Email cannot start with a number.");
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    valid = false;
+    showError("studentEmail", "errEmail", "Please enter a valid email address.");
   } else {
     showSuccess("studentEmail", "errEmail");
   }
 
-  // Password
-  if (password.length < 6) {
+  // Password Validation
+  if (!password) {
     valid = false;
-    showError("studentPassword", "errPassword", "Password must be at least 6 characters.");
+    showError("studentPassword", "errPassword", "Password is required.");
+  } else if (password.length < 10) {
+    valid = false;
+    showError("studentPassword", "errPassword", "Password must be at least 10 characters long.");
+  } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
+    valid = false;
+    showError("studentPassword", "errPassword", "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
   } else {
     showSuccess("studentPassword", "errPassword");
   }

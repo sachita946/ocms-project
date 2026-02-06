@@ -279,59 +279,14 @@ async function processEnrollment(courseId) {
   }
 }
 
-// Enroll in course - check payment status first
+// Enroll in course - always require fresh login for security
 async function enrollInCourse(courseId) {
   const course = allCourses.find(c => c.id === parseInt(courseId));
   if (!course) return;
 
-  const token = localStorage.getItem('ocms_token') || localStorage.getItem('token');
-  if (!token) {
-    // Not logged in - redirect to login with enrollment intent
-    window.location.href = `../auth/login.html?redirect=courses&enroll=${courseId}`;
-    return;
-  }
-
-  // Check if already enrolled
-  if (enrolledCourseIds.has(parseInt(courseId))) {
-    showInlineMessage('You are already enrolled in this course!', 'info');
-    return;
-  }
-
-  // For free courses, enroll directly
-  if (!course.price || course.price <= 0) {
-    await processEnrollment(courseId);
-    return;
-  }
-
-  // For paid courses, check payment status first
-  try {
-    const paymentResponse = await fetch(`${API_URL}/payments/my`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    if (paymentResponse.ok) {
-      const payments = await paymentResponse.json();
-      const completedPayment = payments.find(p =>
-        p.course_id === parseInt(courseId) &&
-        p.status === 'COMPLETED'
-      );
-
-      if (completedPayment) {
-        // User has already paid - enroll directly
-        await processEnrollment(courseId);
-        return;
-      }
-    }
-  } catch (error) {
-    console.log('Could not check payment status:', error);
-    // Continue to payment anyway
-  }
-
-  // No completed payment found - redirect to payment
-  if (course.zoom_link) {
-    localStorage.setItem('payment_return_url', course.zoom_link);
-  }
-  window.location.href = `payment.html?courseId=${courseId}&courseName=${encodeURIComponent(course.title)}&price=${course.price}`;
+  // Always redirect to login first for enrollment security
+  // This ensures fresh authentication and prevents session issues
+  window.location.href = `../auth/login.html?redirect=courses&enroll=${courseId}`;
 }
 
 // View course details
@@ -535,3 +490,4 @@ function closeResourcesModal() {
     modal.style.display = 'none';
   }
 }
+

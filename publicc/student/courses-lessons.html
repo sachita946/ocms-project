@@ -790,19 +790,19 @@
 			document.getElementById('stat-certificates').textContent = certificates.length;
 		}
 
-		function renderCourses(enrollments, dashboard) {
+		async function renderCourses(enrollments, dashboard) {
 			const container = document.getElementById('coursesContainer');
 			const certificates = dashboard.lists?.certificates || [];
 			const progress = dashboard.charts?.progress || [];
 			
-			container.innerHTML = enrollments.map((enrollment, idx) => {
+			const coursesHTML = await Promise.all(enrollments.map(async (enrollment, idx) => {
 				const courseProgress = progress.find(p => p.courseId === enrollment.courseId) || { percentage: 0 };
 				const hasCertificate = certificates.some(c => c.courseId === enrollment.courseId);
 				
 				// Fetch real lessons data from API
 				let lessons = [];
 				try {
-					const lessonsResponse = await fetch(`${API_URL}/lessons/course/${enrollment.courseId}`, {
+					const lessonsResponse = await fetch(`http://localhost:5500/api/lessons/course/${enrollment.courseId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 							'Content-Type': 'application/json'
@@ -892,7 +892,8 @@
 						</div>
 					</div>
 				`;
-			}).join('');
+			}));
+			container.innerHTML = coursesHTML.join('');
 		}
 
 		function toggleCourse(index) {

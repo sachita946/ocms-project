@@ -135,9 +135,34 @@ export const getInstructorCourses = async (req, res) => {
     const courses = await prisma.course.findMany({
       where: { instructor_id: parseInt(req.user.id) },
       include: {
-        lessons: true,
-        enrollments: { select: { id: true } },
-        payments: { select: { amount: true } }
+        lessons: {
+          include: {
+            quiz: {
+              include: {
+                questions: true,
+                attempts: true
+              }
+            }
+          }
+        },
+        enrollments: { 
+          include: {
+            student: {
+              include: {
+                user: {
+                  select: { 
+                    id: true, 
+                    first_name: true, 
+                    last_name: true, 
+                    email: true 
+                  }
+                }
+              }
+            }
+          }
+        },
+        payments: { select: { amount: true, status: true } },
+        reviews: true
       }
     });
     res.json(courses);

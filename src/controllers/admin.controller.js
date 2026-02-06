@@ -13,12 +13,28 @@ export const getStats = async (req, res) => {
     const instructors = await prisma.user.count({ where: { role: 'INSTRUCTOR' } });
     const courses = await prisma.course.count();
     const payments = await prisma.payment.count();
-    const totalRevenue = await prisma.payment.aggregate({
-      _sum: { amount: true }
-    });
-    const totalEarnings = await prisma.instructorEarning.aggregate({
-      _sum: { net_amount: true }
-    });
+    const lessons = await prisma.lesson.count();
+    
+    // Handle aggregate queries with error handling
+    let totalRevenue = { _sum: { amount: 0 } };
+    let totalEarnings = { _sum: { net_amount: 0 } };
+    
+    try {
+      totalRevenue = await prisma.payment.aggregate({
+        _sum: { amount: true }
+      });
+    } catch (error) {
+      console.warn('Error aggregating payments:', error.message);
+    }
+    
+    try {
+      totalEarnings = await prisma.instructorEarning.aggregate({
+        _sum: { net_amount: true }
+      });
+    } catch (error) {
+      console.warn('Error aggregating instructor earnings:', error.message);
+    }
+    
     const reviews = await prisma.review.count();
 
     // Get recent data
@@ -75,17 +91,37 @@ export const getStats = async (req, res) => {
       orderBy: { paid_at: 'desc' }
     });
 
-    const reviewsList = await prisma.review.findMany({
+    const reviewsList = await (async () => {
+      try {
+        return await prisma.review.findMany({
+          include: {
+            student: {
+              select: { full_name: true }
+            },
+            course: {
+              select: { title: true }
+            }
+          },
+          take: 50,
+          orderBy: { created_at: 'desc' }
+        });
+      } catch (error) {
+        console.warn('Error fetching reviews list:', error.message);
+        return [];
+      }
+    })();
+
+    const lessonsList = await prisma.lesson.findMany({
       include: {
-        student: {
-          select: { full_name: true }
-        },
         course: {
+          select: { title: true }
+        },
+        subject: {
           select: { title: true }
         }
       },
       take: 50,
-      orderBy: { created_at: 'desc' }
+      orderBy: { id: 'desc' }
     });
 
     const notifications = await prisma.notification.findMany({
@@ -107,14 +143,16 @@ export const getStats = async (req, res) => {
       students,
       instructors,
       courses,
+      lessons,
       payments,
       totalRevenue: totalRevenue._sum.amount || 0,
       totalEarnings: totalEarnings._sum.net_amount || 0,
-      reviews,
+      reviewsCount: reviews,
       users,
       coursesList,
+      lessonsList,
       payments: paymentsList,
-      reviews: reviewsList,
+      reviewsList,
       notifications,
       activities,
       timestamp: new Date()

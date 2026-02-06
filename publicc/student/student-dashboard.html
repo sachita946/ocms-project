@@ -578,6 +578,70 @@
       color: #ffffff;
     }
 
+    /* Rating Stars */
+    .rating-stars {
+      display: flex;
+      gap: 8px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .rating-stars i {
+      color: #d1d5db;
+      transition: color 0.3s ease;
+    }
+
+    .rating-stars i:hover,
+    .rating-stars i.active {
+      color: #fbbf24;
+    }
+
+    .rating-stars i.fas {
+      color: #fbbf24;
+    }
+
+    /* Review Cards */
+    .review-card {
+      padding: 20px;
+      border-radius: var(--border-radius-lg);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .review-course {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .review-date {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .review-rating {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .review-rating i {
+      color: #fbbf24;
+      font-size: 16px;
+    }
+
+    .review-comment {
+      color: #d1d5db;
+      line-height: 1.5;
+    }
+
     /* Lists */
     .list {
       list-style: none;
@@ -757,6 +821,10 @@
           <i class="fas fa-credit-card"></i>
           <span>Payments</span>
         </button>
+        <button class="nav-item" data-section="reviews">
+          <i class="fas fa-star"></i>
+          <span>Reviews</span>
+        </button>
         <button class="nav-item" data-section="notifications">
           <i class="fas fa-bell"></i>
           <span>Notifications</span>
@@ -911,6 +979,51 @@
         <div class="panel-content">
           <div class="loading" id="payments-loading">Loading payments...</div>
           <ul class="list" id="payments-list" style="display: none;"></ul>
+        </div>
+      </div>
+
+      <div id="section-reviews" class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">My Reviews</h2>
+        </div>
+        <div class="panel-content">
+          <div class="loading" id="reviews-loading">Loading reviews...</div>
+          <div id="reviews-content" style="display: none;">
+            <div class="review-form" style="margin-bottom: 32px;">
+              <h3 style="color: #ffffff; margin-bottom: 16px;">Write a Review</h3>
+              <form id="reviewForm">
+                <div style="margin-bottom: 16px;">
+                  <label style="color: #d1d5db; display: block; margin-bottom: 8px;">Select Course</label>
+                  <select id="reviewCourseId" required style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #ffffff;">
+                    <option value="" style="background: #1f2937; color: #ffffff;">Choose a course...</option>
+                  </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                  <label style="color: #d1d5db; display: block; margin-bottom: 8px;">Rating</label>
+                  <div class="rating-stars" id="ratingStars">
+                    <i class="far fa-star" data-rating="1"></i>
+                    <i class="far fa-star" data-rating="2"></i>
+                    <i class="far fa-star" data-rating="3"></i>
+                    <i class="far fa-star" data-rating="4"></i>
+                    <i class="far fa-star" data-rating="5"></i>
+                  </div>
+                  <input type="hidden" id="reviewRating" name="rating" required>
+                </div>
+                <div style="margin-bottom: 16px;">
+                  <label style="color: #d1d5db; display: block; margin-bottom: 8px;">Comment</label>
+                  <textarea id="reviewComment" name="comment" rows="4" placeholder="Share your experience with this course..." style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #ffffff; resize: vertical;" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submitReviewBtn">
+                  <i class="fas fa-paper-plane"></i>
+                  Submit Review
+                </button>
+              </form>
+            </div>
+            <div class="reviews-list">
+              <h3 style="color: #ffffff; margin-bottom: 16px;">Your Reviews</h3>
+              <div id="reviewsList"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1276,6 +1389,171 @@
       });
     }
 
+    // Reviews functionality
+    async function loadReviewCourses() {
+      try {
+        const res = await fetch(`${API_URL}/enrollments/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const enrollments = await res.json();
+          const courseSelect = $('reviewCourseId');
+          courseSelect.innerHTML = '<option value="" style="background: #1f2937; color: #ffffff;">Choose a course...</option>';
+
+          enrollments.forEach(enrollment => {
+            const option = document.createElement('option');
+            option.value = enrollment.course_id;
+            option.textContent = enrollment.course?.title || `Course ${enrollment.course_id}`;
+            option.style.background = '#1f2937';
+            option.style.color = '#ffffff';
+            courseSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading courses for review:', error);
+      }
+    }
+
+    function initRatingStars() {
+      const stars = document.querySelectorAll('#ratingStars i');
+      const ratingInput = $('reviewRating');
+
+      stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+          const rating = index + 1;
+          ratingInput.value = rating;
+
+          // Update star display
+          stars.forEach((s, i) => {
+            if (i < rating) {
+              s.classList.remove('far');
+              s.classList.add('fas');
+            } else {
+              s.classList.remove('fas');
+              s.classList.add('far');
+            }
+          });
+        });
+
+        star.addEventListener('mouseover', () => {
+          stars.forEach((s, i) => {
+            if (i <= index) {
+              s.classList.add('active');
+            } else {
+              s.classList.remove('active');
+            }
+          });
+        });
+
+        star.addEventListener('mouseout', () => {
+          stars.forEach(s => s.classList.remove('active'));
+        });
+      });
+    }
+
+    async function submitReview(event) {
+      event.preventDefault();
+
+      const courseId = $('reviewCourseId').value;
+      const rating = $('reviewRating').value;
+      const comment = $('reviewComment').value;
+
+      if (!courseId || !rating || !comment.trim()) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
+      const submitBtn = $('submitReviewBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        const res = await fetch(`${API_URL}/reviews`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            course_id: parseInt(courseId),
+            rating: parseInt(rating),
+            comment: comment.trim()
+          })
+        });
+
+        if (res.ok) {
+          showToast('Review submitted successfully!', 'success');
+          $('reviewForm').reset();
+          document.querySelectorAll('#ratingStars i').forEach(star => {
+            star.classList.remove('fas');
+            star.classList.add('far');
+          });
+          loadReviews(); // Reload reviews
+        } else {
+          const error = await res.json();
+          showToast(error.message || 'Failed to submit review', 'error');
+        }
+      } catch (error) {
+        console.error('Error submitting review:', error);
+        showToast('Network error. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    }
+
+    async function loadReviews() {
+      const loading = $('reviews-loading');
+      const content = $('reviews-content');
+      const reviewsList = $('reviewsList');
+
+      try {
+        const res = await fetch(`${API_URL}/reviews/my-reviews`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+
+        if (res.ok) {
+          const reviews = await res.json();
+
+          if (!reviews.length) {
+            reviewsList.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">No reviews yet. Share your experience with courses you\'ve taken!</div>';
+            return;
+          }
+
+          reviewsList.innerHTML = '';
+          reviews.forEach(review => {
+            const reviewCard = document.createElement('div');
+            reviewCard.className = 'review-card';
+
+            const stars = Array.from({length: 5}, (_, i) =>
+              `<i class="fas fa-star" style="color: ${i < review.rating ? '#fbbf24' : '#d1d5db'}"></i>`
+            ).join('');
+
+            reviewCard.innerHTML = `
+              <div class="review-header">
+                <div class="review-course">${review.course?.title || 'Course'}</div>
+                <div class="review-date">${fmtDate(review.created_at)}</div>
+              </div>
+              <div class="review-rating">${stars}</div>
+              <div class="review-comment">${review.comment}</div>
+            `;
+
+            reviewsList.appendChild(reviewCard);
+          });
+        } else {
+          reviewsList.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Unable to load reviews</div>';
+        }
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        reviewsList.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Error loading reviews</div>';
+      }
+    }
+
     // Notifications rendering
     function renderNotifications(items = [], activities = []) {
       const loading = $('notifications-loading');
@@ -1358,6 +1636,11 @@
         renderPayments(payload.dashboard.lists?.payments || []);
         renderNotifications(payload.dashboard.lists?.notifications || [], payload.dashboard.lists?.activities || []);
 
+        // Initialize reviews functionality
+        loadReviewCourses();
+        initRatingStars();
+        loadReviews();
+
         showToast('Dashboard loaded successfully!', 'success');
 
       } catch (err) {
@@ -1387,6 +1670,12 @@
         });
       });
 
+      // Add review form submission
+      const reviewForm = $('reviewForm');
+      if (reviewForm) {
+        reviewForm.addEventListener('submit', submitReview);
+      }
+
       // Add keyboard shortcuts
       document.addEventListener('keydown', (e) => {
         if (e.ctrlKey || e.metaKey) {
@@ -1396,6 +1685,7 @@
             case '3': e.preventDefault(); switchSection('enrollments'); break;
             case '4': e.preventDefault(); switchSection('resources'); break;
             case '5': e.preventDefault(); switchSection('progress'); break;
+            case '6': e.preventDefault(); switchSection('reviews'); break;
           }
         }
       });

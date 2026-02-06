@@ -215,6 +215,7 @@ tr:hover { background: rgba(255,255,255,0.1); }
         <div class="stat-card"><div class="label">👨‍🎓 Students</div><div class="value" id="stat-students">0</div></div>
         <div class="stat-card"><div class="label">👨‍🏫 Instructors</div><div class="value" id="stat-instructors">0</div></div>
         <div class="stat-card"><div class="label">📚 Courses</div><div class="value" id="stat-courses">0</div></div>
+        <div class="stat-card"><div class="label">📖 Lessons</div><div class="value" id="stat-lessons">0</div></div>
         <div class="stat-card"><div class="label">� Total Earnings</div><div class="value" id="stat-payments">NPR 0.00</div></div>
         <div class="stat-card"><div class="label">⭐ Reviews</div><div class="value" id="stat-reviews">0</div></div>
       </div>
@@ -290,8 +291,9 @@ tr:hover { background: rgba(255,255,255,0.1); }
       </section>
       <section id="section-lessons" class="panel">
         <h2>📖 Lesson Resources</h2>
-        <div class="empty-state">
-          <p>Lesson resources management coming soon.</p>
+        <div id="lessons-list" class="list"></div>
+        <div class="empty-state" id="lessons-empty" style="display: none;">
+          <p>No lessons found.</p>
         </div>
       </section>
       <section id="section-student-progress" class="panel">
